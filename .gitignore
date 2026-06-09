@@ -51,6 +51,13 @@ cc-install/
 langgraph-deep-research/
 LangGraph_Architecture_Analysis.md
 RPA_project.txt
+old_tools/
+old_prompt/
+
+# ============================================================
+# 大数据目录（不上传）
+# ============================================================
+database/
 
 # ============================================================
 # Jupyter / Notebook
