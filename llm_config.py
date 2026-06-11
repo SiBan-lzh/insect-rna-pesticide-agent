@@ -1,4 +1,6 @@
 """
+llm_config.py — LLM factory with provider registry (openai/anthropic/google).
+
 Usage:
     from llm_config import get_llm, get_default_llm, Settings
 
@@ -13,7 +15,7 @@ import os
 from functools import lru_cache
 from typing import Callable, Optional
 
-from dotenv import load_dotenv
+from dotenv import find_dotenv, load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -21,8 +23,9 @@ from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-# Load .env and expand $VAR references from the process environment
-load_dotenv(".env", override=True)
+# Load .env — find_dotenv walks up from this file to locate .env
+# so the script works regardless of which directory it is run from
+load_dotenv(find_dotenv(".env", usecwd=True), override=True)
 for _k, _v in list(os.environ.items()):
     if "$" in _v:
         os.environ[_k] = os.path.expandvars(_v)

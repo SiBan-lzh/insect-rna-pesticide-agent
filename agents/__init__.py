@@ -16,7 +16,7 @@ agents —— LangGraph ReAct Agent 实现
     )
 """
 
-from .dsrna_designer import build_dsrna_designer_agent, dsrna_designer_agent
+from .dsrna_designer import build_dsrna_designer_graph, dsrna_designer_graph
 from .safety_inspector import (
     build_safety_inspector_graph,
     build_species_analysis_subgraph,
@@ -24,8 +24,8 @@ from .safety_inspector import (
 )
 
 __all__ = [
-    "build_dsrna_designer_agent",
-    "dsrna_designer_agent",
+    "build_dsrna_designer_graph",
+    "dsrna_designer_graph",
     "build_safety_inspector_graph",
     "build_species_analysis_subgraph",
     "safety_inspector_graph",

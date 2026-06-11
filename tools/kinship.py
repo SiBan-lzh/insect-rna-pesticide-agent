@@ -32,15 +32,20 @@ from tool_config import INSECT_TREE_PATH, INSECT_TAXA_DB_PATH
 logger = logging.getLogger("RPA_Tools.Kinship")
 
 # ============================================================
-# 初始化 NCBI 分类数据库（模块级单例）
+# NCBI taxonomy database (lazy-loaded on first use)
 # ============================================================
 _ncbi = None
-if INSECT_TAXA_DB_PATH.exists():
-    try:
-        _ncbi = NCBITaxa(dbfile=str(INSECT_TAXA_DB_PATH))
-        logger.info("NCBI Taxa DB loaded: %s", INSECT_TAXA_DB_PATH)
-    except Exception as e:
-        logger.error("Failed to load NCBI Taxa DB: %s", e)
+
+def _get_ncbi():
+    """Lazy-load NCBITaxa singleton, returns None on failure."""
+    global _ncbi
+    if _ncbi is None and INSECT_TAXA_DB_PATH.exists():
+        try:
+            _ncbi = NCBITaxa(dbfile=str(INSECT_TAXA_DB_PATH))
+            logger.info("NCBI Taxa DB loaded: %s", INSECT_TAXA_DB_PATH)
+        except Exception as e:
+            logger.error("Failed to load NCBI Taxa DB: %s", e)
+    return _ncbi
 
 # ============================================================
 # 分类学关系标签（从最亲到最远）
@@ -117,21 +122,21 @@ def _load_tree() -> Tree:
 
 def _get_relation_label(target_clean: str, candidate_name: str) -> str:
     """使用 NCBI 分类法判断两个物种间的分类学关系。"""
-    if not _ncbi:
+    if not _get_ncbi():
         return "unknown"
 
     try:
-        target_map = _ncbi.get_name_translator([target_clean])
-        cand_map = _ncbi.get_name_translator([candidate_name])
+        target_map = _get_ncbi().get_name_translator([target_clean])
+        cand_map = _get_ncbi().get_name_translator([candidate_name])
         if not target_map or not cand_map:
             return "unknown"
 
         target_id = list(target_map.values())[0][0]
         cand_id = list(cand_map.values())[0][0]
 
-        target_lineage = set(_ncbi.get_lineage(target_id))
-        cand_lineage = _ncbi.get_lineage(cand_id)
-        ranks = _ncbi.get_rank(list(target_lineage | set(cand_lineage)))
+        target_lineage = set(_get_ncbi().get_lineage(target_id))
+        cand_lineage = _get_ncbi().get_lineage(cand_id)
+        ranks = _get_ncbi().get_rank(list(target_lineage | set(cand_lineage)))
 
         for tid in reversed(cand_lineage):
             if tid in target_lineage:
@@ -177,18 +182,18 @@ def get_stepped_candidates(
 
     if target_nodes:
         target_node = target_nodes[0]
-    elif _ncbi:
+    elif _get_ncbi():
         # 代理回退：沿 NCBI 分类层级向上查找树中存在的近亲
         logger.warning(
             "Target '%s' not found in tree, searching for taxonomic proxy...",
             clean_name,
         )
         try:
-            name_map = _ncbi.get_name_translator([clean_name])
+            name_map = _get_ncbi().get_name_translator([clean_name])
             if name_map:
                 target_id = list(name_map.values())[0][0]
-                lineage = _ncbi.get_lineage(target_id)
-                lineage_ranks = _ncbi.get_rank(lineage)
+                lineage = _get_ncbi().get_lineage(target_id)
+                lineage_ranks = _get_ncbi().get_rank(lineage)
 
                 tree_leaf_set = {_clean_leaf_name(l.name) for l in all_leaves}
 
@@ -200,10 +205,10 @@ def get_stepped_candidates(
                     if not rank_ids:
                         continue
 
-                    descendants = _ncbi.get_descendant_taxa(
+                    descendants = _get_ncbi().get_descendant_taxa(
                         rank_ids[0], collapse_subspecies=True
                     )
-                    id_to_name = _ncbi.get_taxid_translator(descendants)
+                    id_to_name = _get_ncbi().get_taxid_translator(descendants)
 
                     group_candidates = []
                     for name in id_to_name.values():
