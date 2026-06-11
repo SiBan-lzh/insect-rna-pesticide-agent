@@ -1,20 +1,18 @@
 """
-SafetyInspectorGraph —— LangGraph ecological safety assessment workflow.
+SafetyInspectorGraph — LangGraph ecological safety assessment workflow.
 
-This module implements SafetyInspector as a workflow graph, not a ReAct agent.
 Tools produce facts; LangGraph controls routing, retries, fan-out/fan-in, and state.
-LLM is only used for ecosystem interpretation and final report explanation.
-All risk levels are computed by deterministic rule-engine functions.
+LLM is only used for field-type classification and final report explanation.
+All risk levels are computed by a deterministic rule engine.
 
-Architecture:
-    SafetyInspectorGraph:
-        START → input_clean → candidate_species_build
-              → Send(species_analysis_subgraph x N) → risk_aggregate
-              → report_generate → END
+Graph:
+    START -> input_clean -> candidate_species_build
+          -> [Send(species_analysis_subgraph) x N] -> risk_aggregate
+          -> report_generate -> END
 
-    NTOAnalysisSubgraph:
-        START → nto_blast → risk_hit_evaluate → sequence_fetch
-              → clustal → risk_score → END
+Subgraph:
+    nto_blast -> risk_hit_evaluate -> sequence_fetch
+              -> clustal -> risk_score -> END
 """
 
 from __future__ import annotations
@@ -22,44 +20,24 @@ from __future__ import annotations
 import json
 import logging
 import operator
-import os
 import sys
 from pathlib import Path
 from typing import Any, Literal
 
-# Ensure project root is importable when this file is executed directly.
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_PROJECT_ROOT))
 
-from dotenv import load_dotenv
-from langchain_openai import ChatOpenAI
+from langchain_core.language_models import BaseChatModel
 from langchain_core.tools import BaseTool
 from langgraph.checkpoint.memory import MemorySaver
-from langgraph.constants import Send
 from langgraph.graph import END, START, StateGraph
+from langgraph.types import Send
 from typing_extensions import Annotated, TypedDict
 
 from tool_config import NTO_BLAST_DB, NTOS_REFSEQ_DB
 from tools import clustal_tool, fetch_nto_seq_tool, nto_blast_tool
 
-# ============================================================
-# Environment and logging
-# ============================================================
-for _env_path in [
-    _PROJECT_ROOT / ".env",
-    _PROJECT_ROOT / "test" / "quickstart" / ".env",
-]:
-    if _env_path.exists():
-        load_dotenv(_env_path, override=True)
-        break
-else:
-    load_dotenv()
-
 logger = logging.getLogger("RPA_Agent.SafetyInspector")
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(name)s] %(message)s",
-)
 
 NTO_LIST_DIR = _PROJECT_ROOT / "database" / "NTOs_lists"
 MAX_TOOL_RETRIES = 3
@@ -72,7 +50,7 @@ class SafetyState(TypedDict, total=False):
     """Main ecological safety assessment graph state."""
 
     field_type: str
-    dsrna_sequence: str
+    dsrna_sequence: Annotated[str, lambda a, b: a if a else b]
     field_types: list[str]
     candidate_species: list[dict]
     species_results: Annotated[list[dict], operator.add]
@@ -305,15 +283,21 @@ def build_species_analysis_subgraph(
     blast_tool: BaseTool = nto_blast_tool,
     fetch_tool: BaseTool = fetch_nto_seq_tool,
     align_tool: BaseTool = clustal_tool,
+    debug_output: bool = False,
 ):
-    """Build reusable single-NTO off-target analysis subgraph."""
+    """Build reusable single-NTO off-target analysis subgraph.
 
+    Flow (tool calls in brackets):
+        nto_blast [nto_blast] -> risk_hit_evaluate -> sequence_fetch [fetch_nto_seq]
+        -> clustal [clustal x N] -> risk_score -> END
+    """
     def _increment_retry(state: NTOAnalysisState, node_name: str) -> tuple[dict, int]:
         retry_counts = dict(state.get("retry_counts", {}) or {})
         attempt = int(retry_counts.get(node_name, 0)) + 1
         retry_counts[node_name] = attempt
         return retry_counts, attempt
 
+    # ----- nto_blast: homology search against one NTO genome -----
     def nto_blast_node(state: NTOAnalysisState) -> dict:
         species = state.get("species", {})
         species_name = _species_name(species)
@@ -340,6 +324,14 @@ def build_species_analysis_subgraph(
             ]
         return updates
 
+    def route_after_blast(state: NTOAnalysisState) -> Literal["risk_hit_evaluate", "nto_blast", "risk_score"]:
+        if (state.get("blast_result") or {}).get("status") == "success":
+            return "risk_hit_evaluate"
+        if (state.get("retry_counts") or {}).get("nto_blast", 0) < MAX_TOOL_RETRIES:
+            return "nto_blast"
+        return "risk_score"
+
+    # ----- risk_hit_evaluate: filter hits by identity>80% and coverage>80% -----
     def risk_hit_evaluate_node(state: NTOAnalysisState) -> dict:
         risk_hits = select_fetchable_hits(
             state.get("blast_result", {}) or {},
@@ -347,6 +339,10 @@ def build_species_analysis_subgraph(
         )
         return {"risk_hits": risk_hits, "phase": "hits_evaluated"}
 
+    def route_after_hit_evaluate(state: NTOAnalysisState) -> Literal["sequence_fetch", "risk_score"]:
+        return "sequence_fetch" if state.get("risk_hits") else "risk_score"
+
+    # ----- sequence_fetch: extract subject sequences for the risk hits -----
     def sequence_fetch_node(state: NTOAnalysisState) -> dict:
         species = state.get("species", {})
         species_name = _species_name(species)
@@ -383,6 +379,14 @@ def build_species_analysis_subgraph(
             ]
         return updates
 
+    def route_after_fetch(state: NTOAnalysisState) -> Literal["clustal", "sequence_fetch", "risk_score"]:
+        if state.get("risk_sequences"):
+            return "clustal"
+        if (state.get("retry_counts") or {}).get("sequence_fetch", 0) < MAX_TOOL_RETRIES:
+            return "sequence_fetch"
+        return "risk_score"
+
+    # ----- clustal: pairwise alignment, detect >=21nt perfect-match windows -----
     def clustal_node(state: NTOAnalysisState) -> dict:
         species = state.get("species", {})
         species_name = _species_name(species)
@@ -429,6 +433,14 @@ def build_species_analysis_subgraph(
             updates["errors"] = errors
         return updates
 
+    def route_after_clustal(state: NTOAnalysisState) -> Literal["risk_score", "clustal"]:
+        if state.get("alignment_results"):
+            return "risk_score"
+        if (state.get("retry_counts") or {}).get("clustal", 0) < MAX_TOOL_RETRIES:
+            return "clustal"
+        return "risk_score"
+
+    # ----- risk_score: rule engine derives final risk level (no LLM, no tool) -----
     def risk_score_node(state: NTOAnalysisState) -> dict:
         species = state.get("species", {})
         species_name = _species_name(species)
@@ -458,6 +470,7 @@ def build_species_analysis_subgraph(
 
         species_result = {
             "species": species_name,
+            "display_name": species_name.replace("_", " "),
             "category": species.get("category"),
             "chinese_name": species.get("chinese_name"),
             "english_name": species.get("english_name"),
@@ -468,10 +481,9 @@ def build_species_analysis_subgraph(
                 "hits_count": blast_result.get("hits_count", 0),
                 "best_identity_pct": round(best_identity, 2),
                 "best_coverage_pct": round(best_coverage, 2),
+                "risk_hits_count": len(risk_hits),
+                "alignments_count": len(alignment_results),
             },
-            "risk_hits": risk_hits,
-            "risk_sequences": state.get("risk_sequences", []) or [],
-            "alignment_results": alignment_results,
             "rule_trace": {
                 "hit_filter": "identity_pct > 80 and coverage_pct > 80",
                 "risk_rule": "no fetchable hit => negligible; longest_match >= 21 => high; >= 19 => medium; else low",
@@ -480,32 +492,15 @@ def build_species_analysis_subgraph(
             "status": "error" if risk_level == "error" else ("negligible" if risk_level == "negligible" else "success"),
             "errors": errors,
         }
+        if debug_output:
+            species_result["evidence"] = {
+                "risk_hits": risk_hits,
+                "risk_sequences": state.get("risk_sequences", []) or [],
+                "alignment_results": alignment_results,
+            }
         return {"species_result": species_result, "species_results": [species_result], "phase": "risk_scored"}
 
-    def route_after_blast(state: NTOAnalysisState) -> Literal["risk_hit_evaluate", "nto_blast", "risk_score"]:
-        if (state.get("blast_result") or {}).get("status") == "success":
-            return "risk_hit_evaluate"
-        if (state.get("retry_counts") or {}).get("nto_blast", 0) < MAX_TOOL_RETRIES:
-            return "nto_blast"
-        return "risk_score"
-
-    def route_after_hit_evaluate(state: NTOAnalysisState) -> Literal["sequence_fetch", "risk_score"]:
-        return "sequence_fetch" if state.get("risk_hits") else "risk_score"
-
-    def route_after_fetch(state: NTOAnalysisState) -> Literal["clustal", "sequence_fetch", "risk_score"]:
-        if state.get("risk_sequences"):
-            return "clustal"
-        if (state.get("retry_counts") or {}).get("sequence_fetch", 0) < MAX_TOOL_RETRIES:
-            return "sequence_fetch"
-        return "risk_score"
-
-    def route_after_clustal(state: NTOAnalysisState) -> Literal["risk_score", "clustal"]:
-        if state.get("alignment_results"):
-            return "risk_score"
-        if (state.get("retry_counts") or {}).get("clustal", 0) < MAX_TOOL_RETRIES:
-            return "clustal"
-        return "risk_score"
-
+    # ----- graph assembly -----
     builder = StateGraph(NTOAnalysisState)
     builder.add_node("nto_blast", nto_blast_node)
     builder.add_node("risk_hit_evaluate", risk_hit_evaluate_node)
@@ -514,40 +509,24 @@ def build_species_analysis_subgraph(
     builder.add_node("risk_score", risk_score_node)
 
     builder.add_edge(START, "nto_blast")
-    builder.add_conditional_edges(
-        "nto_blast",
-        route_after_blast,
-        {
-            "risk_hit_evaluate": "risk_hit_evaluate",
-            "nto_blast": "nto_blast",
-            "risk_score": "risk_score",
-        },
-    )
-    builder.add_conditional_edges(
-        "risk_hit_evaluate",
-        route_after_hit_evaluate,
-        {
-            "sequence_fetch": "sequence_fetch",
-            "risk_score": "risk_score",
-        },
-    )
-    builder.add_conditional_edges(
-        "sequence_fetch",
-        route_after_fetch,
-        {
-            "clustal": "clustal",
-            "sequence_fetch": "sequence_fetch",
-            "risk_score": "risk_score",
-        },
-    )
-    builder.add_conditional_edges(
-        "clustal",
-        route_after_clustal,
-        {
-            "risk_score": "risk_score",
-            "clustal": "clustal",
-        },
-    )
+    builder.add_conditional_edges("nto_blast", route_after_blast, {
+        "risk_hit_evaluate": "risk_hit_evaluate",
+        "nto_blast": "nto_blast",
+        "risk_score": "risk_score",
+    })
+    builder.add_conditional_edges("risk_hit_evaluate", route_after_hit_evaluate, {
+        "sequence_fetch": "sequence_fetch",
+        "risk_score": "risk_score",
+    })
+    builder.add_conditional_edges("sequence_fetch", route_after_fetch, {
+        "clustal": "clustal",
+        "sequence_fetch": "sequence_fetch",
+        "risk_score": "risk_score",
+    })
+    builder.add_conditional_edges("clustal", route_after_clustal, {
+        "risk_score": "risk_score",
+        "clustal": "clustal",
+    })
     builder.add_edge("risk_score", END)
     return builder.compile()
 
@@ -556,30 +535,30 @@ def build_species_analysis_subgraph(
 # SafetyInspectorGraph
 # ============================================================
 def build_safety_inspector_graph(
-    model_name: str = "deepseek-chat",
-    base_url: str = "https://api.deepseek.com/v1",
-    api_key: str | None = None,
-    temperature: float = 0.2,
+    llm: BaseChatModel | None = None,
     checkpointer=None,
     interrupt_before: list[str] | None = None,
-    max_species: int | None = None,
     species_subgraph=None,
+    debug_output: bool = False,
 ):
-    """Build the main ecological safety assessment graph."""
-    effective_api_key = os.getenv("DEEPSEEK_API_KEY", "") if api_key is None else api_key
-    if not effective_api_key:
-        raise ValueError("DEEPSEEK_API_KEY must be set; LLM is required for field classification and report generation")
+    """Build the main ecological safety assessment graph.
 
-    llm = ChatOpenAI(
-        model=model_name,
-        base_url=base_url,
-        api_key=effective_api_key,
-        temperature=temperature,
-    )
+    LLM is only used by `input_clean_node` (field-type classification) and
+    `report_generate_node` (final report). When `llm` is None, the default
+    LLM from `llm_config.get_default_llm()` is used. Full sequence/alignment
+    evidence is included only when `debug_output=True`.
 
-    compiled_species_subgraph = species_subgraph or build_species_analysis_subgraph()
+    Flow:
+        input_clean -> candidate_species_build
+                    -> [Send(species_analysis_subgraph) x N]
+                    -> risk_aggregate -> report_generate -> END
+    """
+    if llm is None:
+        from llm_config import get_default_llm
+        llm = get_default_llm()
 
-    # Field-type to JSON filename mapping
+    compiled_species_subgraph = species_subgraph or build_species_analysis_subgraph(debug_output=debug_output)
+
     FIELD_TYPE_FILES = {
         "rice_field": "ricefield_NTOs.json",
         "corn_field": "cornfield_NTOs.json",
@@ -588,6 +567,7 @@ def build_safety_inspector_graph(
     }
     EPA_FILE = "EPA_NTOs.json"
 
+    # ----- input_clean: dsRNA sanity check + LLM-driven field-type classification -----
     def input_clean_node(state: SafetyState) -> dict:
         """Clean dsRNA sequence and use LLM to classify field type(s) from user description."""
         user_input = str(state.get("field_type", "")).strip()
@@ -625,6 +605,7 @@ def build_safety_inspector_graph(
             "dsrna_sequence": sequence,
         }
 
+    # ----- candidate_species_build: load NTO JSON files for classified field types -----
     def candidate_species_build_node(state: SafetyState) -> dict:
         """Build candidate species list from classified field types via JSON files."""
         field_types = state.get("field_types", [])
@@ -654,6 +635,7 @@ def build_safety_inspector_graph(
 
         return {"candidate_species": candidates}
 
+    # ----- parallel_off_target_analyze: fan-out dispatcher for the NTO subgraph -----
     def parallel_off_target_analyze(state: SafetyState):
         """Fan-out: dispatch each candidate species into the NTO analysis subgraph."""
         candidates = state.get("candidate_species", []) or []
@@ -674,10 +656,12 @@ def build_safety_inspector_graph(
             for species in candidates
         ]
 
+    # ----- risk_aggregate: bucket species into high/medium/low risk groups -----
     def risk_aggregate_node(state: SafetyState) -> dict:
         groups = group_species_by_risk(state.get("species_results", []) or [])
         return groups
 
+    # ----- report_generate: LLM produces a natural-language final report -----
     def _detect_language(text: str) -> str:
         """Heuristic language detection based on Chinese character presence."""
         if any("一" <= c <= "鿿" for c in text):
@@ -687,8 +671,7 @@ def build_safety_inspector_graph(
     def report_generate_node(state: SafetyState) -> dict:
         overall = derive_overall_risk_level(state.get("species_results", []) or [])
         field_types = state.get("field_types", [])
-        # Detect language from classified field_types list
-        lang = _detect_language(" ".join(field_types))
+        lang = _detect_language(str(state.get("field_type", "")))
         report_lang_instruction = (
             "Write the entire report in Chinese." if lang == "Chinese"
             else "Write the entire report in English."
@@ -757,15 +740,15 @@ def build_safety_inspector_graph(
 # ============================================================
 # Singleton and CLI smoke test
 # ============================================================
-safety_inspector_graph = build_safety_inspector_graph()
+from llm_config import get_default_llm
+safety_inspector_graph = build_safety_inspector_graph(llm=get_default_llm())
 
 
 if __name__ == "__main__":
     import uuid
 
     test_seq = (
-        "ATGAAGCGGCAGAATGTACGAACATTGTCACTTGTGGTTTGCACTTTTACGTATCTT"
-        "CTCATCGGAGCAGCGGTCTTTGATGCATTGGAGTCAGACACCGAAAGTAA"
+        "AATAGTATAATGGCGAAAAGGAAGTCGCAGATGCAAACTTTAGGAGCAAATAACATTTACGGAGTGGCGGGCAATCCTTTGGGAATTCAAGCATCGAGAAGTAGCCAGATTTCTGTTAAGGATGTATTCGAAGGACACAGTGGTCATACTAACCCAGGCTACGAACCAGACGAAAATGCTGGAAACAATCTCACTTCACAGTTTAAGTCAGAATCCGTGGAGAGAACAGAATAATAtctga"
     )
     result = safety_inspector_graph.invoke(
         {"field_type": "rice_field", "dsrna_sequence": test_seq},
