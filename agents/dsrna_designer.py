@@ -67,7 +67,6 @@ class DSRNADesignState(TypedDict, total=False):
     fragment_proposals: list[dict]
     fragment_results: Annotated[list[dict], operator.add]
     pis_scores: list[dict]
-    pis_tier: str
     final_report: dict
     errors: Annotated[list[dict], operator.add]
 
@@ -465,7 +464,7 @@ def build_dsrna_designer_graph(
             "  - Avoid fragments with extreme GC% (<30% or >65%)\n"
             "  - Prefer fragments where the 5' and 3' ends have reasonable GC content for primer binding\n\n"
             "Your task:\n"
-            "  1. Simulate sliding windows across the full sequence (step ~20-50 bp). "
+            "  1. Simulate sliding windows across the full sequence (step ~10-20 bp). "
             f"Window size: 300-500 bp if sequence >= 300 nt; "
             f"otherwise, use the full sequence length as the window size.\n"
             "  2. For each window, score: (a) sum of OligoWalk |Overall| scores of siRNAs inside the window; "
@@ -485,7 +484,7 @@ def build_dsrna_designer_graph(
             raw = getattr(response, "content", str(response)).strip()
             parsed = _extract_json_from_llm_response(raw)
             if parsed is None:
-                logger.warning("fragment_design: could not parse JSON from LLM response: %s", raw[:200])
+                logger.warning("fragment_design: could not parse JSON from LLM response: %s", raw)
                 proposals = []
             else:
                 proposals = parsed.get("fragment_proposals", [])
@@ -572,7 +571,6 @@ def build_dsrna_designer_graph(
             "  5. Recommend the best fragment if multiple are provided.\n\n"
             "Return a JSON object with keys:\n"
             "  'pis_scores': list of {{fragment_id, score_A, score_B, score_C, pis_total, tier, weight_rationale}}\n"
-            "  'overall_tier': the worst tier among all fragments\n"
             "  'best_fragment_id': fragment_id of the recommended fragment\n"
             "  'weight_explanation': your reasoning for any weight adjustments\n"
             "Return ONLY valid JSON, no explanation outside the JSON."
@@ -583,18 +581,15 @@ def build_dsrna_designer_graph(
             raw = getattr(response, "content", str(response)).strip()
             parsed = _extract_json_from_llm_response(raw)
             if parsed is None:
-                logger.warning("pis_score: could not parse JSON from LLM response: %s", raw[:200])
+                logger.warning("pis_score: could not parse JSON from LLM response: %s", raw)
                 pis_scores = []
-                pis_tier = "low"
             else:
                 pis_scores = parsed.get("pis_scores", [])
-                pis_tier = parsed.get("overall_tier", "low")
         except Exception as exc:
             logger.exception("pis_score LLM call failed")
             pis_scores = []
-            pis_tier = "low"
 
-        return {"pis_scores": pis_scores, "pis_tier": pis_tier}
+        return {"pis_scores": pis_scores}
 
     # ----- report_generate: LLM final report -----
     def report_generate_node(state: DSRNADesignState) -> dict:
@@ -646,8 +641,7 @@ def build_dsrna_designer_graph(
             "Generate the complete dsRNA Design Report from the structured data below.\n\n"
             f"Sequence QC: length={qc.get('length')}, GC%={qc.get('gc_percent')}, warnings={qc.get('warnings')}\n"
             f"siRNA candidates scanned (OligoWalk): {len(candidates)} total\n"
-            f"Fragments designed: {len(fragment_results)}\n"
-            f"Overall PIS tier: {state.get('pis_tier', 'unknown')}\n\n"
+            f"Fragments designed: {len(fragment_results)}\n\n"
             "Output Requirements — your report MUST include all of the following sections:\n"
             "1. Sequence Quality Control: length, GC%, complexity warnings\n"
             "2. siRNA Candidate Summary: top 5 ranked by OligoWalk Overall score, with position and score\n"
@@ -660,7 +654,7 @@ def build_dsrna_designer_graph(
             "Data:\n"
             f"Fragment results:\n{json.dumps(compact_fragments, ensure_ascii=False, indent=2)}\n\n"
             f"PIS scores:\n{json.dumps(pis_scores, ensure_ascii=False, indent=2)}\n\n"
-            f"Top siRNA candidates:\n{json.dumps(candidates[:5], ensure_ascii=False, indent=2)}"
+            f"Top siRNA candidates:\n{json.dumps(candidates[:15], ensure_ascii=False, indent=2)}"
         )
 
         try:
@@ -677,7 +671,6 @@ def build_dsrna_designer_graph(
                 "sirna_candidates": candidates,
                 "fragment_results": fragment_results,
                 "pis_scores": pis_scores,
-                "pis_tier": state.get("pis_tier", "unknown"),
                 "errors": errors,
                 "report_text": report_text,
                 "computed_by": "llm_fragment_design + llm_pis_scoring + llm_report",
@@ -743,8 +736,7 @@ if __name__ == "__main__":
     )
     fr = result.get("final_report", {})
     print(f"Status: {fr.get('status', 'unknown')}")
-    print(f"PIS tier: {fr.get('pis_tier', 'unknown')}")
     print(f"Fragments: {len(fr.get('fragment_results', []))}")
     print(f"Errors: {len(fr.get('errors', []))}")
     if fr.get("report_text"):
-        print(f"\nReport preview:\n{str(fr['report_text'])[:500]}...")
+        print(fr['report_text'])
