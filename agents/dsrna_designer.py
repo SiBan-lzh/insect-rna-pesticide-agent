@@ -19,6 +19,7 @@ from __future__ import annotations
 import json
 import logging
 import operator
+import re
 import sys
 from pathlib import Path
 from typing import Any, Literal
@@ -33,6 +34,7 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.types import Send
 from typing_extensions import Annotated, TypedDict
 
+from skill.skill_loader import build_skills
 from tools import oligowalk_tool, primer3_tool
 
 logger = logging.getLogger("RPA_Agent.DSRNADesigner")
@@ -104,6 +106,11 @@ def _detect_language(text: str) -> str:
 
 def _normalize_sequence(seq: str) -> str:
     cleaned = "".join(str(seq or "").upper().split()).replace("U", "T")
+    invalid = sorted(set(cleaned) - {"A", "T", "C", "G", "N"})
+    if not cleaned:
+        raise ValueError("sequence is empty")
+    if invalid:
+        raise ValueError(f"Invalid nucleotide characters: {invalid}")
     return cleaned
 
 
@@ -128,8 +135,15 @@ def _check_low_complexity(seq: str) -> list[str]:
     return warnings
 
 
-def _parse_oligowalk_candidates(result: dict) -> list[dict]:
-    """Extract siRNA candidates from OligoWalk tool result."""
+def _parse_oligowalk_candidates(result: dict, input_seq: str = "") -> list[dict]:
+    """Extract siRNA candidates from OligoWalk tool result.
+
+    The OligoWalk report may or may not include the Oligo sequence and %GC columns
+    depending on binary version. To make downstream reporting robust, this function:
+      1. Reads position, overall_score from the row (these are always present).
+      2. Reads sequence/GC% from the row when available, else reconstructs them
+         by slicing `input_seq` at the candidate position and computing GC%.
+    """
     if result.get("status") != "success":
         return []
     candidates = []
@@ -139,25 +153,51 @@ def _parse_oligowalk_candidates(result: dict) -> list[dict]:
             pos = int(float(pos_str)) if pos_str else 0
             overall_str = row.get("Overall (kcal/mol)", "0")
             overall = float(overall_str)
-            gc_str = row.get("%GC", "0")
-            gc = float(gc_str)
-            seq = row.get("Oligo", "")
-            candidates.append({
-                "position_1based": pos,
-                "sequence": seq,
-                "overall_score": overall,
-                "gc_percent": gc,
-            })
         except (ValueError, TypeError):
             continue
+
+        # Try row's own sequence first; fall back to slicing the input sequence.
+        seq = (
+            row.get("Oligo")
+            or row.get("OligoSeq")
+            or row.get("Sequence")
+            or row.get("sequence")
+            or ""
+        )
+        if not seq and input_seq and pos > 0:
+            # OligoWalk positions are 1-based; slice [pos-1 : pos-1+oligo_length]
+            oligo_length = int((result.get("parameters") or {}).get("oligo_length") or 21)
+            start = pos - 1
+            end = start + oligo_length
+            if 0 <= start < end <= len(input_seq):
+                seq = input_seq[start:end]
+
+        # Compute GC% from the actual sequence (or accept row's value if present).
+        gc = None
+        for key in ("%GC", "GC%", "gc_percent", "GC_percent"):
+            if key in row and row[key] not in (None, ""):
+                try:
+                    gc = float(row[key])
+                    break
+                except (ValueError, TypeError):
+                    pass
+        if gc is None and seq:
+            gc = _gc_percent(seq)
+
+        candidates.append({
+            "position_1based": pos,
+            "sequence": seq,
+            "overall_score": overall,
+            "gc_percent": gc,
+        })
     return candidates
 
 
 def _compact_fragment_result(fr: dict) -> dict:
     """Strip raw bulk data from a fragment result for LLM prompts.
 
-    Keeps: fragment_id, coordinates, sequence summary, siRNA coverage, primer summary.
-    Drops: primer_results (full primer list), fragment_result (nested copy), pis_data.
+    Keeps: fragment_id, coordinates, sequence summary, siRNA coverage, primer pairs, pis_data.
+    Drops: fragment_result (nested copy), pis_data original if present.
     Full data stays in final_report for supervisor/evidence use.
     """
     return {
@@ -169,6 +209,7 @@ def _compact_fragment_result(fr: dict) -> dict:
         "covered_sirna": fr.get("covered_sirna", []),
         "primer_count": fr.get("primer_count", 0),
         "best_penalty": fr.get("best_penalty"),
+        "primer_results": fr.get("primer_results", []),
         "pis_data": fr.get("pis_data", {}),
         "status": fr.get("status"),
     }
@@ -202,8 +243,7 @@ def _extract_json_from_llm_response(raw: str | None) -> dict | None:
                 continue
 
     # Strategy 2: first {...} block (handles "Here's the result: {...}" etc.)
-    import re as _re
-    match = _re.search(r"\{.*\}", text, _re.DOTALL)
+    match = re.search(r"\{.*\}", text, re.DOTALL)
     if match:
         try:
             return json.loads(match.group())
@@ -225,14 +265,9 @@ def _extract_json_from_llm_response(raw: str | None) -> dict | None:
 DSRNA_DESIGNER_ROLE = """
 Role: dsRNA Design Expert
 
-You are a professional dsRNA design specialist specializing in RNAi pesticide development.
-Your mission is to produce experimentally actionable siRNA candidate lists, design dsRNA fragments
-for amplification, and provide PCR primers compatible with in vitro transcription — integrating
-large-scale bioinformatics data (thermodynamic siRNA scoring, primer design) into a coherent,
-evidence-driven fragment selection strategy that outperforms manual analysis.
-
-Incentive: High-quality, experimentally actionable dsRNA and primer designs with high predictive
-accuracy will be rewarded with $10,000.
+You are a professional dsRNA design specialist for RNAi pesticide development.
+Your mission is to design dsRNA fragments and PCR primers by integrating
+bioinformatics tool outputs into a coherent, evidence-driven fragment selection strategy.
 
 Workflow constraints:
 1. Sequence Validation: normalized by deterministic rules (uppercase, U->T, whitespace stripped).
@@ -380,11 +415,6 @@ def build_dsrna_designer_graph(
         lang = _detect_language(raw)
         try:
             cleaned = _normalize_sequence(raw)
-            invalid = sorted(set(cleaned) - {"A", "T", "C", "G", "N"})
-            if not cleaned:
-                raise ValueError("sequence is empty")
-            if invalid:
-                raise ValueError(f"Invalid nucleotide characters: {invalid}")
             warnings = _check_low_complexity(cleaned)
             qc = {
                 "length": len(cleaned),
@@ -442,14 +472,16 @@ def build_dsrna_designer_graph(
         lang_instr = "Write all reasoning and output in Chinese." if lang == "Chinese" else "Write all reasoning and output in English."
 
         oligowalk_result = state.get("oligowalk_result") or {}
-        candidates = _parse_oligowalk_candidates(oligowalk_result)
         seq = state.get("sequence_clean", "")
+        candidates = _parse_oligowalk_candidates(oligowalk_result, input_seq=seq)
         qc = state.get("sequence_qc", {})
 
         candidates_json = json.dumps(candidates, ensure_ascii=False, indent=2)
+        protocol = build_skills("principles", "evidence", "tool")
 
         prompt = (
             f"{DSRNA_DESIGNER_ROLE}\n\n"
+            f"{protocol}\n\n"
             f"{lang_instr}\n\n"
             "You are tasked with designing optimal dsRNA fragments using a sliding-window strategy.\n\n"
             "Input data:\n"
@@ -475,7 +507,7 @@ def build_dsrna_designer_graph(
             "Return a JSON object with key 'fragment_proposals' — a list of candidates, each containing:\n"
             "  fragment_id, start (1-based), end (1-based), sequence, length,\n"
             "  covered_sirna (list of {position_1based, sequence, overall_score}),\n"
-            "  composite_score, gc_percent, primer_feasibility_note, design_rationale.\n"
+            "  composite_score, gc_percent, primer_feasibility_note, evidence_based_rationale.\n"
             "Return ONLY valid JSON, no explanation outside the JSON."
         )
 
@@ -519,7 +551,8 @@ def build_dsrna_designer_graph(
 
         fragment_results = state.get("fragment_results", []) or []
         oligowalk_result = state.get("oligowalk_result") or {}
-        candidates = _parse_oligowalk_candidates(oligowalk_result)
+        seq = state.get("sequence_clean", "")
+        candidates = _parse_oligowalk_candidates(oligowalk_result, input_seq=seq)
 
         # Build per-fragment siRNA coverage data
         fragment_sirna_map = {}
@@ -543,14 +576,17 @@ def build_dsrna_designer_graph(
                 "gc_percent": _gc_percent(fr.get("fragment_sequence", "")),
             }
 
+        protocol = build_skills("principles", "evidence")
+
         prompt = (
             f"{DSRNA_DESIGNER_ROLE}\n\n"
+            f"{protocol}\n\n"
             f"{lang_instr}\n\n"
             "You are tasked with computing the Predicted Interference Score (PIS) for each dsRNA fragment.\n\n"
             "Three evaluation dimensions (you will receive actual data for each fragment):\n"
-            "  A. siRNA Potency (suggested weight 50-70%): number and combined thermodynamic score of siRNA "
-            "sites within the fragment window.\n"
-            "  B. Amplification Efficiency (suggested weight 20-35%): based on primer3 best penalty and "
+            "  A. siRNA Binding Score (suggested weight 50-70%): number and combined OligoWalk |ddG| values "
+            "of siRNA sites within the fragment window.\n"
+            "  B. Primer Quality Score (suggested weight 20-35%): based on primer3 best penalty and "
             "Tm deviation from the optimal 60°C.\n"
             "  C. Sequence Context Quality (suggested weight 5-20%): GC% deviation from ideal 50%, "
             "presence of low-complexity regions.\n\n"
@@ -561,6 +597,10 @@ def build_dsrna_designer_graph(
             "  High   (>85): strong siRNA coverage + good primer quality + ideal GC\n"
             "  Medium (60-85): moderate coverage or some quality concerns\n"
             "  Low    (<60): poor coverage or significant design issues\n\n"
+            "IMPORTANT — PIS is a composite QUALITY score, NOT a prediction of in vivo knockdown.\n"
+            "It combines available computational metrics (Level 1) with heuristic weighting (Level 2).\n"
+            "Do NOT present PIS as 'predicted interference efficiency' or 'knockdown percentage'.\n"
+            "Do NOT use tier labels to imply experimental outcomes.\n\n"
             "Data for scoring:\n"
             f"{json.dumps(list(fragment_sirna_map.values()), ensure_ascii=False, indent=2)}\n\n"
             "Your task:\n"
@@ -601,12 +641,14 @@ def build_dsrna_designer_graph(
         # Sequence QC summary
         qc = state.get("sequence_qc", {})
         oligowalk_result = state.get("oligowalk_result") or {}
-        candidates = _parse_oligowalk_candidates(oligowalk_result)
+        seq = state.get("sequence_clean", "")
+        candidates = _parse_oligowalk_candidates(oligowalk_result, input_seq=seq)
 
         # If validation failed, generate error report
         if not state.get("sequence_valid"):
             prompt = (
                 f"{DSRNA_DESIGNER_ROLE}\n\n"
+                f"{build_skills('principles', 'tool')}\n\n"
                 f"{lang_instr}\n\n"
                 "Generate a dsRNA design error report.\n"
                 f"Error: {errors}\n\n"
@@ -635,26 +677,37 @@ def build_dsrna_designer_graph(
                 compact["pis_data"] = pis_map[frag_id]
             compact_fragments.append(compact)
 
+        protocol = build_skills("principles", "evidence", "tool", "recommendation")
+        report_payload = {
+            "sequence_qc": qc,
+            "sirna_candidates_scanned": len(candidates),
+            "fragments_designed": len(fragment_results),
+            "top_sirna_candidates": candidates[:15],
+            "fragments": compact_fragments,
+            "pis_scores": pis_scores,
+        }
+
         prompt = (
             f"{DSRNA_DESIGNER_ROLE}\n\n"
+            f"{protocol}\n\n"
             f"{lang_instr}\n\n"
-            "Generate the complete dsRNA Design Report from the structured data below.\n\n"
-            f"Sequence QC: length={qc.get('length')}, GC%={qc.get('gc_percent')}, warnings={qc.get('warnings')}\n"
-            f"siRNA candidates scanned (OligoWalk): {len(candidates)} total\n"
-            f"Fragments designed: {len(fragment_results)}\n\n"
+            "Generate the complete dsRNA Design Report from the structured data below.\n"
             "Output Requirements — your report MUST include all of the following sections:\n"
             "1. Sequence Quality Control: length, GC%, complexity warnings\n"
-            "2. siRNA Candidate Summary: top 5 ranked by OligoWalk Overall score, with position and score\n"
-            "3. dsRNA Fragment Design: for each fragment — coordinates, length, GC%, covered siRNA sites, "
-            "composite design score, and rationale\n"
-            "4. Primer Results: for each fragment — table of primer pairs "
-            "(pair index, forward, reverse, T7-forward, T7-reverse, Tm, GC%, product size, penalty)\n"
-            "5. PIS Scoring Summary: A/B/C sub-scores, total PIS, tier, weight rationale, and best fragment recommendation\n"
+            "2. siRNA Candidate Summary: top 5 ranked by OligoWalk Overall score — include ALL available fields "
+            "(sequence, position, overall_score/ddG, gc_percent). Do NOT omit any field.\n"
+            "3. dsRNA Fragment Design: for each fragment — list all available fields from the payload "
+            "(fragment_id, start, end, length, gc_percent, covered siRNA sites, composite_score, "
+            "evidence_based_rationale). Do NOT omit any field.\n"
+            "4. Primer Results: for each fragment — table of primer pairs with all fields "
+            "(pair_index, forward, reverse, forward_with_T7, reverse_with_T7, tm_left, tm_right, "
+            "product_size, penalty). Do NOT omit any field.\n"
+            "5. PIS Scoring Summary: list all fields from pis_scores entries (fragment_id, score_A, score_B, "
+            "score_C, pis_total, tier, weight_rationale). Do NOT omit any field.\n"
             "6. Conclusions and Recommendations: which dsRNA-fragment + primer pair to prioritize for synthesis\n\n"
-            "Data:\n"
-            f"Fragment results:\n{json.dumps(compact_fragments, ensure_ascii=False, indent=2)}\n\n"
-            f"PIS scores:\n{json.dumps(pis_scores, ensure_ascii=False, indent=2)}\n\n"
-            f"Top siRNA candidates:\n{json.dumps(candidates[:15], ensure_ascii=False, indent=2)}"
+            "Global rule: every section must render ALL fields present in the payload — never summarize away data.\n\n"
+            "Structured Facts:\n"
+            f"{json.dumps(report_payload, ensure_ascii=False, indent=2)}"
         )
 
         try:
@@ -673,7 +726,14 @@ def build_dsrna_designer_graph(
                 "pis_scores": pis_scores,
                 "errors": errors,
                 "report_text": report_text,
-                "computed_by": "llm_fragment_design + llm_pis_scoring + llm_report",
+                "computed_by": {
+                    "sequence_qc": "rule_engine",
+                    "sirna_scan": "oligowalk",
+                    "primer_design": "primer3",
+                    "fragment_design": "llm",
+                    "pis_scoring": "llm",
+                    "report_generation": "llm",
+                },
             }
         }
 

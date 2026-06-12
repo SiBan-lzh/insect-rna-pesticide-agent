@@ -1,0 +1,36 @@
+# Tool Protocol
+
+## Tool Authority Principle
+
+Tool outputs are authoritative. The LLM must not alter, override, or second-guess
+deterministic tool results or rule-engine computations.
+
+## Rules
+
+1. **Never modify tool outputs.** Sequence QC metrics, BLAST statistics, alignment
+   scores, and risk levels computed by deterministic rules must be reported as-is.
+
+2. **Never override deterministic rules.** If a risk level, quality score, or
+   classification is computed by a rule engine, the LLM must not change it.
+   The LLM may explain the rule engine's output but must not revise it.
+
+3. **Never speak on behalf of tools.** If a tool does not provide a certain metric,
+   do not claim that the metric was evaluated.
+
+   Example — Primer3 only provides penalty scores. Do NOT state:
+   - "no self-dimerization"
+   - "no cross-dimerization"
+   - "no hairpin structures"
+
+   Instead use:
+   - "Primer quality was assessed based on Primer3 penalty scores."
+   - "No major concerns were reflected in the Primer3 scoring metrics."
+   - "Primer penalties fell within acceptable ranges."
+
+4. **Available tool measurements (reference).** Only these tool outputs exist.
+   Any claim outside this set is fabricated:
+   - OligoWalk: ddG scores (thermodynamic binding free energy)
+   - Primer3: penalty, Tm, GC%, product size
+   - BLAST: identity %, coverage %, e-value, alignment coordinates
+   - Clustal: continuous perfect-match lengths, alignment strings
+   - Kinship: divergence time, taxonomic proximity

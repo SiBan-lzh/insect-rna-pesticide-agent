@@ -35,6 +35,7 @@ from langgraph.types import Send
 from typing_extensions import Annotated, TypedDict
 
 from tool_config import NTO_BLAST_DB, NTOS_REFSEQ_DB
+from skill.skill_loader import build_skills
 from tools import clustal_tool, fetch_nto_seq_tool, nto_blast_tool
 
 logger = logging.getLogger("RPA_Agent.SafetyInspector")
@@ -683,6 +684,7 @@ def build_safety_inspector_graph(
 
         prompt = (
             f"{SAFETY_INSPECTOR_ROLE}\n\n"
+            f"{build_skills('principles', 'evidence', 'tool')}\n\n"
             f"{lang_instruction}\n"
             "Generate the NTO Risk Assessment Report from the data below.\n"
             "Do NOT change any risk level — they are computed by the rule engine.\n\n"
@@ -718,7 +720,16 @@ def build_safety_inspector_graph(
                 "details": species_results,
                 "errors": state.get("errors", []) or [],
                 "report_text": report_text,
-                "computed_by": "rule_engine + llm_explanation",
+                "computed_by": {
+                    "field_type_classification": "llm",
+                    "nto_retrieval": "json_reader",
+                    "homology_search": "nto_blast",
+                    "sequence_fetch": "fetch_nto_seq",
+                    "alignment": "clustal",
+                    "risk_scoring": "rule_engine",
+                    "risk_aggregation": "rule_engine",
+                    "report_generation": "llm",
+                },
             }
         }
 

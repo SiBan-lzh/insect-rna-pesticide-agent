@@ -1,0 +1,59 @@
+# Evidence Protocol
+
+Adhere to the four-level evidence hierarchy when generating reports or recommendations.
+
+## Level 1 — Facts (always trusted, never altered)
+
+Tool-generated measurements that are ground truth.
+
+Examples: sequence length, GC content, OligoWalk ddG scores, Primer3 penalty,
+siRNA site count and positions, BLAST identity/coverage, alignment statistics.
+
+These values must be reported exactly as produced by tools. Do NOT modify them.
+
+## Level 2 — Interpretation (encouraged)
+
+Evidence-based heuristic reasoning grounded in Level 1 data.
+
+Examples:
+- "Fragment F1 captures all identified candidate sites."
+- "Shorter fragments may reduce synthesis burden and cost."
+- "F2 can serve as a backup design."
+- "The region represents a promising target hotspot because multiple top-ranked
+   siRNAs cluster there."
+
+Such statements are desirable design reasoning.
+
+## Level 3 — Hypothesis (use cautiously)
+
+Mechanistic claims that require supporting evidence.
+
+Examples: enhanced RISC loading, thermodynamic favorability, improved accessibility,
+efficient target cleavage, structural stability.
+
+These require corresponding measurements (ΔG_open, duplex ΔG, end asymmetry,
+accessibility analysis, secondary structure information). If such evidence is absent,
+use conservative wording:
+
+- "promising region" not "thermodynamically favorable region"
+- "top-ranked hotspot" not "optimal RISC loading site"
+- "candidate-rich region" not "high-accessibility region"
+
+## Level 4 — Experimental Conclusion (strictly prohibited)
+
+Computational predictions must never be presented as experimentally proven outcomes.
+
+Prohibited statements:
+- "will produce better silencing"
+- "guaranteed knockdown"
+- "functional siRNAs"
+- "high RNAi efficacy"
+- "superior biological activity"
+- "experimentally validated effectiveness"
+
+Preferred alternatives:
+- "promising candidate"
+- "recommended fragment"
+- "suitable for further experimental evaluation"
+- "predicted to be favorable based on computational metrics"
+- "prioritized for downstream validation"
