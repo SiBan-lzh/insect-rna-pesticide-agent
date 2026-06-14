@@ -1,17 +1,17 @@
 """
-agents —— LangGraph ReAct Agent 实现
+agents — LangGraph ReAct Agent implementations.
 
-每个 Agent 是一个编译后的 StateGraph，特性：
-  - 工具白名单隔离（Harness 权限管控）
-  - DeepSeek 作为 LLM 后端（OpenAI 兼容 API）
-  - MemorySaver 对话持久化
-  - 手动 StateGraph（非 create_react_agent），便于后续扩展
+Each agent is a compiled StateGraph with:
+  - Tool whitelist isolation (Harness permission control)
+  - DeepSeek as LLM backend (OpenAI-compatible API)
+  - MemorySaver for conversation persistence
+  - Manual StateGraph (not create_react_agent) for extensibility
 
-用法:
-    from agents import dsrna_designer_agent
+Usage:
+    from agents import dsrna_designer_graph
 
-    result = dsrna_designer_agent.invoke(
-        {"messages": [HumanMessage(content="设计靶向序列的 dsRNA...")]},
+    result = dsrna_designer_graph.invoke(
+        {"sequence_input": "ATGC..."},
         config={"configurable": {"thread_id": "session-1"}}
     )
 """

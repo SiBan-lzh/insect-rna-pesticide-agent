@@ -64,6 +64,7 @@ class DSRNADesignState(TypedDict, total=False):
     sequence_clean: str
     sequence_valid: bool
     sequence_qc: dict
+    oligowalk_mode: str
     oligowalk_result: dict
     retry_counts: Annotated[dict, _merge_dicts]
     fragment_proposals: list[dict]
@@ -442,9 +443,9 @@ def build_dsrna_designer_graph(
         retry_counts["oligowalk_scan"] = attempt
         payload = {
             "sequence": state["sequence_clean"],
-            "run_type": "fast",
+            "run_type": state.get("oligowalk_mode", "fast"),
             "oligo_length": 21,
-            "top_n": 10,
+            "top_n": 30,
         }
         try:
             result = _json_loads_tool_result(_oligowalk.invoke(payload))
@@ -496,17 +497,20 @@ def build_dsrna_designer_graph(
             "  - Avoid fragments with extreme GC% (<30% or >65%)\n"
             "  - Prefer fragments where the 5' and 3' ends have reasonable GC content for primer binding\n\n"
             "Your task:\n"
-            "  1. Simulate sliding windows across the full sequence (step ~10-20 bp). "
-            f"Window size: 300-500 bp if sequence >= 300 nt; "
-            f"otherwise, use the full sequence length as the window size.\n"
-            "  2. For each window, score: (a) sum of OligoWalk |Overall| scores of siRNAs inside the window; "
+            "  1. Identify siRNA hotspot regions — scan the target sequence using a sliding window "
+            f"(step ~10-20 bp, window size 300-500 bp if sequence >= 300 nt; "
+            f"otherwise use the full sequence length). "
+            "Score each window by the sum of OligoWalk |Overall| scores of siRNAs inside it.\n"
+            "  2. Rank windows by composite score: (a) siRNA coverage density (dominant); "
             "(b) GC% of the window; (c) 5'/3' end GC% for primer feasibility.\n"
-            "  3. Design a composite score that balances siRNA coverage and primer design quality.\n"
+            "  3. Design 1-3 dsRNA fragments — ONLY around high-scoring siRNA hotspot regions. "
+            "It is perfectly acceptable to propose a single fragment if there is only one clear hotspot. "
+            "Do NOT design fragments in regions with zero or negligible siRNA coverage — "
+            "a fragment with no siRNA hits has PIS=0 and serves no purpose.\n"
             "     Explain your scoring logic — you may weight these factors as you see fit for this sequence.\n"
-            "  4. Design 2-4 fragments that collectively TILE across the full sequence — "
-            "each fragment should cover a different region of the target. "
-            "Avoid designing multiple fragments that cover the same siRNA hotspot; "
-            "overlapping fragments are only justified if the sequence is too short to tile otherwise.\n\n"
+            "  4. If the sequence is short (e.g., <600 bp), a single fragment covering the entire "
+            "sequence is the preferred approach. Multiple fragments are justified only when "
+            "there are multiple distinct, well-separated hotspot regions.\n\n"
             "Return a JSON object with key 'fragment_proposals' — a list of candidates, each containing:\n"
             "  fragment_id, start (1-based), end (1-based), sequence, length,\n"
             "  covered_sirna (list of {position_1based, sequence, overall_score}),\n"
@@ -685,7 +689,7 @@ def build_dsrna_designer_graph(
             "sequence_qc": qc,
             "sirna_candidates_scanned": len(candidates),
             "fragments_designed": len(fragment_results),
-            "top_sirna_candidates": candidates[:15],
+            "top_sirna_candidates": candidates[:30],
             "fragments": compact_fragments,
             "pis_scores": pis_scores,
         }
@@ -731,7 +735,7 @@ def build_dsrna_designer_graph(
                 "report_text": report_text,
                 "computed_by": {
                     "sequence_qc": "rule_engine",
-                    "sirna_scan": "oligowalk",
+                    "sirna_scan": f"oligowalk({state.get('oligowalk_mode', 'fast')})",
                     "primer_design": "primer3",
                     "fragment_design": "llm",
                     "pis_scoring": "llm",

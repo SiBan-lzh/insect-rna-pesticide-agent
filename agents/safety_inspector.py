@@ -646,7 +646,7 @@ def build_safety_inspector_graph(
 
     def route_after_input_clean(state: SafetyState) -> Literal["candidate_species_build", "report_generate"]:
         """Skip species analysis when sequence validation failed."""
-        if not state.get("dsrna_sequence"):
+        if any(e.get("stage") == "input_clean" for e in state.get("errors", []) or []):
             return "report_generate"
         return "candidate_species_build"
 
@@ -720,10 +720,35 @@ def build_safety_inspector_graph(
         }
 
     def report_generate_node(state: SafetyState) -> dict:
-        overall = derive_overall_risk_level(state.get("species_results", []) or [])
+        errors = state.get("errors", []) or []
         field_types = state.get("field_types", [])
         lang = _detect_language(str(state.get("field_type", "")))
         lang_instruction = "Write the entire report in Chinese." if lang == "Chinese" else "Write the entire report in English."
+
+        # Input validation failed — generate error report without LLM
+        if any(e.get("stage") == "input_clean" for e in errors):
+            return {
+                "final_report": {
+                    "status": "failed",
+                    "risk_level": "incomplete",
+                    "field_types": field_types,
+                    "species_analyzed": 0,
+                    "errors": errors,
+                    "report_text": f"[Safety assessment aborted: {errors[0].get('error', 'Invalid dsRNA sequence')}]",
+                    "computed_by": {
+                        "field_type_classification": "llm",
+                        "nto_retrieval": "json_reader",
+                        "homology_search": "nto_blast",
+                        "sequence_fetch": "fetch_nto_seq",
+                        "alignment": "clustal",
+                        "risk_scoring": "rule_engine",
+                        "risk_aggregation": "rule_engine",
+                        "report_generation": "llm",
+                    },
+                }
+            }
+
+        overall = derive_overall_risk_level(state.get("species_results", []) or [])
 
         species_results = state.get("species_results", []) or []
         summary_for_llm = [_compact_species(r) for r in species_results]
