@@ -60,6 +60,7 @@ def build_openai(s: Settings) -> ChatOpenAI:
         model=s.model_name,
         api_key=s.api_key,
         base_url=s.base_url or "https://api.openai.com/v1",
+        max_tokens=32768,
     )
 
 
@@ -67,6 +68,7 @@ def build_anthropic(s: Settings) -> ChatAnthropic:
     kwargs: dict = {"model": s.model_name, "api_key": s.api_key}
     if s.base_url:
         kwargs["base_url"] = s.base_url
+    kwargs["max_tokens"] = 32768
     return ChatAnthropic(**kwargs)
 
 
@@ -74,6 +76,7 @@ def build_google(s: Settings) -> ChatGoogleGenerativeAI:
     return ChatGoogleGenerativeAI(
         model=s.model_name,
         google_api_key=s.api_key,
+        max_output_tokens=32768,
     )
 
 

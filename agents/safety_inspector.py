@@ -20,6 +20,7 @@ from __future__ import annotations
 import json
 import logging
 import operator
+import re
 import sys
 from pathlib import Path
 from typing import Any, Literal
@@ -185,6 +186,47 @@ def _json_loads_tool_result(raw: Any) -> dict:
     if isinstance(raw, str):
         return json.loads(raw)
     return {"status": "error", "error": "Unexpected tool result type", "details": str(type(raw))}
+
+
+def _extract_json_from_llm_response(raw: str | None) -> dict | None:
+    """Robustly extract JSON from LLM response text.
+
+    Tries in order:
+    1. Strip markdown fences (```json ... ```) and json.loads each fenced block
+    2. Find first {...} block via regex and json.loads
+    3. Treat whole text as JSON
+    Returns None on failure (caller decides fallback).
+    """
+    if not raw:
+        return None
+    text = raw.strip()
+
+    if text.startswith("```"):
+        parts = text.split("```")
+        for part in parts[1::2]:
+            part = part.strip()
+            if not part:
+                continue
+            if part.startswith("json"):
+                part = part[4:].strip()
+            try:
+                return json.loads(part)
+            except (json.JSONDecodeError, ValueError):
+                continue
+
+    match = re.search(r"\{.*\}", text, re.DOTALL)
+    if match:
+        try:
+            return json.loads(match.group())
+        except (json.JSONDecodeError, ValueError):
+            pass
+
+    try:
+        return json.loads(text)
+    except (json.JSONDecodeError, ValueError):
+        pass
+
+    return None
 
 
 def _tool_error(node: str, tool_name: str, species: str, error: str, attempt: int) -> dict:
@@ -582,20 +624,31 @@ def build_safety_inspector_graph(
             "Return ONLY valid JSON, no explanation."
         )
 
-        response = llm.invoke(prompt)
-        raw = getattr(response, "content", str(response)).strip()
-        if raw.startswith("```"):
-            raw = raw.split("```")[1]
-            if raw.startswith("json"):
-                raw = raw[4:]
-        parsed = json.loads(raw)
-        field_types = parsed.get("field_types", [])
+        field_types: list[str] = []
+        try:
+            response = llm.invoke(prompt)
+            raw = getattr(response, "content", str(response)).strip()
+            parsed = _extract_json_from_llm_response(raw)
+            if parsed is not None:
+                field_types = parsed.get("field_types", []) or []
+            else:
+                logger.warning("input_clean: could not parse JSON from LLM response: %s", raw)
+        except Exception:
+            logger.exception("input_clean LLM call failed")
+
         if "EPA" not in field_types:
             field_types.append("EPA")
+
         return {
             "field_types": field_types,
             "dsrna_sequence": sequence,
         }
+
+    def route_after_input_clean(state: SafetyState) -> Literal["candidate_species_build", "report_generate"]:
+        """Skip species analysis when sequence validation failed."""
+        if not state.get("dsrna_sequence"):
+            return "report_generate"
+        return "candidate_species_build"
 
     # ----- candidate_species_build: resolve field types to NTO JSON files -----
     def candidate_species_build_node(state: SafetyState) -> dict:
@@ -741,7 +794,10 @@ def build_safety_inspector_graph(
     builder.add_node("report_generate", report_generate_node)
 
     builder.add_edge(START, "input_clean")
-    builder.add_edge("input_clean", "candidate_species_build")
+    builder.add_conditional_edges("input_clean", route_after_input_clean, {
+        "candidate_species_build": "candidate_species_build",
+        "report_generate": "report_generate",
+    })
     builder.add_conditional_edges(
         "candidate_species_build",
         parallel_off_target_analyze,
