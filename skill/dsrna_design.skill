@@ -1,0 +1,172 @@
+# dsRNA Design Guide
+
+---
+
+## Metadata
+
+**Short Description**: Step-by-step guide for designing dsRNA fragments and PCR primers using OligoWalk and Primer3 tools.
+
+**Authors**: RPA Team
+
+**Version**: 1.0
+
+**Last Updated**: June 2026
+
+---
+
+## Overview
+
+This guide covers the complete dsRNA design workflow for RNAi pesticide development. It integrates OligoWalk thermodynamic siRNA scanning with Primer3 PCR primer design to produce synthesis-ready dsRNA fragments.
+
+The workflow consists of four phases:
+1. **Sequence Preparation** — normalize and QC the input sequence
+2. **siRNA Scanning** — use OligoWalk to identify candidate siRNA binding sites
+3. **dsRNA Fragment Design** — select fragment boundaries that cover high-scoring siRNA hotspots
+4. **Primer Design** — design PCR primers for each selected fragment
+
+---
+
+## Phase 1: Sequence Preparation
+
+### Normalization
+
+Before running any tool, normalize the sequence:
+- Convert to uppercase
+- Replace U with T
+- Strip whitespace
+- Validate: only A, T, C, G, N are allowed
+
+### Quality Control
+
+Check these metrics after normalization:
+- **Length**: ideally 300+ bp for dsRNA design; shorter sequences still work but with fewer fragment options
+- **GC%**: 30-65% is acceptable; extreme GC% (<30% or >65%) may affect primer design
+- **Low-complexity regions**: long homopolymer runs (≥6 same bases) may indicate problematic regions
+
+---
+
+## Phase 2: siRNA Scanning with OligoWalk
+
+### When to Run
+
+Always run OligoWalk before fragment design. The siRNA hotspot map determines where fragments should be placed.
+
+### Tool: `oligowalk`
+
+**Parameters:**
+- `sequence`: the normalized target sequence
+- `run_type`: `"fast"` for quick screening, `"research"` for higher precision (slower)
+- `oligo_length`: 21 (standard siRNA length)
+- `top_n`: 30 (number of top candidates to return)
+
+**What the output means:**
+- `Overall (kcal/mol)`: thermodynamic binding free energy — more negative = stronger predicted binding
+- `Pos.`: 1-based position of the siRNA on the target sequence
+- Higher |Overall| scores indicate more stable siRNA-target duplex formation
+
+**Interpretation guidelines:**
+- Use the top 30 candidates to identify hotspot regions (clusters of high-scoring siRNAs)
+- A hotspot is a region where multiple top siRNAs overlap within a 300-500 bp window
+- Do NOT design fragments in regions with zero or negligible siRNA coverage — a fragment with no siRNA hits has no predicted activity
+
+---
+
+## Phase 3: dsRNA Fragment Design
+
+### Strategy
+
+1. **Identify hotspots**: scan the target sequence with a sliding window (step ~10-20 bp, window 300-500 bp). Score each window by the sum of OligoWalk |Overall| scores of siRNAs inside it.
+2. **Rank windows** by composite score considering: siRNA coverage density (dominant), GC%, and 5'/3' end GC% for primer feasibility.
+3. **Design 1-3 fragments** — only around high-scoring hotspots. A single fragment is acceptable if there is only one clear hotspot.
+4. **Short sequences** (<600 bp): a single fragment covering the entire sequence is preferred.
+
+### Fragment Constraints
+
+- Fragment size: 300-500 bp (adapt for sequences shorter than 300 bp)
+- Target amplicon size for primers: 100-300 bp
+- Avoid extreme GC% (<30% or >65%)
+- Prefer fragments with reasonable GC content at 5' and 3' ends for primer binding
+
+### Evidence Levels for Fragment Reasoning
+
+When describing fragments, adhere to this hierarchy:
+- **Level 1 (Facts)**: OligoWalk ddG scores, siRNA positions, GC%, sequence length — report exactly as measured
+- **Level 2 (Interpretation)**: "Fragment F1 captures all top siRNAs", "F2 can serve as backup" — encouraged heuristic reasoning
+- **Level 3 (Hypothesis)**: Use cautiously. "Thermodynamically favorable region" requires corresponding measurements. Without data, use "promising region" not "thermodynamically favorable region"
+- **Level 4 (Experimental Conclusion)**: Strictly prohibited. Never say "will produce better silencing" or "high RNAi efficacy"
+
+---
+
+## Phase 4: Primer Design with Primer3
+
+### When to Run
+
+Run Primer3 for each fragment that passed the design phase. Primer3 is a deterministic tool — its outputs are authoritative.
+
+### Tool: `primer3`
+
+**Parameters:**
+- `sequence`: the fragment sequence
+- `sequence_id`: fragment identifier
+- `num_return`: 3-5 primer pairs
+- `primer_opt_size`: 20
+- `primer_opt_tm`: 60.0°C
+- `primer_min_tm`: 57.0°C
+- `primer_max_tm`: 63.0°C
+- `primer_product_size_range`: [100, 300]
+
+**What the output means:**
+- `penalty`: lower is better — Primer3's composite quality score
+- `tm_left` / `tm_right`: melting temperatures of forward/reverse primers
+- `product_size`: expected PCR product length
+
+**Important — Primer3 limitations:**
+- Primer3 provides penalty scores only. Do NOT claim it evaluates secondary structures (hairpins, dimers) unless explicitly stated in the output.
+- Acceptable statements: "Primer quality was assessed based on Primer3 penalty scores."
+- Prohibited statements: "no self-dimerization", "no hairpin structures" — Primer3 does not measure these.
+
+### PIS Scoring (Predicted Interference Score)
+
+After primer design, compute a composite quality score for each fragment:
+
+**Three dimensions:**
+- **A. siRNA Binding Score** (weight 50-70%): number and combined OligoWalk |ddG| values of siRNA sites within the fragment
+- **B. Primer Quality Score** (weight 20-35%): based on Primer3 best penalty and Tm deviation from 60°C
+- **C. Sequence Context Quality** (weight 5-20%): GC% deviation from 50%, low-complexity regions
+
+**Reference formula**: 0.6A + 0.3B + 0.1C (adjustable based on data quality)
+
+**Tier thresholds:**
+- High (>85): strong siRNA coverage + good primer quality + ideal GC
+- Medium (60-85): moderate coverage or some quality concerns
+- Low (<60): poor coverage or significant design issues
+
+**Important**: PIS is a composite QUALITY score, NOT a prediction of in vivo knockdown. Never present it as "predicted interference efficiency" or "knockdown percentage".
+
+---
+
+## Complete Workflow Example
+
+```
+User: "Design dsRNA for this sequence: ATGGCTGCGACCTCT..."
+
+Agent actions:
+1. Normalize and QC the sequence
+2. Run oligowalk(sequence=seq, run_type="fast", top_n=30)
+3. Examine results to identify siRNA hotspots
+4. Select 1-3 fragment regions around hotspots
+5. For each fragment, run primer3(sequence=fragment_seq, ...)
+6. Compute PIS scores for each fragment
+7. Generate final report with recommendations
+```
+
+## Vocabulary Rules for Recommendations
+
+**Allowed:**
+- suggest, may, potentially, candidate, recommended, prioritized
+- "The data suggest F1 is a promising candidate"
+- "F1 is prioritized over F2 due to higher siRNA density"
+
+**Prohibited:**
+- prove, demonstrate, superior, guarantee, confirmed, effective, efficacy, validated
+- Never claim experimental outcomes from computational predictions
