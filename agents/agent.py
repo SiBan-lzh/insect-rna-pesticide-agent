@@ -88,12 +88,9 @@ def build_rnai_agent(
     skill_content = build_skills(*skills)
     system_prompt = f"{AGENT_ROLE}\n\n{skill_content}"
 
-    # Bind all tools to the LLM
-    llm_with_tools = llm.bind_tools(ALL_TOOLS)
-
     # Create the agent
     agent = create_agent(
-        model=llm_with_tools,
+        model=llm,
         tools=ALL_TOOLS,
         system_prompt=system_prompt,
         checkpointer=checkpointer or MemorySaver(),

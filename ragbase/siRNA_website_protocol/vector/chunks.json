@@ -1,0 +1,1184 @@
+[
+  {
+    "content": "You can copy and paste a nucleotide target sequence directly into the Nucleotide Sequence field, or you can enter a database accession number for the sequence in the Accession Number field. If you enter an accession number, the Designer will link to the Entrez search engine and search the crosslinked databases at the National Center for Biotechnology Information (NCBI), including GenBank and OMIM. Then the sequence associated with the accession number will be automatically downloaded into the Designer.\nNote: We recommend entering an accession number in RefSeq format (e.g., NT_123456). For RefSeq numbers, the Designer will check the sequence for known single-nucleotide polymorphisms (SNPs). Designs that include SNPs will be rejected by the Designer. SNP identification will not be performed if you paste in nucleotide sequences or enter GenBank-format accession numbers.",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Stealth RNAi™ siRNA - Enter Sequence and Parameters / Step 1. Enter an Accession Number or Provide a Nucleotide Sequence.",
+    "parent_content": "Overview\nStealth RNA™ siRNA oligonucleotides are 25-base-pair double-stranded RNA oligonucleotides with proprietary chemical modifications. Compared to siRNA, Stealth RNAi™ siRNA molecules provide decreased nonspecific stress responses for clearer results, high potency for more powerful knockdown of genes, and improved stability both in cell culture systems and in vivo.\nTo begin designing Stealth RNA™ siRNA oligos, select the Stealth RNAi™ siRNA target design option at the top of the Designer page. Then enter a sequence for the gene that you want to target or a database accession number for that sequence, select a database to BLAST search to identify unique regions of the sequence, and specify a GC percentage range for the oligos."
+  },
+  {
+    "content": "Any regions of the sequence containing ambiguous bases (e.g., N) or other letters will be skipped when generating the designs. If your sequence includes too many ambiguous bases or other letters, you will be prompted to re-enter the sequence. White spaces and numerals in the sequence will be ignored.\nNote: If you are having difficulty generating Stealth™ RNA designs, check your input sequence to make sure that it contains only the letters A, C, G, T, or U.",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Stealth RNAi™ siRNA - Enter Sequence and Parameters / Nucleotide Sequence: Type or paste your single-stranded target sequence into this box. The designer accepts sequences in text, FASTA, or GenBank format. The sequence should be oriented from 5' to 3'. Because Stealth RNAi™ siRNA molecules must be highly specific, the input sequence should contain only the following 1-letter base code abbreviations: A, C, G, T, U (case insensitive).",
+    "parent_content": "Overview\nStealth RNA™ siRNA oligonucleotides are 25-base-pair double-stranded RNA oligonucleotides with proprietary chemical modifications. Compared to siRNA, Stealth RNAi™ siRNA molecules provide decreased nonspecific stress responses for clearer results, high potency for more powerful knockdown of genes, and improved stability both in cell culture systems and in vivo.\nTo begin designing Stealth RNA™ siRNA oligos, select the Stealth RNAi™ siRNA target design option at the top of the Designer page. Then enter a sequence for the gene that you want to target or a database accession number for that sequence, select a database to BLAST search to identify unique regions of the sequence, and specify a GC percentage range for the oligos."
+  },
+  {
+    "content": "RefSeq-format accession numbers begin with two letters followed by an underscore and six digits (e.g., NT_123456).\nGenBank accession numbers are usually a combination of a letters and numbers, such as a single letter followed by five digits (e.g., U12345) or two letters followed by six digits (e.g., AF123456). If you enter an accession number in RefSeq format (e.g., NT_123456), the Designer will check the sequence for known single-nucleotide polymorphisms (SNPs). Designs that include SNPs will be rejected by the Designer. SNP identification will not be performed if you paste in nucleotide sequences or enter GenBank-format accession numbers.",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Stealth RNAi™ siRNA - Enter Sequence and Parameters / Accession Number: Enter the database accession number for your sequence in this field. The Designer will link to the Entrez search engine and search the crosslinked databases at NCBI, including GenBank and OMIM. The sequence associated with the accession number will be automatically downloaded into the Designer.",
+    "parent_content": "Overview\nStealth RNA™ siRNA oligonucleotides are 25-base-pair double-stranded RNA oligonucleotides with proprietary chemical modifications. Compared to siRNA, Stealth RNAi™ siRNA molecules provide decreased nonspecific stress responses for clearer results, high potency for more powerful knockdown of genes, and improved stability both in cell culture systems and in vivo.\nTo begin designing Stealth RNA™ siRNA oligos, select the Stealth RNAi™ siRNA target design option at the top of the Designer page. Then enter a sequence for the gene that you want to target or a database accession number for that sequence, select a database to BLAST search to identify unique regions of the sequence, and specify a GC percentage range for the oligos."
+  },
+  {
+    "content": "Overview\nStealth RNA™ siRNA oligonucleotides are 25-base-pair double-stranded RNA oligonucleotides with proprietary chemical modifications. Compared to siRNA, Stealth RNAi™ siRNA molecules provide decreased nonspecific stress responses for clearer results, high potency for more powerful knockdown of genes, and improved stability both in cell culture systems and in vivo.\nTo begin designing Stealth RNA™ siRNA oligos, select the Stealth RNAi™ siRNA target design option at the top of the Designer page. Then enter a sequence for the gene that you want to target or a database accession number for that sequence, select a database to BLAST search to identify unique regions of the sequence, and specify a GC percentage range for the oligos.",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Stealth RNAi™ siRNA - Enter Sequence and Parameters",
+    "parent_content": ""
+  },
+  {
+    "content": "If you entered an accession number in Step 1, in this step you specify the regions of the sequence for which you want to design Stealth RNAi™ siRNA oligos. The default selection of Open Reading Frame (ORF) is appropriate in most cases. If you have trouble generating designs for the ORF alone, select the 5' UTR and/or 3' UTR checkboxes and redesign the molecules.",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Step 2. If You Entered an Accession Number in Step 1, Select Regions for Target Design / Accession Number: Enter the database accession number for your sequence in this field. The Designer will link to the Entrez search engine and search the crosslinked databases at NCBI, including GenBank and OMIM. The sequence associated with the accession number will be automatically downloaded into the Designer.",
+    "parent_content": ""
+  },
+  {
+    "content": "In Step 3, select a species-specific database from the pulldown list that you want to perform a BLAST (Basic Local Alignment Search Tool) search on to identify unique regions in your target sequence. Areas of homology identified by the BLAST search will be \"masked\" in the sequence to ensure that the Stealth™ RNA target designs are highly specific.\nEach BLAST search is performed against a a nonredundant version of the UniGene database. The database contains representative gene sequences for the selected species.\nNote: The databases used in this search contain one representation of each gene and do not include splice variants.",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Step 2. If You Entered an Accession Number in Step 1, Select Regions for Target Design / Step 3. Choose Database for BLAST",
+    "parent_content": ""
+  },
+  {
+    "content": "The Minimum GC Percentage and Maximum GC Percentage fields contain default values for the minimum and maximum percentage GC content of your Stealth RNA™ siRNA molecules. For most sequences, this range is wide enough to generate several Stealth RNA™ siRNA designs. You can change this range if you are having difficulty generating designs, or if you know that the GC content of your Stealth RNA™ siRNA molecules will fall outside this range based on the sequence. Designs outside the selected range will be rejected by the Designer.",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Step 2. If You Entered an Accession Number in Step 1, Select Regions for Target Design / Step 4. Choose Minimum and Maximum GC Percentage",
+    "parent_content": ""
+  },
+  {
+    "content": "Click on the RNAi Design button to design Stealth RNA™ siRNA molecules. Up to 10 designs will be generated for your target sequence. The BLOCK-iT™ RNAi Designer uses statistical analysis of multiple validated Stealth RNA™ siRNA sets and a proprietary algorithm to select unique regions in the target gene sequence that have a markedly improved probability of success in silencing the gene.\n$\n{}",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Step 2. If You Entered an Accession Number in Step 1, Select Regions for Target Design / Step 5: Click \"RNAi Design\" to Design Your Stealth RNA™ siRNA Molecules.",
+    "parent_content": ""
+  },
+  {
+    "content": "The BLOCK-iT™ RNAi Designer can design synthetic 19-mer short interfering RNA (siRNA) molecules that are specific to your nucleotide sequence of interest. To begin, select the siRNA target design option at the top of the Designer page. On the first page, you enter a sequence for the gene that you want to target or a database accession number for that sequence, select a database to BLAST search to identify unique regions of the sequence, specify a GC percentage range for the oligos, and select an algorithm to generate the designs.",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Step 2. If You Entered an Accession Number in Step 1, Select Regions for Target Design / siRNA - Enter Sequence and Parameters",
+    "parent_content": ""
+  },
+  {
+    "content": "You can copy and paste a nucleotide target sequence directly into the Nucleotide Sequence field, or you can enter a database accession number for the sequence in the Accession Number field. If you enter an accession number, the Designer will link to the Entrez search engine and search the crosslinked databases at the National Center for Biotechnology Information (NCBI), including GenBank and OMIM. Then the sequence associated with the accession number will be automatically downloaded into the Designer.\nNote: If you enter an accession number in RefSeq format (e.g., NT_123456), the Designer will check the sequence for known single-nucleotide polymorphisms (SNPs). Designs that include SNPs will be rejected by the Designer. SNP identification will not be performed if you paste in nucleotide sequences or enter GenBank-format accession numbers.",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Step 2. If You Entered an Accession Number in Step 1, Select Regions for Target Design / Step 1. Enter an Accession Number or Provide a Nucleotide Sequence.",
+    "parent_content": ""
+  },
+  {
+    "content": "If you entered an accession number in Step 1, in this step you specify the regions of the sequence for which you want to design siRNA molecules. The default selection of Open Reading Frame (ORF) is appropriate in most cases. If you have trouble generating designs for the ORF alone, select the 5' UTR and/or 3' UTR checkboxes and redesign the molecules.",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Step 2. If You Entered an Accession Number in Step 1, Select Regions for Target Design / RefSeq-format accession numbers begin with two letters followed by an underscore and six digits (e.g., NT_123456). GenBank accession numbers are usually a combination of a letters and numbers, such as a single letter followed by five digits (e.g., U12345) or two letters followed by six digits (e.g., AF123456). If you enter an accession number in RefSeq format (e.g., NT_123456), the Designer will check the sequence for known single-nucleotide polymorphisms (SNPs). Designs that include SNPs will be rejected by the Designer. SNP identification will not be performed if you paste in nucleotide sequences or enter GenBank-format accession numbers.",
+    "parent_content": ""
+  },
+  {
+    "content": "In Step 3, select a species-specific database from the pulldown list that you want to perform a BLAST (Basic Local Alignment Search Tool) search on to identify unique regions in your target sequence. Areas of homology identified by the BLAST search will be \"masked\" in the sequence to ensure that the siRNA target designs are highly specific.\nEach BLAST search is performed against a a nonredundant version of the UniGene database. The database contains representative gene sequences for the selected species.\nNote: The databases used in this search contain one representation of each gene and do not include splice variants.",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Step 2. If You Entered an Accession Number in Step 1, Select Regions for Target Design / Step 3. Choose Database for BLAST",
+    "parent_content": ""
+  },
+  {
+    "content": "The Minimum GC Percentage and Maximum GC Percentage fields contain default values for the minimum and maximum percentage GC content of your siRNA molecules. For most sequences, this range is wide enough to generate several siRNA designs. You can change this range if you are having difficulty generating siRNA designs, or if you know that the GC content of your siRNA molecules will fall outside this range based on the sequence. Designs outside the selected range will be rejected by the Designer.",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Step 2. If You Entered an Accession Number in Step 1, Select Regions for Target Design / Step 4. Choose Minimum and Maximum GC Percentage",
+    "parent_content": ""
+  },
+  {
+    "content": "In this step, you select the algorithm used to generate the siRNA designs. Select either the Proprietary algorithm or one or more of the Tuschl's motif patterns, and then click on the RNAi Design button. Up to 10 designs will be generated for your target sequence.\nNote: The Default Motif Pattern design algorithm will give the best results in most cases, and is highly recommended.\nThe results using this algorithm may include some Tuschl's patterns; these will be noted on the results page.",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Step 2. If You Entered an Accession Number in Step 1, Select Regions for Target Design / Step 5: Select siRNA Design Options and Click \"RNAi Design\" to Design siRNA.",
+    "parent_content": ""
+  },
+  {
+    "content": "Tuschl's Motif Pattern: To design RNA molecules using Tuschl's rules, select the option button next to Tuschl's Motif Pattern and then select one or more pattern checkboxes. The Designer will generate 19-nucleotide RNA sequences that match the selected pattern(s). For example, if you select the AA(N19)TT pattern, the Designer will search for an area of the sequence that begins with \"AA\" and ends with \"TT,\" with 19 bases in between. Each pattern is listed using the following base code letters: A = Adenine; T = Thymine; R = Adenine or Guanine (Purines); Y = Thymine or Cytosine (Pyrimidines); N = Any",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Step 2. If You Entered an Accession Number in Step 1, Select Regions for Target Design / Default Motif Pattern: Select the option button next to Default Motif Pattern to use Invitrogen's proprietary design algorithm. This algorithm performs a statistical analysis of the target sequence—considering such factors as sequence composition, nucleotide content at 5' and 3' ends, and thermodynamic properties—and correlates it with data collected from multiple validated siRNA oligo sets tested on different gene targets.",
+    "parent_content": ""
+  },
+  {
+    "content": "Overview\nShort-hairpin RNA (shRNA) is an RNA molecule that contains sense and antisense sequences connected by a short spacer of nucleotides that enables the molecule to form a loop structure. shRNA is expressed in mammalian cells from a vector with a Pol III-type promoter. It is transported from the nucleus into the cytoplasm, where it's processed by the Dicer enzyme into 21-23 nucleotide siRNA duplexes. Once in the cell, the shRNA can enter the RNAi pathway and result in gene silencing by blocking translation.",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "shRNA - Enter Sequence and Parameters / Default Motif Pattern: Select the option button next to Default Motif Pattern to use Invitrogen's proprietary design algorithm. This algorithm performs a statistical analysis of the target sequence—considering such factors as sequence composition, nucleotide content at 5' and 3' ends, and thermodynamic properties—and correlates it with data collected from multiple validated siRNA oligo sets tested on different gene targets.",
+    "parent_content": ""
+  },
+  {
+    "content": "(Linker - purple, Sense Sequence - green, Loop Sequence - black, Antisense Seqence - red)",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "shRNA - Enter Sequence and Parameters / The BLOCK-iT RNAi Designer can design double-stranded DNA (dsDNA) molecules for directional cloning into a Gateway®-adapted entry vector and subsequent expression of shRNA. The dsDNA has complementary 21-mer sequences and a default 4-nucleotide loop sequence or a custom loop sequence that you specify and a 4-nucleotide sequence (CACC or AAAA) for directional cloning. An example of a dsDNA design for encoding shRNA is shown below:",
+    "parent_content": ""
+  },
+  {
+    "content": "You can copy and paste a nucleotide target sequence directly into the Nucleotide Sequence field, or you can enter a database accession number for the sequence in the Accession Number field. If you enter an accession number, the Designer will link to the Entrez search engine and search the crosslinked databases at the National Center for Biotechnology Information (NCBI), including GenBank and OMIM.\nThen the sequence associated with the accession number will be automatically downloaded into the Designer.\nNote: If you enter an accession number in RefSeq format (e.g., NT_123456), the Designer will check the sequence for known singlenucleotide polymorphisms (SNPs). Designs that include SNPs will be rejected by the Designer. SNP identification will not be performed if you paste in nucleotide sequences or enter GenBank-format accession numbers.",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Step 1. Enter an Accession Number or Provide a Nucleotide Sequence. / To begin designing a dsDNA oligo, select the shRNA target design option at the top of the Designer page. Then enter a sequence for the gene that you want to target or a database accession number for that sequence, select a database to BLAST search to identify unique regions of the sequence, and specify a GC percentage range for the oligos. Finally, select the expression vector and the strand orientation of the oligo.",
+    "parent_content": ""
+  },
+  {
+    "content": "Note: If you are having difficulty generating designs, check your input sequence to make sure that it contains only the letters A, C, G, T, or U.",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Step 1. Enter an Accession Number or Provide a Nucleotide Sequence. / Nucleotide Sequence: Type or paste your single-stranded target sequence into this box. The designer accepts sequences in text, FASTA, or GenBank format. The sequence should be oriented from 5' to 3'. Because shRNA molecules must be highly specific, the input sequence should contain only the following 1-letter base code abbreviations: A, C, G, T, U (case insensitive). Any regions of the sequence containing ambiguous bases (e.g., N) or other letters will be skipped when generating the designs. If your sequence includes too many ambiguous bases or other letters, you will be prompted to re-enter the sequence. White spaces and numerals in the sequence will be ignored.",
+    "parent_content": ""
+  },
+  {
+    "content": "If you entered an accession number in Step 1, in this step you specify the regions of the sequence for which you want to design your dsDNA molecules. The default selection of Open Reading Frame (ORF) is appropriate in most cases. If you have trouble generating designs for the ORF alone, select the 5' UTR and/or 3' UTR checkboxes and redesign the molecules.",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Step 2. If You Entered an Accession Number in Step 1, Select Regions for Target Design / Accession Number: Enter the database accession number for your sequence in this field. The Designer will link to the Entrez search engine and search the crosslinked databases at NCBI, including GenBank and OMIM. The sequence associated with the accession number will be automatically downloaded into the Designer. RefSeq-format accession numbers begin with two letters followed by an underscore and six digits (e.g., NT_123456). GenBank accession numbers are usually a combination of a letters and numbers, such as a single letter followed by five digits (e.g., U12345) or two letters followed by six digits (e.g., AF123456). If you enter an accession number in RefSeq format (e.g., NT_123456), the Designer will check the sequence for known single-nucleotide polymorphisms (SNPs). Designs that include SNPs will be rejected by the Designer. SNP identification will not be performed if you paste in nucleotide sequences or enter GenBank-format accession numbers.",
+    "parent_content": ""
+  },
+  {
+    "content": "In Step 3, select a species-specific database from the pulldown list that you want to perform a BLAST (Basic Local Alignment Search Tool)\nsearch on to identify unique regions in your target sequence. Areas of homology identified by the BLAST search will be \"masked\" in the sequence to ensure that the target designs are highly specific. Each BLAST search is performed against a a nonredundant version of the UniGene database. The database contains representative gene sequences for the selected species.\nNote: The databases used in this search contain one representation of each gene and do not include splice variants.",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Step 2. If You Entered an Accession Number in Step 1, Select Regions for Target Design / Step 3. Choose Database for BLAST",
+    "parent_content": ""
+  },
+  {
+    "content": "The Minimum GC Percentage and Maximum GC Percentage fields contain default values for the minimum and maximum percentage GC content of your shRNA molecules. For most sequences, this range is wide enough to generate several designs.\nYou can change this range if you are having difficulty generating designs, or if you know that the GC content of your dsDNA molecules will fall outside this range based on the sequence. Designs outside the selected range will be rejected by the Designer.",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Step 2. If You Entered an Accession Number in Step 1, Select Regions for Target Design / Step 4. Choose Minimum and Maximum GC Percentage",
+    "parent_content": ""
+  },
+  {
+    "content": "In this step, you select the Gateway®-adapted entry vector for expressing your shRNA and the strand encoding the shRNA, and then click on the RNAi Design button. Up to 10 designs will be generated for your target sequence. Select the desired vector from the Vector pulldown list. Select either the pENTR™/U6 entry vector for constitutive shRNA expression or the pENTR™/H1/TO entry vector for inducible expression. Note that if you select pENTR™ /U6, the shRNA oligo designs will be compatible with both vectors. Next, select the desired Strand Orientation, depending on whether the resulting shRNA should be encoded from the sense target sequence (sense-loop-antisense) or the antisense target sequence (antisense-loop-sense). When you have made your selections, click on the RNAi Design button.",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Step 2. If You Entered an Accession Number in Step 1, Select Regions for Target Design / Step 5: Select Vector and Strand Orientation and click \"RNAi Design\" to Design.",
+    "parent_content": ""
+  },
+  {
+    "content": "Overview\nMicroRNAs (miRNAs) are endogenously expressed small ssRNA sequences of ~22 nucleotides in length that naturally direct gene silencing through components shared with the RNAi pathway. BLOCK-iT™ Pol II miR RNAi Technology uses expression vectors that allow flexible expression of miRNA-based knockdown cassettes driven by RNA Polymerase II (Pol II) promoters in mammalian cells.\nTo generate miR RNAi oligos for use with this system, you can use BLOCK-iT™ RNAi Designer to design two single-stranded DNA oligonucleotides: one encoding the target pre-miRNA (top-strand oligo) and the other its complement (bottom-strand oligo).",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "miR RNAi - Enter Sequence and Parameters / Step 5: Select Vector and Strand Orientation and click \"RNAi Design\" to Design.",
+    "parent_content": ""
+  },
+  {
+    "content": "The top-strand oligo encoding the target pre-miRNA has the following features:\n·A 4-nucleotide, 5' overhang (TGCT) complementary to the vector (required for directional cloning)\n·A 5' G + a short 21-nucleotide antisense sequence (mature miRNA) derived from the target gene, followed by\n·A short spacer of 19 nucleotides to form a terminal loop and\n·A short sense target sequence with 2 nucleotides removed to create an internal loop\nSee the BLOCK-iT™ Pol II miR RNAi Expression Vector Kits manual for more information, including details about the oligo design rules used by the RNAi Designer.",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "miR RNAi - Enter Sequence and Parameters / You then anneal the top and bottom strands to generate a double-stranded oligonucleotide (ds oligo) suitable for cloning into BLOCK-iT™ Pol II miR RNAi Expression Vectors.",
+    "parent_content": ""
+  },
+  {
+    "content": "You can copy and paste a nucleotide target sequence directly into the Nucleotide Sequence field, or you can enter a database accession number for the sequence in the Accession Number field. If you enter an accession number, the Designer will link to the Entrez search engine and search the crosslinked databases at the National Center for Biotechnology Information (NCBI), including GenBank and OMIM. Then the sequence associated with the accession number will be automatically downloaded into the Designer.\nNote: If you enter an accession number in RefSeq format (e.g., NT_123456), the Designer will check the sequence for known single-nucleotide polymorphisms (SNPs). Designs that include SNPs will be rejected by the Designer. SNP identification will not be performed if you paste in nucleotide sequences or enter GenBank-format accession numbers.",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Step 1. Enter an Accession Number or Provide a Nucleotide Sequence. / To begin designing miR RNAi oligos, select the miR RNAi target design option at the top of the Designer page. Then enter a sequence for the gene that you want to target or a database accession number for that sequence, select a database to BLAST search to identify unique regions of the sequence, and specify a GC percentage range for the oligos.",
+    "parent_content": ""
+  },
+  {
+    "content": "Any regions of the sequence containing ambiguous bases (e.g., N) or other letters will be skipped when generating the designs. If your sequence includes too many ambiguous bases or other letters, you will be prompted to re-enter the sequence. White spaces and numerals in the sequence will be ignored.\nNote: If you are having difficulty generating designs, check your input sequence to make sure that it contains only the letters A, C, G, T, or U.",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Step 1. Enter an Accession Number or Provide a Nucleotide Sequence. / Nucleotide Sequence: Type or paste your single-stranded target sequence into this box. The designer accepts sequences in text, FASTA, or GenBank format. The sequence should be oriented from 5' to 3'. Because miR RNAi oligonucleotides must be highly specific, the input sequence should contain only the following 1-letter base code abbreviations: A, C, G, T, U (case insensitive).",
+    "parent_content": ""
+  },
+  {
+    "content": "RefSeq-format accession numbers begin with two letters followed by an underscore and six digits (e.g., NT_123456). GenBank accession numbers are usually a combination of a letters and numbers, such as a single letter followed by five digits (e.g., U12345) or two letters followed by six digits (e.g., AF123456). If you enter an accession number in RefSeq format (e.g., NT_123456), the Designer will check the sequence for known single-nucleotide polymorphisms (SNPs). Designs that include SNPs will be rejected by the Designer. SNP identification will not be performed if you paste in nucleotide sequences or enter GenBank-format accession numbers.",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Step 1. Enter an Accession Number or Provide a Nucleotide Sequence. / Accession Number: Enter the database accession number for your sequence in this field. The Designer will link to the Entrez search engine and search the crosslinked databases at NCBI, including GenBank and OMIM. The sequence associated with the accession number will be automatically downloaded into the Designer.",
+    "parent_content": ""
+  },
+  {
+    "content": "If you entered an accession number in Step 1, in this step you specify the regions of the sequence for which you want to design your miR RNAi oligo. The default selection of Open Reading Frame (ORF) is appropriate in most cases. If you have trouble generating designs for the ORF alone, select the 5' UTR and/or 3' UTR checkboxes and redesign the oligonucleotides.",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Step 2. If You Entered an Accession Number in Step 1, Select Regions for Target Design / Accession Number: Enter the database accession number for your sequence in this field. The Designer will link to the Entrez search engine and search the crosslinked databases at NCBI, including GenBank and OMIM. The sequence associated with the accession number will be automatically downloaded into the Designer.",
+    "parent_content": ""
+  },
+  {
+    "content": "In Step 3, select a species-specific database from the pulldown list that you want to perform a BLAST (Basic Local Alignment Search Tool) search on to identify unique regions in your target sequence. Areas of homology identified by the BLAST search will be \"masked\" in the sequence to ensure that the target designs are highly specific.\nEach BLAST search is performed against a nonredundant version of the UniGene database. The database contains representative gene sequences for the selected species.\nNote: The databases used in this search contain one representation of each gene and do not include splice variants.",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Step 2. If You Entered an Accession Number in Step 1, Select Regions for Target Design / Step 3. Choose Database for BLAST",
+    "parent_content": ""
+  },
+  {
+    "content": "The Minimum GC Percentage and Maximum GC Percentage fields contain default values for the minimum and maximum percentage GC content of your miR RNAi oligos. For most sequences, this range is wide enough to generate several designs.\nYou can change this range if you are having difficulty generating designs, or if you know that the GC content of your oligonucleotides will fall outside this range based on the sequence.\nDesigns outside the selected range will be rejected by the Designer.",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Step 2. If You Entered an Accession Number in Step 1, Select Regions for Target Design / Step 4. Choose Minimum and Maximum GC Percentage",
+    "parent_content": ""
+  },
+  {
+    "content": "When you have made your selections above, click on the RNAi Design button",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Step 2. If You Entered an Accession Number in Step 1, Select Regions for Target Design / Step 5: Click on \"RNAi Design\" to Design.",
+    "parent_content": ""
+  },
+  {
+    "content": "Stealth RNA™ siRNA oligonucleotides are 25-base-pair double-stranded RNA oligonucleotides with proprietary chemical modifications. Compared to siRNA, Stealth RNA™ siRNA molecules provide decreased nonspecific stress responses for clearer results, high potency for more powerful knockdown of genes, and improved stability both in cell culture systems and in vivo.\nYou can reconfigure 19-mer siRNA sequences into 25-mer Stealth RNA™ siRNA sequences using the RNAi Designer. Select the siRNA to Stealth design option at the top of the Designer page. Then enter a sequence for the gene that you want to target or a database accession number for that sequence, and the 19-mer siRNA oligo sequence(s) that you want to convert to Stealth RNA™ siRNA.",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Convert siRNA to Stealth RNA™ siRNA / Step 5: Click on \"RNAi Design\" to Design.",
+    "parent_content": ""
+  },
+  {
+    "content": "You can copy and paste a nucleotide target sequence directly into the Nucleotide Sequence field, or you can enter a database accession number for the sequence in the Accession Number field. If you enter an accession number, the Designer will link to the Entrez search engine and search the crosslinked databases at the National Center for Biotechnology Information (NCBI), including GenBank and OMIM. Then the sequence associated with the accession number will be automatically downloaded into the Designer.\nNote: If you enter an accession number in RefSeq format (e.g., NT_123456), the Designer will check the sequence for known single-nucleotide polymorphisms (SNPs). Designs that include SNPs will be rejected by the Designer. SNP identification will not be performed if you paste in nucleotide sequences or enter GenBank-format accession numbers.",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Convert siRNA to Stealth RNA™ siRNA / Enter an Accession Number or Provide a Nucleotide Sequence",
+    "parent_content": ""
+  },
+  {
+    "content": "Note: If you are having difficulty generating Stealth RNA™ siRNA designs, check your input sequence to make sure that it contains only the letters A, C, G, T, or U.",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Convert siRNA to Stealth RNA™ siRNA / Nucleotide Sequence: Type or paste your single-stranded target sequence into this box. The designer accepts sequences in text, FASTA, or GenBank format. The sequence should be oriented from 5' to 3'. Because Stealth RNA™ siRNA molecules must be highly specific, the input sequence should contain only the following 1-letter base code abbreviations: A, C, G, T, U (case insensitive). Any regions of the sequence containing ambiguous bases (e.g., N) or other letters will be skipped when generating the designs. If your sequence includes too many ambiguous bases or other letters, you will be prompted to re-enter the sequence. White spaces and numerals in the sequence will be ignored.",
+    "parent_content": ""
+  },
+  {
+    "content": "RefSeq-format accession numbers begin with two letters followed by an underscore and six digits (e.g., NT_123456). GenBank accession numbers are usually a combination of a letters and numbers, such as a single letter followed by five digits (e.g., U12345) or two letters followed by six digits (e.g., AF123456). If you enter an accession number in RefSeq format (e.g., NT_123456), the Designer will check the sequence for known single-nucleotide polymorphisms (SNPs). Designs that include SNPs will be rejected by the Designer. SNP identification will not be performed if you paste in nucleotide sequences or enter GenBank-format accession numbers.",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Convert siRNA to Stealth RNA™ siRNA / Accession Number: Enter the database accession number for your sequence in this field. The Designer will link to the Entrez search engine and search the crosslinked databases at NCBI, including GenBank and OMIM. The sequence associated with the accession number will be automatically downloaded into the Designer.",
+    "parent_content": ""
+  },
+  {
+    "content": "In the siRNA Sequences field, enter each 19-mer siRNA sequence that you want to convert to a Stealth RNA™ siRNA oligo. Each sequence should be oriented from 5' to 3' and should be complementary to the target sequence that you specified above. Enter each siRNA sequence on a separate line in the field.\nClick on Submit to begin the conversion process. The BLOCK-iT™ RNAi Designer uses statistical analysis of multiple validated Stealth RNA™ siRNA sets and a proprietary algorithm to analyze the target gene sequence and determine the optimal Stealth RNA™ siRNA oligo configuration for silencing the gene. A Stealth RNA™ siRNA sequence will be generated for each siRNA molecule, and you will be prompted to select negative control sequences for the Stealth RNA™ siRNA.",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Enter the siRNA Sequence(s) that You Want to Convert / Accession Number: Enter the database accession number for your sequence in this field. The Designer will link to the Entrez search engine and search the crosslinked databases at NCBI, including GenBank and OMIM. The sequence associated with the accession number will be automatically downloaded into the Designer.",
+    "parent_content": ""
+  },
+  {
+    "content": "Short-hairpin RNA (shRNA) is an RNA molecule that contains sense and antisense sequences connected by a short spacer of nucleotides that enables the molecule to form a loop structure. shRNA is expressed in mammalian cells from a vector with a Pol III-type promoter, and is processed by the Dicer enzyme in vivo into 21-23 nucleotide siRNA duplexes.\nIf you have identified a synthetic siRNA that is active in triggering knockdown of your target gene, you can generate a corresponding shRNA molecule using the RNAi Designer.\nSelect the siRNA to shRNA design option at the top of the Designer page. Then enter the siRNA sequence that will form the \"sense\" portion of the shRNA oligo, select or enter the loop sequence, and select the Gateway®-adapted entry vector for expressing your shRNA. The Designer will generate the complete shRNA design with appropriate overhangs for directional cloning.",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Convert siRNA to shRNA / Accession Number: Enter the database accession number for your sequence in this field. The Designer will link to the Entrez search engine and search the crosslinked databases at NCBI, including GenBank and OMIM. The sequence associated with the accession number will be automatically downloaded into the Designer.",
+    "parent_content": ""
+  },
+  {
+    "content": "In the Sense siRNA Sequence field, enter the siRNA sequence that you want to convert into the sense part of the shRNA molecule (the resulting shRNA structure will be sense-loop-antisense). Select one of the predesigned 4-nucleotide loop sequences from the Default Loop Sequence pulldown list, or enter a custom loop sequence of 4–11 nucleotides in the Custom Loop Sequence field.\nNote that short loop sequences (4–7 nucleotides) are usually more efficient. Avoid using a loop sequence containing thymidines (T’s) as they may cause early termination. This is particularly true if the target sequence ends in a T residue.",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Convert siRNA to shRNA / Design Parameters",
+    "parent_content": ""
+  },
+  {
+    "content": "Click on Design shRNA Oligo to begin the conversion process. The BLOCK-iT™ RNAi Designer will generate the shRNA oligo from your parameters.",
+    "source": "BLOCK-iT_RNAi_Designer - user guide.docx",
+    "section": "Convert siRNA to shRNA / Next, select the Gateway®-adapted entry vector from the Vector pulldown list. Select either the pENTR™/U6 entry vector for constitutive shRNA expression or the pENTR™/H1/TO entry vector for inducible expression. Note that if you select pENTR™ /U6, the shRNA oligo designs will be compatible with both vectors.",
+    "parent_content": ""
+  },
+  {
+    "content": "High Predictive Accuracy with Interpretability: As one of the first tools using rigorous machine learning (LASSO regression) on a large dataset, it matched or surpassed the performance of contemporary \"black-box\" neural networks (BIOPREDsi). Its linear model provides clear, quantitative insights into which sequence features promote or hinder efficacy, a significant advantage for mechanistic understanding over opaque models.\nComprehensive Off-Target Analysis Suite: Goes beyond simple homology filtering by integrating SCF calculation, an early and methodologically sound approach to predict miRNA-like off-target effects based on seed region complementarity to 3'UTRs, a feature not uniformly present in earlier tools.\nOpen Access & Transparent Methodology: The algorithm, based on a peer-reviewed, publicly described linear model, is fully transparent. The web server has been freely available, and the approach does not rely on proprietary or undisclosed rules, allowing for independent evaluation and reproducibility.",
+    "source": "DSIR -user guide.docx",
+    "section": "DSIR (Designer of Small Interfering RNA) - Raw Article Summary / Advantages:",
+    "parent_content": "Tool Name: DSIR (Designer of Small Interfering RNA)\nDeveloper/Unit: Jean-Philippe Vert, Nicolas Foveau, Christian Lajaunie, Yves Vandenbrouck (Centre for Computational Biology, Ecole des Mines de Paris & CEA Grenoble, France)\nCore Principles:\n·Employs a linear regression model trained with LASSO on a large, unbiased siRNA dataset (Huesken et al., 2005), achieving state-of-the-art prediction accuracy (Pearson correlation ~0.67).\n·Utilizes a composite feature representation combining: 1) Sparse representation (nucleotide identity at each specific position, including the 3' overhang), and 2) Spectral representation (frequency of short sequence motifs of length 1-3, capturing position-independent compositional biases).\n·The model is inherently interpretable; the learned weights quantify the positive or negative contribution of each nucleotide at each position and each short motif to the predicted silencing efficacy.\n·Integrates specificity filters including BLAST-based similarity search against RefSeq databases and Seed Complement Frequency (SCF) calculation to estimate potential off-target effects via the miRNA-like seed region (nt 2-8 of the guide strand)."
+  },
+  {
+    "content": "Primarily Sequence-Based, Lacks Target Structure Consideration: The core model focuses exclusively on siRNA sequence features. It does not incorporate target mRNA secondary structure or accessibility calculations, a factor recognized as important and integrated into more biophysically-oriented tools like OligoWalk.\nModel Trained on Early Dataset: Its performance is benchmarked on the 2005 Huesken dataset. While robust, later tools may benefit from larger, more diverse training datasets and incorporate subsequent discoveries in RNAi biology that are not captured in this model.\nNo Specialized Design for Advanced Formats: The tool is designed for standard 19-21nt siRNA duplexes. It does not offer dedicated design modules for newer formats like Dicer-substrate RNAs (DsiRNAs), which are optimized in vendor tools like IDT's, or for shRNA vector design, which is a strength of tools like siRNA Wizard.\nComputational Interface May Be Dated: As a legacy academic web server, its user interface and processing speed may be less streamlined or modern compared to contemporary commercial or actively-maintained academic platforms.",
+    "source": "DSIR -user guide.docx",
+    "section": "DSIR (Designer of Small Interfering RNA) - Raw Article Summary / Limitations:",
+    "parent_content": "Tool Name: DSIR (Designer of Small Interfering RNA)\nDeveloper/Unit: Jean-Philippe Vert, Nicolas Foveau, Christian Lajaunie, Yves Vandenbrouck (Centre for Computational Biology, Ecole des Mines de Paris & CEA Grenoble, France)\nCore Principles:\n·Employs a linear regression model trained with LASSO on a large, unbiased siRNA dataset (Huesken et al., 2005), achieving state-of-the-art prediction accuracy (Pearson correlation ~0.67).\n·Utilizes a composite feature representation combining: 1) Sparse representation (nucleotide identity at each specific position, including the 3' overhang), and 2) Spectral representation (frequency of short sequence motifs of length 1-3, capturing position-independent compositional biases).\n·The model is inherently interpretable; the learned weights quantify the positive or negative contribution of each nucleotide at each position and each short motif to the predicted silencing efficacy.\n·Integrates specificity filters including BLAST-based similarity search against RefSeq databases and Seed Complement Frequency (SCF) calculation to estimate potential off-target effects via the miRNA-like seed region (nt 2-8 of the guide strand)."
+  },
+  {
+    "content": "Tool Name: DSIR (Designer of Small Interfering RNA)\nDeveloper/Unit: Jean-Philippe Vert, Nicolas Foveau, Christian Lajaunie, Yves Vandenbrouck (Centre for Computational Biology, Ecole des Mines de Paris & CEA Grenoble, France)\nCore Principles:\n·Employs a linear regression model trained with LASSO on a large, unbiased siRNA dataset (Huesken et al., 2005), achieving state-of-the-art prediction accuracy (Pearson correlation ~0.67).\n·Utilizes a composite feature representation combining: 1) Sparse representation (nucleotide identity at each specific position, including the 3' overhang), and 2) Spectral representation (frequency of short sequence motifs of length 1-3, capturing position-independent compositional biases).\n·The model is inherently interpretable; the learned weights quantify the positive or negative contribution of each nucleotide at each position and each short motif to the predicted silencing efficacy.\n·Integrates specificity filters including BLAST-based similarity search against RefSeq databases and Seed Complement Frequency (SCF) calculation to estimate potential off-target effects via the miRNA-like seed region (nt 2-8 of the guide strand).",
+    "source": "DSIR -user guide.docx",
+    "section": "DSIR (Designer of Small Interfering RNA) - Raw Article Summary",
+    "parent_content": ""
+  },
+  {
+    "content": "1. Sequence definition\nThis part requires a name for your DSIR session in order to keep track.\nSequence name\nEnter a name for your design session to identify it precisely (i.e. my_targetname_design_1). This\nfield is mandatory, a message will informed you in case of omission.\nSequence\nPaste your target sequence in FASTA format or click on Browse button to upload your sequence\nfile from your computer (use a file in fasta format).\nFASTA format only : your sequence must respect FASTA format.\nIf your sequence is in an incorrect format, DSIR will inform you by an error and ask you to check\nyour sequence.",
+    "source": "DSIR -user guide.docx",
+    "section": "DSIR User Guide / Limitations:",
+    "parent_content": ""
+  },
+  {
+    "content": "The first step of the design performed by DSIR relies on the prediction of the efficacy of all possible siRNAs sequence targeting your input sequence. DSIR computes this efficacy thanks to the weights associated with some features (a model that combine a specific nucleotide at a given position and nucleotides motifs) of the sequence, for a detailed description of the model please read: An accurate and interpretable model for siRNA efficacy prediction (Vert, J-P., Foveau, N., Lajaunie, C., Vandenbrouck, Y., BMC Bioinformatics, 2006 7:520).",
+    "source": "DSIR -user guide.docx",
+    "section": "DSIR User Guide / 2. Efficacy prediction settings",
+    "parent_content": ""
+  },
+  {
+    "content": "Depending on your needs, three models are currently available:\n·19nt means a design based on the linear model for 19 nt without 2 nt overhangs that can be further added manually for synthesis (i.e. with symmetric 3'TT overhangs).\n·21nt means a design based on the linear model for 21 nt with 2 nt overhangs belonging to the target sequence.\n·shRNA means a design based on the linear model for 19 nt with the cloning site (forward and reverse) and internal loop sequences included during the export of the final results.",
+    "source": "DSIR -user guide.docx",
+    "section": "DSIR User Guide / RNA design",
+    "parent_content": ""
+  },
+  {
+    "content": "During efficacy prediction, each siRNAs sequences are ranked by their percentage of efficacy. You\ncan adjust the number of displayed siRNA sequences by modifying the \"Efficacy threshold\" field.\nOnly siRNAs with a predicted efficacy greater than the threshold value are kept and displayed. By\ndefault this value is set to 90.",
+    "source": "DSIR -user guide.docx",
+    "section": "DSIR User Guide / Score threshold",
+    "parent_content": ""
+  },
+  {
+    "content": "siRNA sequences harbouring polynucleotides tracts (i.e 4 occurences of \"A\" or more) in their content have been shown to lower target gene silencing. This option allows to detect and to filter all siRNA sequences that contains polyN tracts (with N >= 4). By default this option is set to \"Yes\".\nAvoid immunostimulatory motifs\nToll-like receptors (TLRs) expressed in endosomes have been reported to recognize single- and double-stranded siRNA eliciting an interferon response. These TLRs serve as pattern-recognition sensors of specific immunostimulatroy motifs (such as 5'-UGUGU-3' or 5'-GUCCUUCAA-3' in the siRNA guide strand) that should be avoided in siRNA design [Hornung et al., Nat. Med., 2005;Judge et al., Nat. Biotech., 2005]. This option allows to detect and to filter all siRNA sequences that contains these motifs. By default this option is set to \"Yes\".",
+    "source": "DSIR -user guide.docx",
+    "section": "DSIR User Guide / Avoid 4 or more nucleotides runs",
+    "parent_content": ""
+  },
+  {
+    "content": "siRNA design and efficacy prediction results are reported in this part. Each column can be ranked by clicking on its header. Each siRNA can be selected either for further analysis (i.e. potential offtarget search, see section 4) or for export into formatted file (see section 5).",
+    "source": "DSIR -user guide.docx",
+    "section": "3. Results / Avoid 4 or more nucleotides runs",
+    "parent_content": ""
+  },
+  {
+    "content": "·\"siRNA_id\": identifier attributed to each siRNA numbered from the highest DSIR score to the lowest.\n·\"Pos.\": position site where the siRNA guide strand begins in the target sequence (from 5' to 3').\n·\"SS sequence\": sense strand (passenger strand) siRNA sequence from 5' to 3'.\n· \"AS sequence\": antisense strand (guide strand) siRNA sequence from 5' to 3'.\n·\"Score\": predicted efficacy according to the selected model (19 or 21nt).\n·\"Corrected Score\": previous efficacy score minored by the penalties from some intrinsic target features which have been shown to influence siRNA efficacy (Filhol et al., PLoS One, 2012 7:10).",
+    "source": "DSIR -user guide.docx",
+    "section": "3. Results / Columns for efficacy prediction:",
+    "parent_content": ""
+  },
+  {
+    "content": "·\"OT\": number of potential off-targets (namely the number of hits with the chosen mismatch tolerance) found in the selected databanks.\n·\"SCF Hits\": number of SCF (Seed Complement Frequencies) or hits in a 3' UTR transcript databank. The higher this value is the more off-target effects are suspected.\n·\"#Seqs\": number of 3'UTR sequences matched.\n·\"1 Hit\": number of seeds matching a 3'UTR sequence only one time.\n·\"2 Hits\": number of seeds matching the same 3'UTR sequence two times.\n·\">=3 Hits\": number of seeds matching the same 3'UTR sequence three times or more. The higher this value is, the more off-target effect through miRNA pathway is probable.",
+    "source": "DSIR -user guide.docx",
+    "section": "3. Results / Columns for siRNA similarity search:",
+    "parent_content": ""
+  },
+  {
+    "content": "To check how specific your siRNA guide strand sequence, an exact similarity search can be performed with the siRNAs set that satisfy the efficacy threshold. This can be done either by screening mRNA sequence databank for potential off-targets according to a given mismatchtolerance or by computing the seed complement frequencies (SCF) in order to check the complementarity between the seed region of the siRNA guide strand and the 3'UTR of the offtargeted genes.",
+    "source": "DSIR -user guide.docx",
+    "section": "4. Similarity search / Columns for siRNA similarity search:",
+    "parent_content": ""
+  },
+  {
+    "content": "From the siRNA sequence set, you can perform the similarity search either on all siRNAs satisfying the efficacy threshold or select a subset you want to analyze. For a subset, select rows for each sequence of interest. No selection means that all siRNA sequences will be submitted. To run the similarity click on the \"Search bank\" button at the end of the page.",
+    "source": "DSIR -user guide.docx",
+    "section": "4. Similarity search / Selection",
+    "parent_content": ""
+  },
+  {
+    "content": "The algorithm of similarity search used by DSIR is based on exact pattern matching and allow mismatches. You can set this mismatch tolerance which represents the number of allowed mismatch between your siRNA sequence and sequences from the databank (set 0 if you want a total exact similarity search). By default this value is set to 1. Although the search algorithm is linear with the sequence databank space, you should keep in mind that the computing time increase with this value.",
+    "source": "DSIR -user guide.docx",
+    "section": "4. Similarity search / Mismatch tolerance",
+    "parent_content": ""
+  },
+  {
+    "content": "You can choose the bank against which you want to check the specificity. In the current release of DSIR, six databanks are available built from the RefSeq NCBI section and comprise three organisms (Homo sapiens, Mus musculus, Rattus norvegicus and a concatenation of these species for cross-species detection). These databanks are updated daily.",
+    "source": "DSIR -user guide.docx",
+    "section": "4. Similarity search / Data bank",
+    "parent_content": ""
+  },
+  {
+    "content": "It has been reported that complementarity between the 3'UTR regions of the off-targeted gene and the seed region of the siRNA guide strand is critical for off-targeting and that SCF can be used as a predictor for siRNA specificity [Birmingham et al., Nat. Met., 2006]. Select this option if you want to compute SCF. The length of the seed region of the siRNA guide strand can comprises nucleotides 2-7 or 2-8. By default the length of the seed region is set to 7 (position 2-8 nt). To run the similarity search algorithm, click on the \"Search Bank\" button.",
+    "source": "DSIR -user guide.docx",
+    "section": "4. Similarity search / Compute SCF (Seed Complement Frequencies)",
+    "parent_content": ""
+  },
+  {
+    "content": "This option allows to filter the siRNA sequences according to the number of potential off-targets sequence. A value set to 1 means that all siRNA sequences matching more than one sequence (normally the proper target gene from which the siRNA is designed for) in the sequence space search are removed from the results page avoiding siRNA sequence that presents hit to unintended sequence.",
+    "source": "DSIR -user guide.docx",
+    "section": "4. Similarity search / Filter by off-target",
+    "parent_content": ""
+  },
+  {
+    "content": "The results of your DSIR session can be exported by selecting your favorite file format to send\nyour orders to the manufacturers. The supported file format are: csv (for Excel sheet), text and\nxml.",
+    "source": "DSIR -user guide.docx",
+    "section": "4. Similarity search / 5. Export results",
+    "parent_content": ""
+  },
+  {
+    "content": "·siRNA Target Finder\nUses ΔG1 (internal stability of siRNA duplex) based on pentamer free energy to filter candidates.\nEmploys ΔG2 (specificity score) calculated from binding strength differences to target vs. non - target mRNAs .\nFilters based on secondary structure and removes low - complexity sequences.\nChecks for SNPs to avoid disruption of silencing.\n·siRNA Construct Builder\nDesigns hairpin inserts for vectors/cassettes with customizable loop sequences and transcription start site optimization .\n·siRNA Sequence Scrambler\nGenerates scrambled control sequences with same nucleotide composition, filtered via BLAST against RefSeq.",
+    "source": "Genscript_siRNA_Target_Finder - user guide.docx",
+    "section": "Genscript siRNA Target Finder - Raw Article Summary / Core Principles：",
+    "parent_content": "Tool Name：GenScript siRNA Design Center (includes siRNA Target Finder, siRNA Construct Builder, and siRNA Sequence Scrambler)\nDeveloper/Unit：Luquan Wang and Forest Y. Mu (GenScript Corporation)"
+  },
+  {
+    "content": "Specifically designed for DNA - based siRNA (vector and cassette), unlike most tools focused on synthetic siRNA.\nIntegrates advanced features: automatic homology filtering, internal stability (ΔG1/ΔG2), secondary structure analysis, and SNP checking.\nComprehensive design suite covering target selection, construct building, and control sequence generation.\nFreely available for academic/non - profit use via a secure web server.",
+    "source": "Genscript_siRNA_Target_Finder - user guide.docx",
+    "section": "Genscript siRNA Target Finder - Raw Article Summary / Advantages：",
+    "parent_content": "Tool Name：GenScript siRNA Design Center (includes siRNA Target Finder, siRNA Construct Builder, and siRNA Sequence Scrambler)\nDeveloper/Unit：Luquan Wang and Forest Y. Mu (GenScript Corporation)"
+  },
+  {
+    "content": "Primarily optimized for DNA - based siRNA; may not be ideal for chemically synthesized siRNA design.\nLimited organism datasets (human, mouse, rat, Drosophila) for BLAST filtering at time of publication.\nDoes not address newer siRNA formats (e.g., miRNA - adapted shRNAs) that emerged after 2004.\nMay lack updates in algorithms compared to more modern tools incorporating recent RNAi research advances.",
+    "source": "Genscript_siRNA_Target_Finder - user guide.docx",
+    "section": "Genscript siRNA Target Finder - Raw Article Summary / Limitations：",
+    "parent_content": "Tool Name：GenScript siRNA Design Center (includes siRNA Target Finder, siRNA Construct Builder, and siRNA Sequence Scrambler)\nDeveloper/Unit：Luquan Wang and Forest Y. Mu (GenScript Corporation)"
+  },
+  {
+    "content": "Tool Name：GenScript siRNA Design Center (includes siRNA Target Finder, siRNA Construct Builder, and siRNA Sequence Scrambler)\nDeveloper/Unit：Luquan Wang and Forest Y. Mu (GenScript Corporation)",
+    "source": "Genscript_siRNA_Target_Finder - user guide.docx",
+    "section": "Genscript siRNA Target Finder - Raw Article Summary",
+    "parent_content": ""
+  },
+  {
+    "content": "Machine learning algorithm\nBased on a large number of experimental data of RNAi and advanced data mining technology, GenScript now develops a newest machine learning algorithm to predict siRNA. Compared with our first generation design tool, the accuracy of new algorithm, especially for the design of shRNA, has greatly enhanced by 90%. The siRNA design algorithm developed by GenScript, along with its siRNA Genome-Wide Bio-Reagent Bank (GenPoolTM) library, represents a major improvement over our previous design approach.",
+    "source": "Genscript_siRNA_Target_Finder - user guide.docx",
+    "section": "siRNA Target Finding Strategy[1] / Limitations：",
+    "parent_content": ""
+  },
+  {
+    "content": "To maximize the prediction accuracy of RNAi design, GenScript scientists incorporate the following empirical rules into the novel generation RNAi design software successfully:\n1. Thermodynamic property: Sequences were filtered to remove candidates with unfavored thermodynamic property [2, 4, 5] .\n2. Length of the siRNA target site: Default is 21 mer [3] .\n3. GC content of the target site: Default GC content range is 30-60%. Sequences with low GC content (< 60%) have a better chance to be functional siRNAs site than those with high GC content (> 60%). For GC rich genes, the upper limit of the GC content range may be adjusted to a higher level.\n4. Sequence region: We recommend ORF (open reading frame) as the target selecting region, preferably 50–100 nt downstream of the \"ATG\" start codon, and you may specify your desired region in our design tool.\n5. Organism: The human, mouse, and rat genomes are currently available. The specified genome is used to remove non-unique target sequences via BLAST/SmithWaterman search.",
+    "source": "Genscript_siRNA_Target_Finder - user guide.docx",
+    "section": "siRNA Target Finding Strategy[1] / Empirical rules",
+    "parent_content": ""
+  },
+  {
+    "content": "7. Repeat and low complex sequence: Sequences with tandem repeats and other low complex features will be removed.\n8. Filtering sequences: Filtering sequences are the sequences that trigger mammalian immune response [6, 7] .\n9. SNP: Sequences overlapping with a SNP site will be marked and filtered. This is done only when an accession/gene id is provided.\n10. ΔE and ranking: The candidates are ranked based on a GenScript proprietary algorithm and using the parameter ΔE. This parameter measures the specificity of a target site.\n11. Positive motif: Positive motifs is a group of motifs which can significantly influence the in vivo application of siRNA owing to off target effects and toxicities associated with innate immunte stimulation. Therefore, siRNA containing positive motifs will be suppressed; in the other hand, siRNA containing negative motifs will be given a bonus.",
+    "source": "Genscript_siRNA_Target_Finder - user guide.docx",
+    "section": "siRNA Target Finding Strategy[1] / 6. RNA secondary structure: We calculated the RNA secondary structure and minimum free energy (MFE) for each target sense and anti-sense sequences. Sequences with relatively strong internal structures will be removed.",
+    "parent_content": ""
+  },
+  {
+    "content": "Off-target of RNAi operation is an important feature of GenScript RNAi design software, which stands for the latest developing trend of RNAi technology and application. Controlling off-target efficiency is performed:\n1. BLAST/SmithWaterman search:\nThe imperfectly matched target mRNA with siRNA is a major factor for occurrence of off-target unintended genes. Therefore, each candidate target sequence will be searched against a unique and comprehensive EST/mRNA collection for the specified organism. Sequences overlapping 16 bp or more with other transcripts are removed from the final list.",
+    "source": "Genscript_siRNA_Target_Finder - user guide.docx",
+    "section": "Controlled off-target efficiency / 6. RNA secondary structure: We calculated the RNA secondary structure and minimum free energy (MFE) for each target sense and anti-sense sequences. Sequences with relatively strong internal structures will be removed.",
+    "parent_content": ""
+  },
+  {
+    "content": "2.1 Seed region: Previous investigations and GenScript experiment data show that siRNA \"off target\" transcript silencing mediated by seed region sequence is widespread [8] .\"Seed region\" of siRNA is analogous to seed region of microRNA. GenScript researchers found that size of seed region plays a major part in off target prediction. Size of seed region of siRNA we proposed is 6-8 bases.\n2.2. Seed match: Depending on the proprietary off-target prediction database, threshold of seed match for the specific species in siRNA design is a unique characteristic in GenScript’s siRNA design software. This cutoff value is computed by a probability model which has general biological significance.",
+    "source": "Genscript_siRNA_Target_Finder - user guide.docx",
+    "section": "Controlled off-target efficiency / 2. Off-target of seed match of siRNA:",
+    "parent_content": ""
+  },
+  {
+    "content": "Besides general sequence alignment, GenScript siRNA design tool incorporates a novel alignment approach, functional alignment. This idea for functional alignment derives from asymmetry of siRNA in the assembly of the RNAi enzyme complex.",
+    "source": "Genscript_siRNA_Target_Finder - user guide.docx",
+    "section": "Controlled off-target efficiency / 3. Functional alignment:",
+    "parent_content": ""
+  },
+  {
+    "content": "GenScript guarantees that 95% of off target effect will be filtered if all filtering conditions are chosen. However, some candidate siRNAs with highest knockdown efficiency are filtered owing to carry out a very strict screening condition. Therefore, we should make a tradeoff between off-target effect and gene knockdown efficiency.",
+    "source": "Genscript_siRNA_Target_Finder - user guide.docx",
+    "section": "Controlled off-target efficiency / Announcement:",
+    "parent_content": ""
+  },
+  {
+    "content": "1. Wang L, Mu FY. A Web-based design center for vector-based siRNA and siRNA cassette. Bioinformatics. 2004; 20(11): 1818–1820.\n2. Khvorova A, Reynolds A, Jayasena SD. Functional siRNAs and miRNAs exhibit strand bias. Cell. 2003; 115(2): 209–216.\n3. Harborth J, Elbashir SM, Vandenburgh K, et al. Sequence, chemical, and structural variation of small interfering RNAs and short hairpin RNAs and the effect on mammalian gene silencing. Antisense Nucleic Acid Drug Dev. 2003; 13(2): 83–105.\n4. Reynolds A, Leake D, Boese Q, et al. Rational siRNA design for RNA interference. Nat Biotechnol. 2004; 22(3): 326–330.\n5. Ui-Tei K, Naito Y, Takahashi F, et al. Guidelines for the selection of highly effective siRNA sequences for mammalian and chick RNA interference. Nucleic Acids Res. 2004; 32(3): 936–948.\n6. Adam DJ, Vandana S, Janet RS, et al. Sequence-dependent stimulation of the mammalian innate immune response by synthetic siRNA. Nat Biotechnology. 2005; 23: 457–462\n7. Hornung V, Guenthner-Biller M, Bourquin C, et al. Sequence-specific potent induction of IFN-alpha by short interfering RNA in plasmacytoid dendritic cells through TLR7. Nat Medicine. 2005; 11(3): 263–270\n8. Jackson LA, Burchard J, Schelter J, et al. Widespread siRNA ‘‘off-target’’ transcript silencing mediated by seed region sequence complementarity. RNA. 2006; 12(7): 1179–1187.",
+    "source": "Genscript_siRNA_Target_Finder - user guide.docx",
+    "section": "References: / Announcement:",
+    "parent_content": ""
+  },
+  {
+    "content": "·Thermodynamic Hybridization Model:\nThe core algorithm rigorously calculates the free energy changes (ΔG°) for siRNA binding to its target mRNA. It specifically accounts for the energy costs of disrupting both the target mRNA's secondary structure and the siRNA's own intramolecular and intermolecular structures, modeling the full equilibrium between all these states.\n·Partition Function Calculation:\nEmploys a partition function method to consider the ensemble of all possible secondary structures for both siRNA and target mRNA, providing a more comprehensive thermodynamic profile than methods relying on a single minimum free energy structure.\n·Machine Learning Integration:\nA Support Vector Machine (SVM) classifier integrates the calculated thermodynamic parameters with known siRNA sequence features (e.g., GC content, terminal asymmetry) to predict the probability that a candidate siRNA will achieve high silencing efficacy (>70% inhibition).\n·Empirical Rule Pre-filter:\nOptionally uses established empirical rules (e.g., Reynolds score) to pre-screen and filter out unpromising candidates before the computationally intensive thermodynamic calculations, significantly speeding up the process.",
+    "source": "OligoWalk - user guide.docx",
+    "section": "OligoWalk - Raw Article Summary / Core Principles:",
+    "parent_content": "Tool Name: OligoWalk\nDeveloper/Unit: Zhi John Lu and David H. Mathews (University of Rochester Medical Center, USA)"
+  },
+  {
+    "content": "Target Accessibility Focus: Uniquely emphasizes and rigorously calculates the thermodynamic accessibility of the target mRNA binding site, a critical factor often oversimplified or ignored by other tools that rely primarily on siRNA sequence features alone.\nComprehensive Thermodynamic Model: Uses a more complete and physically realistic model of the binding equilibrium, considering the structure of both interacting partners, which can improve prediction accuracy for challenging targets.\nHigh Predictive Value: Reports a high positive predictive value of 78.6%, meaning nearly 80% of its top-ranked siRNA candidates are expected to be highly effective (>70% silencing) in experiments.\nTransparency and Flexibility: Provides detailed thermodynamic breakdowns (overall ΔG, duplex ΔG, target opening cost, etc.) for each candidate, offering advanced users insights into the driving forces behind the prediction. The web server also offers advanced options to adjust calculation rigor (e.g., folding method).",
+    "source": "OligoWalk - user guide.docx",
+    "section": "OligoWalk - Raw Article Summary / Advantages:",
+    "parent_content": "Tool Name: OligoWalk\nDeveloper/Unit: Zhi John Lu and David H. Mathews (University of Rochester Medical Center, USA)"
+  },
+  {
+    "content": "High Computational Cost: The rigorous partition function calculations, especially for long mRNA targets, are computationally intensive and time-consuming, requiring submission to a job queue.\nPrimary for Synthetic siRNA: The algorithm is trained and optimized for predicting the efficacy of chemically synthesized siRNA duplexes. Its applicability to DNA vector-based siRNA (shRNA) design, where transcriptional context matters, is not explicitly addressed.",
+    "source": "OligoWalk - user guide.docx",
+    "section": "OligoWalk - Raw Article Summary / Limitations:",
+    "parent_content": "Tool Name: OligoWalk\nDeveloper/Unit: Zhi John Lu and David H. Mathews (University of Rochester Medical Center, USA)"
+  },
+  {
+    "content": "Sequence Length Limit: The web server has a sequence input limit (10,000 nt) and a practical folding window limit (default 1000 nt centered on the binding site) for the partition function calculation to manage computational load, which may not capture long-range structural interactions.",
+    "source": "OligoWalk - user guide.docx",
+    "section": "OligoWalk - Raw Article Summary / Complexity for Novices: While the default settings are user-friendly, the full utility and interpretation of the advanced thermodynamic parameters require a deeper understanding of RNA biophysics, potentially making it less accessible for beginners compared to rule-based tools.",
+    "parent_content": "Tool Name: OligoWalk\nDeveloper/Unit: Zhi John Lu and David H. Mathews (University of Rochester Medical Center, USA)"
+  },
+  {
+    "content": "Tool Name: OligoWalk\nDeveloper/Unit: Zhi John Lu and David H. Mathews (University of Rochester Medical Center, USA)",
+    "source": "OligoWalk - user guide.docx",
+    "section": "OligoWalk - Raw Article Summary",
+    "parent_content": ""
+  },
+  {
+    "content": "I. Introduction\nThe OligoWalk web server is constructured to predict efficient siRNA candidates for an mRNA sequence on the basis of the statistical mechanics of the siRNA-target interaction. The secondary structures of the oligomer and target mRNA are considered in the OligoWalk algorithm. In addition to the thermodynamic parameters, a number of local sequence features are also considered by the Support Vector Machine embedded in the server. Please see References for the details.",
+    "source": "OligoWalk - user guide.docx",
+    "section": "User Guide / Complexity for Novices: While the default settings are user-friendly, the full utility and interpretation of the advanced thermodynamic parameters require a deeper understanding of RNA biophysics, potentially making it less accessible for beginners compared to rule-based tools.",
+    "parent_content": ""
+  },
+  {
+    "content": "The input options are restricted to save the calculation time on server. The complete software package without restrictions is available for download.\nOligomer Type: Only RNA is allowed.\nOligomer Length: 19 bases is recommended for siRNA design.\nOligomer Concentration: This is the oligomer concentration. It only affects overall ΔG that is provided as part of the thermodynamic details and it is not used for siRNA selection.\nPrefilter for siRNA design: The prefiter is modified from Reynold's method. The prefilter only allows candidate siRNAs that meet some basic sequence criteria to be considered using the full thermodynamic model. It must be turned on when the secondary structure of the target is considered in order to save time.",
+    "source": "OligoWalk - user guide.docx",
+    "section": "II. Input Options / Complexity for Novices: While the default settings are user-friendly, the full utility and interpretation of the advanced thermodynamic parameters require a deeper understanding of RNA biophysics, potentially making it less accessible for beginners compared to rule-based tools.",
+    "parent_content": ""
+  },
+  {
+    "content": "\"Break local structure\": The target will be folded once. The base pairs of the binding region are broken for the hybridization of the oligomer, but the structures of the other parts will not be refolded. This mode is a compromise between the fastest and most rigorous methods.\n\"Refold target RNA\" : A certain range of region (the size is defined by Folding size, specified below) centered on the binding site will be refolded after oligomer hybridization. This mode is the most rigorous if it is assumed that the system is at equilibrium and this is the recommended mode for siRNA selection.\n\"Not consider target structure\": not consider the secondary structure of the target. This is the fastest mode.",
+    "source": "OligoWalk - user guide.docx",
+    "section": "II. Input Options / Binding mode: Three modes are available(below).",
+    "parent_content": ""
+  },
+  {
+    "content": "\"Only consider the Optimal Structure\": Only the lowest free energy structure is considered for the secondary structure prediction of RNA.\n\"Consider Suboptimal Structures\": Suboptimal structures are also considered using a heuristic method to find suboptimal RNA secondary structures.\n\"Consider all possible structures using partition funcion\": All possible structures are considered with a partition function calculation. This method is the most rigorous and is recommended for siRNA selection.",
+    "source": "OligoWalk - user guide.docx",
+    "section": "II. Input Options / Folding option: Three options are available(below).",
+    "parent_content": ""
+  },
+  {
+    "content": "Scan region: The positions on the target region to be scanned to find the candidates. By defining a sub-region of the sequence, considerable compute time can be saved.",
+    "source": "OligoWalk - user guide.docx",
+    "section": "II. Input Options / Folding size: When secondary structure of the taget is selected to be considered (\"Break local structure\" or \"Refold target RNA\"), the user can define the folding size of target. Then, a certain number of nucleotides centered at the binding region are considered for the secondary structure prediction.",
+    "parent_content": ""
+  },
+  {
+    "content": "The server generates an siRNA candidate table ranked by the probability of being efficient at\nknock-down. It also outputs a thermodynamic table:\n1. Overall ΔG: The net free energy change when all contributions in the above figure are considered. The target-siRNA complex product prefers negative Overall ΔG .\n2. Duplex ΔG : The free energy change of hybidized duplex between oligomer and target. Stable duplex has more negative ΔG than unstable one.\n3. Tm-dup: The melting temperature in degrees C for the hybrided duplex formation.\n4. Break-targ. ΔG: The free energy cost for opening base pairs in the region of complementarity to the target. More negative value means it is less accessible for siRNA binding.",
+    "source": "OligoWalk - user guide.docx",
+    "section": "II. Input Options / III. Output",
+    "parent_content": ""
+  },
+  {
+    "content": "6. Interoligo ΔG: The free energy change of oligo-oligo dimer. Stable dimerization has more negative ΔG than unstable one.\n7. Number of structures: The number of suboptimal structures of target used before and after the binding of oligomer. This is only available when \"Consider Suboptimal Structures\" is selected.\n8. End-diff. : The free energy difference between the 5' and 3' end of the antisense strand of siRNA, with windows of 2. It has been shown that a functional siRNA prefer to have an unstable 5' end (End-diff is more positive).\n9. Prefilter score: The score calculated using Reynold et al. method.",
+    "source": "OligoWalk - user guide.docx",
+    "section": "II. Input Options / 5. Intraoligo ΔG: The free energy change of the self structure of unimolecular oligo. Stable self structure has more negative ΔG than unstable one.",
+    "parent_content": ""
+  },
+  {
+    "content": "Calculation time and memory size :\nThe benchmarks were performed with the default options:\nThe oligonucleotide was a 19 base RNA; the folding size of the target was 800 nucleotides centering on the binding site (full length if the whole target has less than 800 nt); the partition function calculation was conducted; the entire mRNA was scanned; the prefilter was turned on. The time cost is similar for long sequence because the prefitler (7) is turned on and number of candidates being folded is limited.",
+    "source": "OligoWalk - user guide.docx",
+    "section": "IV. Calculation Time / 5. Intraoligo ΔG: The free energy change of the self structure of unimolecular oligo. Stable self structure has more negative ΔG than unstable one.",
+    "parent_content": ""
+  },
+  {
+    "content": "The caculation is tested on mRNA NM_020548 which is 730 nucleotides in length. The oligomer type is RNA. The oligomer length is 19 bases. The folding size is all, the full length of the mRNA. The scanned region size is from the first base to the end. There are 712 and 132 oligomer\ncandidates generated without and with prefilter turned on, respectively. The calculation time without prefilter is shown in parenthesis.",
+    "source": "OligoWalk - user guide.docx",
+    "section": "IV. Calculation Time / b The calculation time for sequence less than 800 nucleotides scales much less because some arrays are reused for such kind of calculation (25).",
+    "parent_content": ""
+  },
+  {
+    "content": "The OligoWalk algorithm is based on the following research:\nThe efficient siRNA selection method is described in: Z.J. Lu and D.H. Mathews. (2008) \"Efficient siRNA selection using hybridization thermodynamics\" Nucleic Acids Research, 36:640-647.\nThe siRNA prefilter method is described in: Reynolds, A., Leake, D., Boese, Q., Scaringe, S., Marshall, W.S. and Khvorova, A. (2004) Rational siRNA design for RNA interference. Nat Biotechnol., 22, 326-330.\nThe thermodynamic parameters and algorithm of RNA secondary structure prediction are described in:\nLu, Z.J., Turner, D.H. and Mathews, D.H. (2006) A set of nearest neighbor parameters for predicting the enthalpy change of RNA secondary structure formation. Nucleic Acids Res., 34, 4912-4924.\nD.H. Mathews, M.D. Disney, J.L. Childs, S.J. Schroeder, M. Zuker, and D.H. Turner. \"Incorporating Chemical Modification Constraints into a Dynamic Programming Algorithm for\nPrediction of RNA Secondary Structure\" Proceedings of the National Academy of Sciences USA, 101, 7287-7292, (2004).\nD.H. Mathews, J. Sabina, M. Zuker, and D. H. Turner \"Expanded Sequence Dependence of Thermodynamic Parameters: Improves Prediction of RNA Secondary Structure\" Journal of Molecular Biology, 288, 911-940, (1999).\nThe thermodynamic parameters of DNA/RNA duplex: N. Sugimoto, S. Nakano, A. Katoh, H. Nakamura, T. Ohmichi, M. Yoneyama, and M. Sasaki \"Thermodynamic Parameters to Predict the Stability of RNA/DNA Hybrid Duplexes\" Biochemistry, 34, 11211-11216, (1995).",
+    "source": "OligoWalk - user guide.docx",
+    "section": "V. References / b The calculation time for sequence less than 800 nucleotides scales much less because some arrays are reused for such kind of calculation (25).",
+    "parent_content": ""
+  },
+  {
+    "content": "Ladunga I. \"More complete gene silencing by fewer siRNAs: transparent optimized design and biophysical signature\" Nucleic Acids Res 35:433-440, (2007)\nO.V. Matveeva, D.H. Mathews, A.D. Tsodikov, S.A. Shabalina, R.F. Gesteland, J.F. Atkins, S.M. Freier \"Thermodynamic criteria for high hit rate antisense oligonucleotide design\" Nucleic Acids Res., 31, 4989-4994, (2003).\nD.H. Mathews, M.E. Burkard, S.M. Freier, J.R. Wyatt, and D.H. Turner \"Predicting Oligonucleotide Affinity to Nucleic Acid Targets\" RNA, 5, 1458-1469 (1999).\nOligoWalk was trained and tested on two experimental databases:\nHuesken D, Lange J, Mickanin C, Weiler J, Asselbergs F, Warner J, Meloon B, Engel S, Rosenberg A, Cohen D, Labow M, Reinhardt M, Natt F, Hall J. (2005). Design of a genome-wide siRNA library using an artificial neural network. Nat Biotechnol 23:995-1001.\nShabalina SA, Spiridonov AN, Ogurtsov AY. (2006). Computational models with thermodynamic\nand composition features improve siRNA design. BMC Bioinformatics 7:65.",
+    "source": "OligoWalk - user guide.docx",
+    "section": "V. References / Other research related to OligoWalk:",
+    "parent_content": ""
+  },
+  {
+    "content": "·Target Site Accessibility as Primary Criterion:\nEmploys the RNAplfold program to compute the local accessibility of the target mRNA site, a factor often neglected in other design tools. This method uses a sliding window approach to calculate the probability that a stretch of nucleotides is unpaired, considering the full Boltzmann ensemble of possible local structures.\n·Optimized Accessibility Regions:\nIdentifies two key lengths of unpaired regions that best correlate with siRNA efficacy: the seed region (8 nucleotides) at the 3' end of the target site and an extended region (16 nucleotides) critical for efficient RISC-mediated cleavage.\n·Combination of Key Filters:\nIntegrates target accessibility with other biologically motivated design criteria:\nAsymmetry: Ensures correct guide strand selection.\nSelf-folding & Free-end: Assesses the siRNA guide strand's own secondary structure.\n·Hierarchical Ranking:\nInstead of a combined score, candidates are ranked by their worst-performing criterion, ensuring that siRNAs with a critical flaw in any step of the RNAi pathway are deprioritized.",
+    "source": "RNAxs - user guide.docx",
+    "section": "RNAxs - Raw Article Summary / Core Principles:",
+    "parent_content": "Tool Name: RNAxs\nDeveloper/Unit: Hakim Tafer, Stefan L. Ameres, Gregor Obernosterer et al. (University of Vienna, Austrian Academy of Sciences, and other Austrian research institutions)"
+  },
+  {
+    "content": "Focus on Target Structure: Uniquely and rigorously incorporates target mRNA site accessibility as a central, validated design principle, addressing a downstream bottleneck in the RNAi mechanism.\nSuperior Performance: In independent validation (360 siRNAs), RNAxs outperformed six other design tools (including OligoWalk and commercial tools). All of its top three predicted siRNAs for four test genes achieved at least 50% repression, with many exceeding 90%.\nTransparent & Biologically Grounded: Uses comprehensible filters based on distinct stages of the RNAi pathway (strand selection, siRNA structure, target binding), offering users adjustable parameters.\nProvides a Full Candidate List: Returns a ranked list of all siRNAs passing the filters, allowing users to select sequences for specific needs (e.g., targeting splice variants).",
+    "source": "RNAxs - user guide.docx",
+    "section": "RNAxs - Raw Article Summary / Advantages:",
+    "parent_content": "Tool Name: RNAxs\nDeveloper/Unit: Hakim Tafer, Stefan L. Ameres, Gregor Obernosterer et al. (University of Vienna, Austrian Academy of Sciences, and other Austrian research institutions)"
+  },
+  {
+    "content": "Primary for Synthetic siRNA: The algorithm and validation are focused on chemically synthesized siRNA efficacy. Its direct applicability to DNA vector-based shRNA design is not explicitly addressed.\nLocal Folding Assumption: The accessibility calculation uses a local folding window (default 80nt), which may not capture the influence of very long-range mRNA secondary structures.\nParameter Sensitivity: Optimal parameters (like the critical unpaired region length u) differed between training datasets targeting 3' UTRs versus coding sequences, suggesting performance may vary by target region.\nNo Integrated Off-Target Scoring: While the web server allows manual BLAST submission, the core algorithm does not automatically score or rank candidates based on genome-wide specificity to minimize off-target effects.",
+    "source": "RNAxs - user guide.docx",
+    "section": "RNAxs - Raw Article Summary / Limitations:",
+    "parent_content": "Tool Name: RNAxs\nDeveloper/Unit: Hakim Tafer, Stefan L. Ameres, Gregor Obernosterer et al. (University of Vienna, Austrian Academy of Sciences, and other Austrian research institutions)"
+  },
+  {
+    "content": "Tool Name: RNAxs\nDeveloper/Unit: Hakim Tafer, Stefan L. Ameres, Gregor Obernosterer et al. (University of Vienna, Austrian Academy of Sciences, and other Austrian research institutions)",
+    "source": "RNAxs - user guide.docx",
+    "section": "RNAxs - Raw Article Summary",
+    "parent_content": ""
+  },
+  {
+    "content": "I. Introduction\nThe RNAxs web server is designed to identify effective siRNA candidates by explicitly modeling the structural accessibility of target mRNA sites, a critical downstream determinant of RNA interference (RNAi) efficiency. Unlike many siRNA design tools that rely primarily on sequence composition or empirical scoring schemes, RNAxs evaluates whether a candidate siRNA can physically access and bind its target region within the folded mRNA. In addition to accessibility, the server incorporates biologically motivated constraints related to guide strand selection, siRNA structural stability, and duplex end properties. Together, these criteria reflect key checkpoints along the RNAi pathway and enable the selection of siRNAs with a high likelihood of functional silencing.",
+    "source": "RNAxs - user guide.docx",
+    "section": "RNAxs Web Server User Guide / Limitations:",
+    "parent_content": ""
+  },
+  {
+    "content": "Purpose and Usage\nThe sequence input field is used to provide the target RNA sequence(s) for siRNA design. RNAxs operates on RNA secondary structure models; therefore, the input sequence must correspond to a mature RNA transcript rather than genomic DNA.\nDesign Standards and Input Format\nAccepted format: plain text or FASTA; Sequence orientation: 5′ → 3′; Maximum length: 20,000 nucleotides; Multiple FASTA entries may be provided to enable common or comparative targeting (e.g., splice variants or homologs).\nPractical Guidance\nUsers should input full-length mRNA sequences whenever possible, including untranslated regions, as RNAxs will automatically evaluate all eligible target sites across the transcript.",
+    "source": "RNAxs - user guide.docx",
+    "section": "RNAxs Web Server User Guide / II. Target Sequence Input",
+    "parent_content": ""
+  },
+  {
+    "content": "8nt (Seed) Accessibility Threshold\nRole and Biological Meaning\nThis parameter defines the minimum accessibility required for the 8-nucleotide seed region of the target site. Seed accessibility governs the initial recognition and binding of the siRNA guide strand by the RNA-induced silencing complex (RISC).\nDesign Standards\nA higher threshold enforces stricter requirements for local unpaired probability, reducing the number of candidate siRNAs but increasing confidence in initial binding efficiency.\nValue Range and Reference Setting\nAllowed range: 0–1 (floating-point number); Default value: approximately 0.01; Recommended usage: retain the default value for most applications; slight relaxation may be considered for highly structured targets.",
+    "source": "RNAxs - user guide.docx",
+    "section": "RNAxs Web Server User Guide / Target Site Accessibility Parameters",
+    "parent_content": ""
+  },
+  {
+    "content": "Role and Biological Meaning\nThe 16-nucleotide accessibility threshold represents the openness of an extended target region required for efficient RISC-mediated cleavage. This parameter is the central design criterion of RNAxs and the primary source of its predictive strength.\nDesign Standards\nBecause extended unpaired regions are relatively rare but highly predictive of siRNA efficacy, this threshold is intentionally stringent. Over-adjustment can severely reduce candidate yield.\nValue Range and Reference Setting\nAllowed range: 0–1 (floating-point number); Default value: approximately 0.001; Recommended usage: keep the default for standard siRNA design; minor relaxation may be acceptable when targeting 3′ UTR regions",
+    "source": "RNAxs - user guide.docx",
+    "section": "RNAxs Web Server User Guide / 16nt Accessibility Threshold",
+    "parent_content": ""
+  },
+  {
+    "content": "Self Folding Energy\nRole and Biological Meaning\nThis parameter evaluates the tendency of the siRNA guide strand to form internal secondary structures, which may hinder RISC loading or target binding.\nDesign Standards\nHigher values enforce stronger exclusion of siRNAs with self-folding potential and favor structurally simple guide strands.\nValue Range and Reference Setting\nAllowed range: 0–1 (floating-point number); Default value: approximately 0.9; Recommended usage: retain default for chemically synthesized siRNAs; modest relaxation may be considered for vector-based designs.",
+    "source": "RNAxs - user guide.docx",
+    "section": "III. siRNA Structural Stability and Strand Selection / 16nt Accessibility Threshold",
+    "parent_content": ""
+  },
+  {
+    "content": "Role and Biological Meaning\nSequence asymmetry reflects nucleotide composition differences between the two ends of the siRNA duplex, contributing to preferential guide strand selection.\nDesign Standards\nThis parameter implements established RNAi design principles and works in conjunction with energy asymmetry to bias RISC loading.\nValue Range and Reference Setting\nAllowed range: 0–1 (floating-point number); Default value: 0.5; Recommended usage: do not modify unless there is a specific experimental rationale.",
+    "source": "RNAxs - user guide.docx",
+    "section": "III. siRNA Structural Stability and Strand Selection / Sequence Asymmetry",
+    "parent_content": ""
+  },
+  {
+    "content": "Role and Biological Meaning\nEnergy asymmetry measures thermodynamic stability differences between the two ends of the siRNA duplex. A less stable 5′ end on the guide strand favors correct strand incorporation into RISC.\nDesign Standards\nModerate asymmetry is sufficient; overly strict thresholds may eliminate otherwise effective candidates.\nValue Range and Reference Setting\nAllowed range: 0–1 (floating-point number); Default value: approximately 0.46; Recommended usage: retain default in most scenarios",
+    "source": "RNAxs - user guide.docx",
+    "section": "III. siRNA Structural Stability and Strand Selection / Energy Asymmetry",
+    "parent_content": ""
+  },
+  {
+    "content": "Role and Biological Meaning\nThe free end parameter assesses whether the terminal nucleotides of the siRNA duplex are excessively base-paired. Open ends facilitate RISC recognition and processing.\nDesign Standards\nHigher values require greater terminal openness but may reduce candidate numbers if set too strictly.\nValue Range and Reference Setting\nAllowed range: 0–1 (floating-point number); Default value: approximately 0.62; Recommended usage: default setting is appropriate for standard siRNA experiments",
+    "source": "RNAxs - user guide.docx",
+    "section": "III. siRNA Structural Stability and Strand Selection / Free End",
+    "parent_content": ""
+  },
+  {
+    "content": "Role and Intended Use\nCustom sequence rules allow users to impose explicit nucleotide-level constraints on candidate siRNAs for technical or experimental reasons, such as synthesis compatibility or cloning requirements.\nDesign Standards\nThis option should be used conservatively and must not be employed to replace or override RNAxs’s accessibility-based decision logic.\nInput Format and Reference Setting\nInput format: exactly 19 characters, one per nucleotide position\nAllowed characters: standard IUPAC nucleotide codes (e.g., A, U, G, C, N)\nDefault value: NNNNNNNNNNNNNNNNNNN (no constraints)",
+    "source": "RNAxs - user guide.docx",
+    "section": "IV. Custom Sequence Rules / Free End",
+    "parent_content": ""
+  },
+  {
+    "content": "Maximal Number of siRNAs\nRole and Usage\nThis parameter controls how many top-ranked siRNA candidates are displayed in the output. It does not influence scoring or ranking, only result presentation.\nValue Range and Reference Setting\nInput type: positive integer; Default value: 3; Recommended usage: 3–5 for routine experiments; higher values for exploratory analysis",
+    "source": "RNAxs - user guide.docx",
+    "section": "IV. Custom Sequence Rules / V. Output Control",
+    "parent_content": ""
+  },
+  {
+    "content": "In routine use, RNAxs achieves optimal performance when default parameter values are preserved, particularly for accessibility thresholds. Parameter modification should be minimal, biologically motivated, and applied only when the experimental context clearly justifies deviation. When used in this manner, RNAxs provides a robust and mechanistically grounded framework for high-confidence siRNA selection.",
+    "source": "RNAxs - user guide.docx",
+    "section": "IV. Custom Sequence Rules / Practical Design Principle",
+    "parent_content": ""
+  },
+  {
+    "content": "NAME\nRNAxs.pl - designs siRNAs based on the target site accessibility\nSYNOPSIS\nRNAxs.pl -s Sequence.seq\nRNAxs.pl -s Sequence.seq -d 1\nRNAxs.pl -s Sequence.seq -x 1\nRNAxs.pl -s Sequence.seq -c siRNA.seq\nDESCRIPTION\nRNAxs designs siRNAs for a set of FASTA formated sequences contained in\nthe file *Sequence.seq*. For each sequences the siRNAs are saved in a\nfile called *output.csv* located in the directory named after the\nsequence name.",
+    "source": "RNAxs - user guide.docx",
+    "section": "RNAxs.pl User Guide / Practical Design Principle",
+    "parent_content": ""
+  },
+  {
+    "content": "RANK Pos Target sequence siRNA sequence Acc. 8 Acc. 16 Asy E Asy S\nSelfFld FreeEnd 26 1807 CCTTTATTCTCTTCTTAAT ATTAAGAAGAGAATAAAGG 0.54500\n0.24340 0.83620 1.00000 1.00000 1.00000 41 1207 CCCAGTACGCTAAAACAAT\nATTGTTTTAGCGTACTGGG 0.59630 0.07760 0.98280 1.00000 1.00000 1.00000\nwhere\n*RANK* is the worst rank of the siRNA\n*POS* is the position of the target site on the target sequence\n*Target sequence* is the target sequence\n*siRNA sequence* is the siRNA sequence\n*Acc 8* is the accessibility of the seed region\n*Acc 16* is the accessibility of the first 15 nucleotides of the target\nsite\n*Asy E* is the duplex Energy Assymetry\n*Asy S* is the duplex Sequence Assymetry\n*SelfFld* is the self-folding energy\n*FreeEnd* is the number of base pairs found in the last 4 nucleotides on\nboth 5' and 3' ends of the siRNA MFE structure",
+    "source": "RNAxs - user guide.docx",
+    "section": "RNAxs.pl User Guide / *output.csv* has the following structure:",
+    "parent_content": ""
+  },
+  {
+    "content": "sequences contained in *Sequence.seq*. This is useful when all\nhomologous of a gene, or all splice variants should be downregulated by\none siRNA. The output is returned on stdout and has the following\nstructure:\nSequence siRNA E_asy S_asy SelfFld FreeEnd # mRNA RANK pos Acc 8 Acc 16\n# # mRNA RANK pos Acc 8 Acc 16 # CCCCCCCCCCCCCCGCCTT AAGGCGGGGGGGGGGGGGG\n0.85340 1.00000 1.00000 1.00000 # seq1 10 105 0.24150 0.26770 # # seq2\n22 92 0.22210 0.24840 CCCCCCCCCCCCCGCCTTG CAAGGCGGGGGGGGGGGGG 0.84480\n0.75000 1.00000 1.00000 # seq1 32 342 0.22210 0.24840 # # seq2 14 102\n0.21000 0.25840",
+    "source": "RNAxs - user guide.docx",
+    "section": "RNAxs.pl User Guide / The *-d* option allows to select siRNAs which efficiently target all",
+    "parent_content": ""
+  },
+  {
+    "content": "sequence. This is useful when a specific splice variant should be\ndownregulated. The output is returned on stdout and has the same\nstructure as the *output.csv* file. The *-x* and *-d* options can be\nused simultaneously.",
+    "source": "RNAxs - user guide.docx",
+    "section": "The *-x* option allows to select siRNAs that are specific to their / The *-d* option allows to select siRNAs which efficiently target all",
+    "parent_content": ""
+  },
+  {
+    "content": "(BIOPREDsi, OptiRNA, ...) based on the criteria used by RNAxs. The\ntarget sequence file should contain only one sequence. The file\n*siRNA.seq* should contain one siRNA per line and each siRNA should be\nexactly 19 nucleotides long. The output is returned on stdout and has\nthe same structure as *output.csv*.",
+    "source": "RNAxs - user guide.docx",
+    "section": "The *-x* option allows to select siRNAs that are specific to their / The *-c* option allows to filter siRNAs designed by other design tools",
+    "parent_content": ""
+  },
+  {
+    "content": "self-folding and free end) can be set with the following command line\noption:\n*-t* sets the accessibility on the seed region (default:0.01)\n*-u* sets the accessibility on the 16 nts region (default:0.001)\n*-e* sets the energy asymmetry (default:0.5)\n*-s* sets the sequence asymmetry (default:0.5)\n*-f* sets the selffolding energy (default:0.9)\n*-g* sets the free end parameter (default:0.7)\nAll thresholds should be set between 0 and 1, where 0 stands for no\nthreshold and 1 stands for the maximal possible threshold. For example a\nthreshold of 1 on the selffolding parameter would only select siRNAs\ndevoid of structure.",
+    "source": "RNAxs - user guide.docx",
+    "section": "The *-x* option allows to select siRNAs that are specific to their / The threshold on the design features (accessiblity, asymmetry,",
+    "parent_content": ""
+  },
+  {
+    "content": "Hakim Tafer <htafer@tbi.univie.ac.at>",
+    "source": "RNAxs - user guide.docx",
+    "section": "The *-x* option allows to select siRNAs that are specific to their / AUTHOR",
+    "parent_content": ""
+  },
+  {
+    "content": "·Statistical Sampling Algorithm:\nEmploys a novel algorithm to sample rigorously from the Boltzmann ensemble of RNA secondary structures, providing a statistically representative set of probable structures, which is crucial for modeling the structural population of mRNAs.\n·Target Accessibility via Probability Profiling:\nIntroduces a probability profiling method to predict accessible single-stranded regions in the target RNA. It computes the probability that a contiguous stretch of nucleotides (default window width W=4) is unpaired across the ensemble of sampled structures.\nIntegrated siRNA Design (Sima Module):",
+    "source": "Sfold_2.2 - user guide.docx",
+    "section": "Sfold - Raw Article Summary / Core Principles:",
+    "parent_content": "Tool Name: Sfold\nDeveloper/Unit: Ye Ding, Chi Yu Chan, and Charles E. Lawrence (Wadsworth Center, New York State Department of Health, USA)"
+  },
+  {
+    "content": "Target Accessibility: Uses a weighted antisense siRNA binding energy, incorporating local unpaired probabilities from the ensemble.\nEmpirical Rules:Implements rules (e.g., from Reynolds et al.) for sequence features and GC content.\nsiRNA Duplex Thermodynamics: Calculates stability indices for duplex asymmetry (DSSE) and cleavage site instability (AIS), integrating findings from contemporary research.\nMulti-Application Suite: Provides specialized modules for different RNA-targeting nucleic acids: Sima (siRNA), Soligo (antisense oligonucleotides), Sribo (hammerhead ribozymes), and Sma (general statistical folding analysis).",
+    "source": "Sfold_2.2 - user guide.docx",
+    "section": "Sfold - Raw Article Summary / ·Combines three key aspects for rational siRNA design:",
+    "parent_content": "Tool Name: Sfold\nDeveloper/Unit: Ye Ding, Chi Yu Chan, and Charles E. Lawrence (Wadsworth Center, New York State Department of Health, USA)"
+  },
+  {
+    "content": "Ensemble-Based Accessibility: Pioneered the use of a statistical ensemble approach to predict target site accessibility, moving beyond single minimum free energy structures to better reflect the dynamic nature of mRNA.\nComprehensive Design Integration: One of the earliest tools to systematically combine target accessibility prediction with empirical rules and detailed thermodynamic profiling of the siRNA duplex itself.\nVersatility: Offers a unified platform for the design of multiple types of RNA-targeting agents (siRNA, antisense oligos, ribozymes), not just siRNAs.\nTransparent Scoring: Provides a detailed total score (max 20) broken down into accessibility, duplex feature, and thermodynamics components, allowing users to understand the basis of the recommendation.",
+    "source": "Sfold_2.2 - user guide.docx",
+    "section": "Sfold - Raw Article Summary / Advantages:",
+    "parent_content": "Tool Name: Sfold\nDeveloper/Unit: Ye Ding, Chi Yu Chan, and Charles E. Lawrence (Wadsworth Center, New York State Department of Health, USA)"
+  },
+  {
+    "content": "Dated Algorithm: As a 2004 tool, its core sampling algorithm and the empirical/thermodynamic rules it uses may not incorporate subsequent major advances in siRNA design principles discovered in later years.\nComputational Intensity: The statistical sampling approach, while rigorous, is computationally more demanding than simpler rule-based methods of its era.\nLack of Machine Learning: Unlike later \"second-generation\" tools (e.g., i-Score, OligoWalk), it does not employ machine learning models trained on large siRNA efficacy datasets to optimize predictions.\nPotential Over-reliance on Fixed Rules: The filtering system is based on fixed thresholds for parameters like binding energy and AIS, which may not be optimal for all targets or experimental contexts.",
+    "source": "Sfold_2.2 - user guide.docx",
+    "section": "Sfold - Raw Article Summary / Limitations:",
+    "parent_content": "Tool Name: Sfold\nDeveloper/Unit: Ye Ding, Chi Yu Chan, and Charles E. Lawrence (Wadsworth Center, New York State Department of Health, USA)"
+  },
+  {
+    "content": "Tool Name: Sfold\nDeveloper/Unit: Ye Ding, Chi Yu Chan, and Charles E. Lawrence (Wadsworth Center, New York State Department of Health, USA)",
+    "source": "Sfold_2.2 - user guide.docx",
+    "section": "Sfold - Raw Article Summary",
+    "parent_content": ""
+  },
+  {
+    "content": "I. FUNCTION\nSfold predicts probable RNA secondary structures, assesses target accessibility, and provides tools for the rational design of RNA-targeting nucleic acids.",
+    "source": "Sfold_2.2 - user guide.docx",
+    "section": "Sfold Web Server User Guide / Limitations:",
+    "parent_content": ""
+  },
+  {
+    "content": "RNA folding and applications\nSfold is based on patent-pending algorithms developed by Ding and Lawrence (2001, 2002, 2003) for RNA folding, prediction of target accessibility, and rational design of RNA-targeting nucleic acids. The RNA folding algorithm generates a statistical sample of secondary structures from the Boltzmann ensemble of RNA secondary structures. From a statistical mechanics perspective, an RNA molecule can have a population of structures distributed according to a Boltzmann distribution, which gives the probability of a secondary structure I at equilibrium as (1/U)exp[-E(I)/RT], where E(I) is the free energy of the structure, R is the gas constant, T is the absolute temperature, and U is the partition function for all admissible secondary structures of the RNA sequence. The algorithm samples secondary structures exactly and rigorously according to the Boltzmann distribution, using recent Turner free energy rules.",
+    "source": "Sfold_2.2 - user guide.docx",
+    "section": "II. DESCRIPTION / Limitations:",
+    "parent_content": ""
+  },
+  {
+    "content": "Empirical rules for siRNA duplexes:\nThe following basic design rules are widely used:\n1) siRNA duplexes should be composed of 21-nt sense and 21-nt antisense strands, paired so as to each have a 2-nt 3' dTdT overhang;\n2) the siRNA sequence should have low to moderate GC content;\n3) sequences with more than three Gs or three Cs in a row should be avoided, because polyG and polyC sequences may hyperstack and thus interfere in the siRNA silencing mechanism;\n4) AAAA or TTTT should also be avoided for RNA polymerase III mediated promoters because transcription tends to terminate at these sequences. It is note that there is a lack of support in the literature for the significance of target patterns such as AA(N19) or NA(N19).\nRecently, empirical rules on sequence features of functional siRNAs have been reported by several groups (Reynolds et al. 2004; Ui-Tei et al. 2004; Amarzguioui and Prydz 2004). Based on the largest published siRNA data set, the rules by Reynolds et al. (2004) are the most comprehensive. However, these rules alone do not guarantee siRNA function.",
+    "source": "Sfold_2.2 - user guide.docx",
+    "section": "Rules for siRNA design and Sfold design methodology / A focus of Sfold is on applications of prediction of target accessibility, and rational design of RNA-targeting nucleic acids. Three modules, Sirna, Soligo and Sribo, provide application tools for the design of shortinterfering RNAs (siRNAs), antisense oligonucleotides (oligos), and trans-cleaving ribozymes, respectively.General folding features and output are available from the fourth module, Srna.",
+    "parent_content": ""
+  },
+  {
+    "content": "Sfold is available through web server at two sites: http://sfold.wadsworth.org/ and http://www.bioinfo.rpi.edu/applications/sfold/. On the server home page, a user can select the application module of primary interest. From the output page for the selected module, links for output are provided for the other modules, with default input settings as described below.",
+    "source": "Sfold_2.2 - user guide.docx",
+    "section": "III. INPUT / A note to all users: please do not design siRNAs or other RNA-targeting nucleic acids based on a single structure from module Srna. We believe that there may be an ensemble of structures for mRNAs and viral RNAs. Please refer to FAQ # 3 on Sfold front page.",
+    "parent_content": ""
+  },
+  {
+    "content": "Folding conditions. Folding temperature is 37 o C. Ionic conditions are 1M NaCl, with no divalent ions.\nJob mode and limits. A job can run in either interactive mode or batch mode. Current limits are 200 bases for an interactive job, and 5,000 bases for a batch job. For a batch job, a correct e-mail address is required, for notification of job completion.\nFor a sequence exceeding the length limit, the user needs to truncate the sequence for folding. It is quite possible that some portions of the secondary structure of a truncated sequence will be different from the structure of the full sequence. This in turn can change the predicted accessibility of some sites on the target.",
+    "source": "Sfold_2.2 - user guide.docx",
+    "section": "III. INPUT / Common information for all modules",
+    "parent_content": ""
+  },
+  {
+    "content": "Centering: For a decision on where to truncate the sequence, we suggest that the region of primary interest be located far way from the sites of the truncation, e.g., near the center of the truncated sequence. Our computational experience suggests that the accessibility of a site is more likely to be maintained when the site is located near the center of the truncated sequence. This can be explained by the fact that, to a great extent, RNA secondary structure is determined by nearest-neighbor interactions. The regions near the 5' and 3' ends of the shortened sequence, i.e., the sites of truncation, are most likely to have different predictions for local structures and accessibility.",
+    "source": "Sfold_2.2 - user guide.docx",
+    "section": "III. INPUT / To computationally address this issue, we suggest two strategies:",
+    "parent_content": ""
+  },
+  {
+    "content": "Sirna: The length of siRNAs with 3' TT overhangs is fixed at 21 nt.\nSoligo: The user has the option to set the length of the oligos. The default length is 20 nt.\nSribo: The user can specify an NUH cleavage triplet for hammerhead ribozymes. The default triplet is GUC.\nSrna: None.",
+    "source": "Sfold_2.2 - user guide.docx",
+    "section": "III. INPUT / Module-specific input information",
+    "parent_content": ""
+  },
+  {
+    "content": "The output page for each module includes both graphical representations and relevant text files. Many of the graphics are interactive through a web browser, and the user can download a colored or black and white plot in PDF or PostScript format. For monochromic printers, the black and white version is recommended. All of the graphs, with the exception of RNA structure diagrams, are first generated by the public domain software Gnuplot and then post-processed by Perl scripts to provide additional features and to improve visualization. Links to output from other modules with default input settings are provided. Output can be accessed on the server for up to 72 hours after job completion.",
+    "source": "Sfold_2.2 - user guide.docx",
+    "section": "IV. OUTPUT / Module-specific input information",
+    "parent_content": ""
+  },
+  {
+    "content": "Graphical output\nProbability profiling for visual display of accessibility prediction. For prediction of target accessibility, a complete probability profile of single-stranded regions is generated for the entire target RNA. Sites with high probabilities of being single-stranded are predicted to be accessible. At nucleotide position i, the profile shows the probability that nucleotides i, i+1, i+2, and i+3 are all unpaired. In other words, the profile is for consecutive fragments with a width W of 4 bases. Although the profile can be generated for any W, W=4 has been found to be particularly useful (Ding & Lawrence 2001). Currently, colored or black and white profile plots are available in PDF and PostScript formats.",
+    "source": "Sfold_2.2 - user guide.docx",
+    "section": "V. Sirna / Module-specific input information",
+    "parent_content": ""
+  },
+  {
+    "content": "<< or >>.",
+    "source": "Sfold_2.2 - user guide.docx",
+    "section": "V. Sirna / For RNA sequences longer than 200 bases, the regional probability profile allows the user to examine either any region of 200 bases, by specifying the starting position, or an adjacent region of 200 bases, by clicking",
+    "parent_content": ""
+  },
+  {
+    "content": "Implementation of target accessibility rule: The probability profile displays predicted accessible sites on the target RNA. Because an accessible site can be targeted by a number of siRNAs, selection of the \"optimal\" one can be based on binding energy of the antisense strand, together with other design rules. Stronger binding is indicated by smaller binding energy (stacking energies are negatively valued). For example, an antisense siRNA with a binding energy of -15 kcal/mol is predicted to be more effective than an antisensesiRNA with a binding energy of -10 kcal/mol. The antisense siRNA binding energy is a weighted sum of the RNA/RNA stacking energies (Xia et al. 1998) for the hybrid formed by the antisense siRNA and the targeted sequence. For a base-pair stack, the weight for the sum is calculated by the probability of the unpaired dinucleotide in the target sequence that is involved in the stack. In addition, A-U terminal penalty is included and is weighted by the probability of the unpaired terminal base. This weighting scheme accounts for the structural variation at the target site. The target accessibility rule is implemented by requiring the siRNA binding energy to be below a threshold value. The current default of the threshold is -10 kcal/mol.",
+    "source": "Sfold_2.2 - user guide.docx",
+    "section": "Text output files / siRNA internal stability profiling: The internal stability profile for every possible siRNA duplex is available through the interactive graphic window for siRNA ends and internal stability profiling. On the profile, the user can use the stabilities for positions 1 and 19 to make a visual comparison of the stabilities of siRNA duplex ends. The stability profiles are not included in the Zip or tar.gz file for Sfold output, because of large number of profiles for long mRNAs. However, from the interactive profiling window, the user can download the profiles for the selected target sites.",
+    "parent_content": ""
+  },
+  {
+    "content": "Line 1:\nColumn 1: target position (startingending)\nColumn 2: sense siRNA (5' → 3')\nColumn 3: antisense siRNA (5' → 3')\nColumn 4: dinucleotide leader preceding the target sequence\nLine 2:\nColumn 1: total score for siRNA duplex\nColumn 2: target accessibility score\nColumn 3: duplex feature score\nColumn 4: duplex thermodynamics score\nColumn 5: siRNA GC content\nColumn 6: antisense siRNA binding energy (kcal/mol)\nColumn 7: differential stability of siRNA duplex ends (DSSE, in kcal/mol)\nColumn 8: average internal stability at the cleavage site (AIS, in kcal/mol)\nColumn 9: total stability of siRNA duplex (kcal/mol)\nColumn 10: sum of probabilities of unpaired target bases (column 4 of output file sstrand.out)\nFilter criteria:\nA) Antisense siRNA binding energy ≤ -10 kcal/mol (target accessibility rule);\nB) Duplex feature score of 6 or higher;\nC) DSSE > 0 kcal/mol (asymmetry rule);\nD) AIS > -8.6 kcal/mol (cleavage site instability rule);\nE) 30% ≤ GC % ≤ 60%;\nF) Exclusion of target sequence with at least one of AAAA, CCCC, GGGG, or UUUU.",
+    "source": "Sfold_2.2 - user guide.docx",
+    "section": "File filtered.out gives output for siRNAs that meet all filter criteria: / Total duplex stability, sum of probabilities of unpaired bases of the target sequence, and the dinucleotide leader preceding the target sequence are also included in the output files. The user has the option to consider dinucleotide leader motifs such as AA or NA, although there is a lack of evidence to support the significance of the leader for siRNA function.",
+    "parent_content": ""
+  },
+  {
+    "content": "1) The starting (ending) position of the target sequence corresponds to position 19 (1) of the antisense siRNA (i.e., dinucleotide leader and nt 22 and nt 23 in Tuschl patterns are not considered by us to be part of the target sequence);\n2) Sense siRNA = target sequence + 3' dTdT overhang; dTdT for both sense and antisense siRNAs can be replaced by UU;\n3) GC % = GC count in siRNA (excluding overhangs) / 19 x 100%;\n4) DSSE = stability of 5'-antisense end of 4 base pairs - stability of 5'-sense end of 4 base pairs; the\nasymmetry rule is enforced by DSSE > 0 (see Schwartz et al. Cell, 115, 199-208, 2003).\n5) AIS = average of internal stability values for positions 9-14 of the antisense strand; starting at a\nposition, the internal stability is for 4 BP stacks; the rule of relative instability at the cleavage site is enforced by AIS > -8.6 kcal/mol, the midpoint between the minimum of -3.6 and the maximum of -13.6 (see Khvorova et al. Cell, 115, 209-216, 2003).\nTotal siRNA duplex score is the sum of target accessibility score, duplex feature score and duplex thermodynamics score, with a maximum of 20 points; the accessibility score is based on antisense siRNA binding energy and has a range of [0, 8]; the duplex feature score is computed with the algorithm by Reynolds et al. (Nature Biotech., 22, 326-330, 2004), and has a range of [-2, 10]; the duplex thermodynamics score has a range of [0, 2], with contribution of 1 point for DSSE > 0, and 1 point for AIS > -8.6 kcal/mol.",
+    "source": "Sfold_2.2 - user guide.docx",
+    "section": "File filtered.out gives output for siRNAs that meet all filter criteria: / Notes:",
+    "parent_content": ""
+  },
+  {
+    "content": "Line 1: target position; antisense siRNA (5' → 3'); 5'-antisense stability (AntiS, in kcal/mol); 5'-sense stability (SS, in kcal/mol); differential stability of siRNA duplex ends (DSSE, in kcal/mol); average internal stability at the cleavage site (AIS, in kcal/mol)\nLine 2: internal stability for antisense positions 1-10\nLine 3: internal stability for antisense positions 11-19",
+    "source": "Sfold_2.2 - user guide.docx",
+    "section": "File sirna_s.out provides output information for siRNAs with total score greater or equal to a preset threshold. The current threshold is 12 points. File sirna.out contains output information for all siRNAs. File stability.out gives output for siRNA ends and internal stabilities: / Notes:",
+    "parent_content": ""
+  },
+  {
+    "content": "1) AntiS is computed by a sum of energies for 4 base pair stacks and the 3' dangling T for the 5' end of the antisense siRNA strand; SS is the sum for the 5' end of the sense strand;\n2) DSSE = AntiS - SS; the symmetry rule is enforced by DSSE > 0 (see Schwartz et al. 2003);\n3) AIS = average of internal stability values for positions 9-14 of the antisense strand; starting at a\nposition, the internal stability is for 4 BP stacks; the rule of relative instability at the cleavage site is enforced by AIS > -8.6 kcal/mol, the midpoint between the minimum of -3.6 and the maximum of -13.6 (see Khvorova et al. 2003).",
+    "source": "Sfold_2.2 - user guide.docx",
+    "section": "File sirna_s.out provides output information for siRNAs with total score greater or equal to a preset threshold. The current threshold is 12 points. File sirna.out contains output information for all siRNAs. File stability.out gives output for siRNA ends and internal stabilities: / Notes:",
+    "parent_content": ""
+  },
+  {
+    "content": "Column 1: nucleotide position i\nColumn 2: nucleotide\nColumn 3: complementary nucleotide\nColumn 4: the probability that nucleotide i is unpaired (i.e., W=1)\nColumn 5: probability that dinucleotide i and i+1 are both unpaired (i.e., W=2)\nColumn 6: the probability that nucleotide i, i+1, i+2, and i+3 are all unpaired (i.e., W=4)",
+    "source": "Sfold_2.2 - user guide.docx",
+    "section": "File sstrand.out contains information for probability profiling and for probability-weighted calculations for antisense siRNA binding energy and antisense oligo binding energy: / Notes:",
+    "parent_content": ""
+  },
+  {
+    "content": "Column 4 is used for making profile plot for individual bases for ribozyme application.\nColumn 5 is used for probability weighted calculations of antisense siRNA binding energy and antisense oligo binding energy.\nColumn 6 is used for probability profiling for single-stranded fragments of 4 bases.\nFile loopr.out contains information for probability profiling of loops:\nColumn 1: nucleotide position\nColumn 2: nucleotide\nColumn 3: the probability that this nucleotide is in a hairpin loop (for Hplot)\nColumn 4: the probability that this nucleotide is in a bulge loop (for Bplot)\nColumn 5: the probability that this nucleotide is in an interior loop (for Iplot)\nColumn 6: the probability that this nucleotide is in a multi-branched loop (for Mplot)\nColumn 7: the probability that this nucleotide is in the exterior loop (for Extplot)\nColumn 8: sum of columns 3 through 7 (this is the same as column 4 of file sstrand.out)",
+    "source": "Sfold_2.2 - user guide.docx",
+    "section": "File sstrand.out contains information for probability profiling and for probability-weighted calculations for antisense siRNA binding energy and antisense oligo binding energy: / Note:",
+    "parent_content": ""
+  },
+  {
+    "content": "Output downloading: With the exception of siRNA internal stability profiles, all of the output and sampled structures in Zip or compressed tar (tar.gz) format are available for downloading. After the compressed file has been uncompressed, a directory with the job ID as the name is created under the current directory. Under the job ID directory, there are seven subdirectories and a file readme.txt to describe the files in the seven subdirectories.\nJob and system information: Links to information on the job and system usage are provided",
+    "source": "Sfold_2.2 - user guide.docx",
+    "section": "Other output: Links to output from other modules with default input settings are provided. / Note:",
+    "parent_content": ""
+  },
+  {
+    "content": "visit https://sfold.wadsworth.org/html/manual.html .",
+    "source": "Sfold_2.2 - user guide.docx",
+    "section": "MORE INFORMATION FOR the output of Soligo, Sribo, Srna, / Note:",
+    "parent_content": ""
+  },
+  {
+    "content": "End-to-End Commercial Integration & Reliability: The tool is seamlessly embedded within IDT's industry-leading oligonucleotide synthesis and ordering platform. Designed sequences (both standard siRNA and advanced DsiRNA) can be ordered immediately with guaranteed quality, offering an unmatched, low-risk workflow from design to experiment.\nSpecialization in High-Potency Formats: It uniquely provides optimized design for Dicer-Substrate RNAs (DsiRNAs), which are reported to offer significantly increased potency and durability of silencing compared to standard 21-mer siRNAs, a feature not commonly found in free academic tools.\nCurated, Multi-Rule Synthesis with BLAST Specificity Check: The algorithm synthesizes parameters from several major, experimentally-derived guidelines, potentially increasing robustness. The web interface integrates BLAST analysis against target species genomes to filter for specificity, a critical step for reducing off-target effects.\nVendor-Optimized and Supported: The designs are tuned for performance with IDT's proprietary chemistries and are backed by extensive internal validation and technical support, reducing experimental uncertainty.",
+    "source": "SiRNA_Design(IDT) - user guide.docx",
+    "section": "IDT DsiRNA Design Tool - Summary / Advantages:",
+    "parent_content": "Tool Name: IDT RNAi Design Tool (including Dicer-Substrate siRNA / DsiRNA design)\nDeveloper / Unit: Integrated DNA Technologies (IDT)\nCore Principles:\n·Unified Rule Integration for Standard siRNA: Combines key design criteria from multiple seminal publications (Elbashir, Reynolds, Ui-Tei, Amarzguioui, Hsieh) into a single algorithm. This includes the AA-N19 motif, avoidance of homopolymer runs, position-specific nucleotide preferences, and enforcement of thermodynamic asymmetry to promote antisense strand RISC loading.\n·Specialized Dicer-Substrate RNA (DsiRNA) Design: Offers a distinct, advanced algorithm for designing 27-mer duplexes (DsiRNAs) based on the principle that providing a substrate for the Dicer enzyme, rather than its product (21-mer siRNA), can enhance potency. The design ensures the predicted Dicer cleavage product corresponds to an effective 21-mer core, incorporating asymmetric overhangs and specific chemical modifications (e.g., DNA bases) to direct processing."
+  },
+  {
+    "content": "Proprietary and Non-Transparent Algorithm: The exact weighting, implementation, and validation datasets for both its standard siRNA and DsiRNA algorithms are not publicly disclosed. This \"black-box\" nature limits independent assessment and direct comparison with transparent, peer-reviewed tools like OligoWalk.\nPrimarily Rule-Based, Lacks Advanced In Silico Predictive Modeling: While incorporating key rules, the tool does not appear to implement sophisticated computational models such as target mRNA accessibility calculations via partition function (a core strength of OligoWalk) or machine learning efficacy predictors that consider the full thermodynamic ensemble.\nScope and Flexibility: The tool is primarily optimized for designing synthetic siRNA/DsiRNA duplexes for direct purchase from IDT. It offers less flexibility for specialized applications that require extensive parameter customization, integration with custom vector backbones for shRNA (unlike siRNA Wizard), or for researchers who do not plan to use IDT as their synthesis provider.",
+    "source": "SiRNA_Design(IDT) - user guide.docx",
+    "section": "IDT DsiRNA Design Tool - Summary / Limitations:",
+    "parent_content": "Tool Name: IDT RNAi Design Tool (including Dicer-Substrate siRNA / DsiRNA design)\nDeveloper / Unit: Integrated DNA Technologies (IDT)\nCore Principles:\n·Unified Rule Integration for Standard siRNA: Combines key design criteria from multiple seminal publications (Elbashir, Reynolds, Ui-Tei, Amarzguioui, Hsieh) into a single algorithm. This includes the AA-N19 motif, avoidance of homopolymer runs, position-specific nucleotide preferences, and enforcement of thermodynamic asymmetry to promote antisense strand RISC loading.\n·Specialized Dicer-Substrate RNA (DsiRNA) Design: Offers a distinct, advanced algorithm for designing 27-mer duplexes (DsiRNAs) based on the principle that providing a substrate for the Dicer enzyme, rather than its product (21-mer siRNA), can enhance potency. The design ensures the predicted Dicer cleavage product corresponds to an effective 21-mer core, incorporating asymmetric overhangs and specific chemical modifications (e.g., DNA bases) to direct processing."
+  },
+  {
+    "content": "Tool Name: IDT RNAi Design Tool (including Dicer-Substrate siRNA / DsiRNA design)\nDeveloper / Unit: Integrated DNA Technologies (IDT)\nCore Principles:\n·Unified Rule Integration for Standard siRNA: Combines key design criteria from multiple seminal publications (Elbashir, Reynolds, Ui-Tei, Amarzguioui, Hsieh) into a single algorithm. This includes the AA-N19 motif, avoidance of homopolymer runs, position-specific nucleotide preferences, and enforcement of thermodynamic asymmetry to promote antisense strand RISC loading.\n·Specialized Dicer-Substrate RNA (DsiRNA) Design: Offers a distinct, advanced algorithm for designing 27-mer duplexes (DsiRNAs) based on the principle that providing a substrate for the Dicer enzyme, rather than its product (21-mer siRNA), can enhance potency. The design ensures the predicted Dicer cleavage product corresponds to an effective 21-mer core, incorporating asymmetric overhangs and specific chemical modifications (e.g., DNA bases) to direct processing.",
+    "source": "SiRNA_Design(IDT) - user guide.docx",
+    "section": "IDT DsiRNA Design Tool - Summary",
+    "parent_content": ""
+  },
+  {
+    "content": "The rational selection of effective RNAi molecules for gene knockdown involves including features that enhance the success and avoiding features that increase the failure of the resulting RNAi molecule. Software for the design of effective RNAi molecules should select candidate RNAi sequences based upon their ability to conform to effectiveness criteria. IDT’s default unified RNAi design parameters incorporate the following criteria for RNAi selection and ranking from the target sequence of interest.",
+    "source": "SiRNA_Design(IDT) - user guide.docx",
+    "section": "IDT’s Unified RNAi Parameters / Limitations:",
+    "parent_content": ""
+  },
+  {
+    "content": "General Nucleotide Patterns\nTarget: AA - N19 (Elbashir et al. 2001)\nAvoid: GGGG, AAAA, CCCC, TTTT, SSSS (Hseih et al. 2004; Ui - Tei et al. 2004)",
+    "source": "SiRNA_Design(IDT) - user guide.docx",
+    "section": "IDT’s Unified RNAi Parameters / Unified RNAi design parameters:",
+    "parent_content": ""
+  },
+  {
+    "content": "(ref: 1(Ui-Tei et al. 2004), 2 (Amarzguioui and Prydz 2004), 3(Hseih et al. 2004), 4 (Reynolds et al. 2004))",
+    "source": "SiRNA_Design(IDT) - user guide.docx",
+    "section": "IDT’s Unified RNAi Parameters / Position Specific Nucleotide Patterns",
+    "parent_content": ""
+  },
+  {
+    "content": "The 5’ end of antisense strand should be less thermodynamically stable than the 5’ end of the sense strand, possibly influencing the bias of strand incorporation into the RISC. (Khorova et al. 2003; Schwarz et al. 2003).",
+    "source": "SiRNA_Design(IDT) - user guide.docx",
+    "section": "IDT’s Unified RNAi Parameters / Asymmetric thermodynamics of 5’ and 3’ ends of the RNAi duplex",
+    "parent_content": ""
+  },
+  {
+    "content": "Amarzguioui, M., and H. Prydz. 2004. An algorithm for selection of functional siRNA sequences. Biochemical and Biophysical Research Communications 316:1050-1058.\nElbashir, S. M., J. Harborth, W. Lendeckel, A. Yalcin, K. Weber, and T. Tuschul. 2001. Duplexes of 21-nucleotide RNAs mediate RNA interference in cultured mammalian cells. Nature 411:494-498.\nHseih, A. C., R. Bo, J. Manola, F. Vazquez, O. Bare, A. Khorova, S. Scaringe, and W. R. Sellers. 2004. A library of siRNA duplexes targeting the phosphoinositide 3-kinase pathway: determinants of gene silencing for use in cell-based screens. Nucleic Acids Res. 32:893-901.\nKhorova, A., A. Reynolds, and S. D. Jayasena. 2003. Functional siRNAs and miRNAs Exhibit Strand Bias. Cell 115:209-216.\nReynolds, A., D. Leake, Q. Boese, S. Scaringe, W. S. Marshall, and A. Khorova. 2004. Rational siRNA design for RNA interference. Nature Biotechnology 22:326-330.\nSchwarz, D. S., G. Hutvagner, T. Du, Z. Xu, N. Aronin, and P. D. Zamore. 2003. Asymmetry in the Assembly of the RNAi Enzyme Complex. Cell 115:199-208.\nUi-Tei, K., Y. Naito, F. Takahashi, T. Haraguchi, H. Ohki-Hamazaki, A. Juni, R. Ueda, and K. Saigo. 2004. Guidelines for the selection of highly effective siRNA sequences for mammalian and chick RNA interference. Nucleic Acids Res. 32:936-948.",
+    "source": "SiRNA_Design(IDT) - user guide.docx",
+    "section": "IDT’s Unified RNAi Parameters / References",
+    "parent_content": ""
+  },
+  {
+    "content": "Early, Rule-Integrated Pioneer: As one of the first dedicated web servers, it systematically integrated the early, foundational design rules (Tuschl patterns, thermodynamic asymmetry) and filtering criteria into an accessible, automated platform.\nComprehensive Specificity Check: Its integrated BLAST against UniGene and genomic mapping (for SNPs, exon junctions) provided a more thorough specificity analysis for its time compared to simple rule-based filtering.\nFlexibility and Transparency: Offers users significant control over the initial sequence pattern and filter parameters, and presents clear thermodynamic calculations and specificity annotations, making the selection process transparent.",
+    "source": "Whitehead_siRNA - user guide.docx",
+    "section": "Whitehead siRNA Selection Server - Raw Article Summary / Advantages:",
+    "parent_content": "Tool Name: Whitehead siRNA (short interfering RNA) Selection Web Server\nDeveloper / Unit: Whitehead Institute for Biomedical Research (Collaboration with Tuschl lab)\nCore Principles:\n·Identifies candidate siRNA sequences (21mers) by applying user-selectable sequence patterns (e.g., AAN19TT) and composition filters (GC content, exclusion of homopolymer runs).\nCalculates and reports the thermodynamic stability difference between the 5' ends of the sense and antisense strands, favoring designs where the antisense 5' end is less stable to promote its entry into RISC.\n·Performs automated BLAST searches against human or mouse UniGene databases to assess sequence uniqueness and minimize off-target effects, and maps candidates to genomes to highlight exon-exon boundaries and SNP locations."
+  },
+  {
+    "content": "Outdated Algorithmic Foundation: Relies solely on early-generation sequence patterns and simple thermodynamic end-stability calculations. It lacks the sophisticated thermodynamic models (e.g., partition function for target accessibility) or machine learning classifiers found in later tools like OligoWalk.\nNo Validated Efficacy Prediction: Unlike tools like OligoWalk (78.6% PPV) or commercial platforms linked to validated reagents, this server does not provide a quantitative, experimentally-validated probability score for silencing efficacy; ranking is based on basic rules and user sorting.\nLimited Scope and Features: Designed primarily for synthetic siRNA design. It does not support shRNA design features (like loop insertion) as seen in tools like siRNA Wizard, and its functionality is confined to the rule sets available around 2004.",
+    "source": "Whitehead_siRNA - user guide.docx",
+    "section": "Whitehead siRNA Selection Server - Raw Article Summary / Limitations:",
+    "parent_content": "Tool Name: Whitehead siRNA (short interfering RNA) Selection Web Server\nDeveloper / Unit: Whitehead Institute for Biomedical Research (Collaboration with Tuschl lab)\nCore Principles:\n·Identifies candidate siRNA sequences (21mers) by applying user-selectable sequence patterns (e.g., AAN19TT) and composition filters (GC content, exclusion of homopolymer runs).\nCalculates and reports the thermodynamic stability difference between the 5' ends of the sense and antisense strands, favoring designs where the antisense 5' end is less stable to promote its entry into RISC.\n·Performs automated BLAST searches against human or mouse UniGene databases to assess sequence uniqueness and minimize off-target effects, and maps candidates to genomes to highlight exon-exon boundaries and SNP locations."
+  },
+  {
+    "content": "Tool Name: Whitehead siRNA (short interfering RNA) Selection Web Server\nDeveloper / Unit: Whitehead Institute for Biomedical Research (Collaboration with Tuschl lab)\nCore Principles:\n·Identifies candidate siRNA sequences (21mers) by applying user-selectable sequence patterns (e.g., AAN19TT) and composition filters (GC content, exclusion of homopolymer runs).\nCalculates and reports the thermodynamic stability difference between the 5' ends of the sense and antisense strands, favoring designs where the antisense 5' end is less stable to promote its entry into RISC.\n·Performs automated BLAST searches against human or mouse UniGene databases to assess sequence uniqueness and minimize off-target effects, and maps candidates to genomes to highlight exon-exon boundaries and SNP locations.",
+    "source": "Whitehead_siRNA - user guide.docx",
+    "section": "Whitehead siRNA Selection Server - Raw Article Summary",
+    "parent_content": ""
+  },
+  {
+    "content": "·Linear Regression Model:\nDeveloped by applying a linear regression model to a large dataset of 2431 siRNAs to determine nucleotide preference scores at each position of a 19-nt siRNA duplex.\nPosition-Specific Scoring: The algorithm assigns scores based solely on which nucleotide (A, U, G, C) appears at each of the 19 positions, reflecting empirically observed preferences for effective siRNAs.\n·Thermodynamic Stability Filter:\nA key finding is that siRNA duplex thermodynamic stability, represented by the whole ΔG value (stacking energy), is critical for reliable prediction. The study recommends excluding highly thermostable siRNAs (whole ΔG < -34.6 kcal/mol) to significantly improve prediction accuracy.\n·Validation System:\nThe team developed a dual-vector experimental validation system (pSELL target vector + pDual effector vector) to conveniently test predicted siRNAs.",
+    "source": "i-score - user guide.docx",
+    "section": "i-Score - Raw Article Summary / Core Principles:",
+    "parent_content": "Tool Name: i-Score (inhibitory-Score)\nDeveloper/Unit: Masatoshi Ichihara et al. (Chubu University & Nagoya University Graduate School of Medicine, Japan)"
+  },
+  {
+    "content": "Simplicity & Transparency: Algorithm is straightforward, based only on position-specific nucleotide scores, making it easy to understand and trace compared to \"black-box\" neural network models (e.g., Biopredsi).\nHigh Yield of Predictions: At a ~90% success rate threshold, i-Score can predict at least 8 times more potentially active siRNA candidates than first-generation algorithms (e.g., Reynolds, Katoh).\nComparable Accuracy: Prediction accuracy (correlation with experimental data) is as good as other contemporary second-generation algorithms (s-Biopredsi, ThermoComposition21, DSIR).\nIntegrated Designer Tool: The provided i-Score designer (Excel VBA) calculates scores for 11 different siRNA design algorithms and key parameters (like whole ΔG), allowing cross-comparison within one platform.\nUniversal Validation Method: The pSELL/pDual vector system offers a cost-effective and flexible way to experimentally validate siRNA activity for any sequence.",
+    "source": "i-score - user guide.docx",
+    "section": "i-Score - Raw Article Summary / Advantages:",
+    "parent_content": "Tool Name: i-Score (inhibitory-Score)\nDeveloper/Unit: Masatoshi Ichihara et al. (Chubu University & Nagoya University Graduate School of Medicine, Japan)"
+  },
+  {
+    "content": "Primarily for Synthetic siRNA: The algorithm is trained and optimized for chemically synthesized siRNA duplexes, not specifically for DNA vector-based siRNA or siRNA cassette design.\nLimited by Thermodynamic Stability: The algorithm cannot accurately predict the activity of highly thermostable siRNA duplexes (low whole ΔG), which represents a class of siRNAs where current design rules fail.\nPotential for Overfitting: Like DSIR, i-Score's performance on its training dataset (Dataset A) is better than on independent validation sets, suggesting possible overfitting to the specific dataset used for development.\nModel Simplicity: Relying only on positional nucleotide preferences may overlook other complex sequence or structural features that influence siRNA efficacy.",
+    "source": "i-score - user guide.docx",
+    "section": "i-Score - Raw Article Summary / Limitations:",
+    "parent_content": "Tool Name: i-Score (inhibitory-Score)\nDeveloper/Unit: Masatoshi Ichihara et al. (Chubu University & Nagoya University Graduate School of Medicine, Japan)"
+  },
+  {
+    "content": "Tool Name: i-Score (inhibitory-Score)\nDeveloper/Unit: Masatoshi Ichihara et al. (Chubu University & Nagoya University Graduate School of Medicine, Japan)",
+    "source": "i-score - user guide.docx",
+    "section": "i-Score - Raw Article Summary",
+    "parent_content": ""
+  },
+  {
+    "content": "Superior Off-Target Control: Its integrated, automated homology filtering based on both sequence alignment and thermodynamic stability (Tm<21.5°C) is more rigorous than many early-generation tools that rely on sequence rules alone.\nUser-Friendly & Streamlined Workflow: Provides a clear, step-by-step web interface that consolidates design, specificity check, and parameter adjustment in one platform, offering greater convenience compared to using multiple disparate bioinformatics tools.\nCommercial-Grade Integration: As part of Dharmacon/Horizon, it is directly linked to downstream siRNA synthesis and ordering services, and offers support for sophisticated experimental designs, which most free academic tools do not provide.",
+    "source": "siDesign_center - user guide.docx",
+    "section": "siDesign center - Raw Article Summary / Advantages:",
+    "parent_content": "Tool Name: siDESIGN Center (Dharmacon online siRNA Target Finder)\nDeveloper / Unit: Dharmacon (Horizon Discovery)\nCore Principles:\n·Applies the established Reynolds rules for rational siRNA sequence scoring and selection.\n·Employs a strict melting temperature threshold for the siRNA seed region to minimize off-target silencing.\n·Integrates automatic BLAST analysis against a specified genome to filter for target specificity."
+  },
+  {
+    "content": "Proprietary Algorithm: The core algorithm is primarily based on the older Reynolds rule set. It may not incorporate the latest publicly available design algorithms or machine learning models from recent research, potentially lagging behind the predictive performance of some cutting-edge academic tools.\nDataset and Transparency: As a commercial tool, its underlying training dataset and the full weighting of design parameters are not publicly transparent, making independent validation and comparison of its algorithm difficult compared to open-source alternatives.\nLimited Customization for Advanced Users: The interface simplifies choices but may offer less flexibility for experts to fine-tune and apply custom design rules or integrate user-defined parameters compared to more programmable, script-based platforms.",
+    "source": "siDesign_center - user guide.docx",
+    "section": "siDesign center - Raw Article Summary / Limitations:",
+    "parent_content": "Tool Name: siDESIGN Center (Dharmacon online siRNA Target Finder)\nDeveloper / Unit: Dharmacon (Horizon Discovery)\nCore Principles:\n·Applies the established Reynolds rules for rational siRNA sequence scoring and selection.\n·Employs a strict melting temperature threshold for the siRNA seed region to minimize off-target silencing.\n·Integrates automatic BLAST analysis against a specified genome to filter for target specificity."
+  },
+  {
+    "content": "Tool Name: siDESIGN Center (Dharmacon online siRNA Target Finder)\nDeveloper / Unit: Dharmacon (Horizon Discovery)\nCore Principles:\n·Applies the established Reynolds rules for rational siRNA sequence scoring and selection.\n·Employs a strict melting temperature threshold for the siRNA seed region to minimize off-target silencing.\n·Integrates automatic BLAST analysis against a specified genome to filter for target specificity.",
+    "source": "siDesign_center - user guide.docx",
+    "section": "siDesign center - Raw Article Summary",
+    "parent_content": ""
+  },
+  {
+    "content": "0. Introduction\nThe siDESIGN Center is an advanced, user-friendly tool for designing potent custom siRNAs. It employs an algorithm that considers various design criteria, such as avoiding motifs linked to toxicity, known microRNA seed sequences, and polymorphisms. Additionally, it offers advanced design options to discriminate transcript variants or add transcript targets from another gene or a different species.\nPlease note that the custom siRNAs designed with the siDESIGN Center are not functionally guaranteed. However, siRNAs designed using this tool are more likely to provide potent and specific knockdown than those designed with conventional methods.",
+    "source": "siDesign_center - user guide.docx",
+    "section": "siDesign center user guide / Limitations:",
+    "parent_content": ""
+  },
+  {
+    "content": "The siDESIGN Center offers three options for identifying the target sequence of interest.\nA. Accession Number\nAccession numbers can be found in the NCBI Reference Sequence (RefSeq) database (link). This is a non-redundant, curated, and annotated collection of sequence records for major model organisms. RefSeq accession numbers use the systematic naming convention below.",
+    "source": "siDesign_center - user guide.docx",
+    "section": "Step 1: Choose an Identifier Type / Limitations:",
+    "parent_content": ""
+  },
+  {
+    "content": "The Nucleotide box accepts FASTA-formatted sequence data up to 10,000 nucleotides. Only mature RNA or cDNA sequence should be entered. Sequences should be formatted using standard nucleic acid codes: A, C, G, T, and U. Any other alphanumeric entries will be ignored. FASTA format requires a \">\" symbol and a line break prior to entering or pasting the nucleotide sequence. A name may also be designated following the “>”symbol and before the page break, as shown below:\n>SGene 4582 Conserved Region\nGACTAGCATGCAGCATGCAGAGCTAGCAGCGAGCAGCAGCATGCATGCAGCAGCAGCATCGAGCAGCAGCATGCATGCAGCAGCAGCAGCAGCAGCAGCATGAGAGCAGCAGCAGCCTAGCTAGCATGCATGCATGCATGCAGCATGCATGCATGCATGCTAGCTAGCTAGTCGATGCATGCATGCAGCGACGATATCGATTACAGCGACGATGCATGCATGCATGCAGCATGCATGCATGATGATATAT",
+    "source": "siDesign_center - user guide.docx",
+    "section": "Step 1: Choose an Identifier Type / B. Nucleotide Sequence",
+    "parent_content": ""
+  },
+  {
+    "content": "This is the unique ID number assigned to each gene in the NCBI database, as you can find, for\ninstance, on our website:\n672 (BRCA1)\n25 (ABL1)\n983 (CDC2)\n6419 (SETMAR)",
+    "source": "siDesign_center - user guide.docx",
+    "section": "Step 1: Choose an Identifier Type / C. Gene ID",
+    "parent_content": ""
+  },
+  {
+    "content": "A series of digits that are assigned consecutively to each sequence record processed by NCBI. The GI number bears no resemblance to the Accession number of the sequence record. If a sequence changes in any way, a new GI number will be assigned. Be sure the GI Number provided is for the nucleotide, not the protein sequence of interest.\nExample: 27436944 (Homo sapiens lamin A/C (LMNA), transcript variant 2, mRNA)",
+    "source": "siDesign_center - user guide.docx",
+    "section": "Step 1: Choose an Identifier Type / D. GI Number (GenInfo Identifier)",
+    "parent_content": ""
+  },
+  {
+    "content": "It is important to note that the BLAST option (Step 4) must be checked and the proper species database selected, otherwise our tool will not take into consideration any advanced options.\na. Selection of accessions\nThe advanced options support more complex design requirements, such as isoform-specific siRNA designs. However, using these options can greatly reduce the number of siRNA designs generated due to the increased stringency of the design parameters.\nWhen the Accession number or Gene ID are entered in Step 1, selecting the Advanced Settings will display the additional accession numbers for all RefSeq variants associated with the target gene. As a default, all variants will be “required” except non-coding accessions, which will be denoted with the “NR” accession prefix.",
+    "source": "siDesign_center - user guide.docx",
+    "section": "Advanced Options / D. GI Number (GenInfo Identifier)",
+    "parent_content": ""
+  },
+  {
+    "content": "Select \"Allowed\" for any transcript variant that will neither be required nor excluded by resulting siRNA designs.\nSelect \"Excluded\" for any transcript variant whose sequence should not be targeted. Use of Advanced Options to exclude a variant will require selection of a BLAST database in Step 4.",
+    "source": "siDesign_center - user guide.docx",
+    "section": "Advanced Options / Select \"Required\" for any transcript variant that must be targeted by the siRNA designs. Note that at least one variant must remain \"Required\" for the design step to proceed.",
+    "parent_content": ""
+  },
+  {
+    "content": "This option supports the design of siRNAs that target multiple genes with homologous regions. For example, homologous genes across multiple species, or conserved gene family members within a species. Using this option may greatly reduce the number of siRNA designs generated due to the increased stringency of the design parameters.\nUp to 10 Accession numbers may be entered in the field provided. These must be separated by spaces or line breaks. Gene targets entered here will be \"Required\" by the design tool along with the original targeted accessions selected.",
+    "source": "siDesign_center - user guide.docx",
+    "section": "Advanced Options / b. Additional required targets",
+    "parent_content": ""
+  },
+  {
+    "content": "This step allows the user to specify which of the following regions to target:\n5' UTR: check this box to include the 5' untranslated region (UTR) for design consideration\nORF: check this box to include designs that target the Open Reading Frame or ORF. This is the default selection. Non-coding RNAs will be treated as an ORF region and no designs will be returned if ORF is not selected. Recommended.\n3' UTR: Check this box to include the 3' untranslated region (UTR). Recommended.\nIf nucleotide sequence was used for the input type in step 1, the sequence will be treated as the\nORF and selecting 5’UTR and 3’UTR will not have any impact.\n$\nStep 3: GC content\nThis value is calculated using the core 19 nucleotide target sequence and does not include the dinucleotide overhangs. Early research suggested that siRNA should have a G/C content of approximately 50%. For genes that are G/C poor or rich, the range of G/C content be expanded to include other ranges. The default and recommended range is between 30% and 64% GC content.",
+    "source": "siDesign_center - user guide.docx",
+    "section": "Step 2: Select desired regions for siRNA design / b. Additional required targets",
+    "parent_content": ""
+  },
+  {
+    "content": "The siDESIGN Center offers the option to BLAST the target sequences against one or two species in order to remove the designs which have significant risk of presenting cross-targets.\nNo BLAST: Choose if there is no BLAST database available through this tool for the desired species, if specificity is less of a concern compared to functionality, or if you have entered a nucleotide sequence (at Step1) which is present in the targeted organism. (In this case, selecting “no BLAST” but doing a BLAST analysis on the siRNA designs through NCBI is recommended.)\nBLAST: Select this option to perform a BLAST analysis to ensure specificity of the siRNA candidates and/or because you have entered advanced options. Select the host species from the drop-down menu.",
+    "source": "siDesign_center - user guide.docx",
+    "section": "Step 4: Choose BLAST Options / b. Additional required targets",
+    "parent_content": ""
+  },
+  {
+    "content": "Note that 3 databases encompass non-coding transcripts in addition to protein-coding transcripts. These are available for Human, Mouse and Rat. You may select those if you wish to exclude some non-coding variants (Step1, advanced options) or if you are concerned about targeting any non-coding transcript.\nTwo combined databases are also available to support cross-species designs:\nCombined Human/Mouse, Combined Human/Rat\nPlease use these databases if you have added transcripts from a different species with the advanced\noptions of Step 1.\nIf your species does not appear in this list, we recommend performing a BLAST analysis at NCBI with the candidate siRNAs target sequences. The siRNA sequences can be found by adding the siRNA designs to your cart and then selecting “More” from the line item in the cart.",
+    "source": "siDesign_center - user guide.docx",
+    "section": "Step 4: Choose BLAST Options / The following species-specific protein-coding transcript databases (RefSeq) are available for BLAST analyses: Human (H. sapiens), Mouse (M. musculus), Rat (R. norvegicus), Zebrafish (D. rerio), Fruitfly (D. melanogaster), Worm (C. elegans), Cow (B. taurus), Rhesus monkey (M. mulatta), Chimpanzee (P. troglodytes), Dog (C. lupus familiaris), Chicken (G. gallus), Chinese Hamster (C. griseus)",
+    "parent_content": ""
+  },
+  {
+    "content": "A list of up to 50 of the top-scoring candidates is presented along with details which will help you select the best siRNAs. The candidates are sorted by the score. Here are explanations of each column:\nSelect: Click to choose siRNA designs that will be added to your shopping cart. When items are in your cart, be sure to click on“Edit”to select additional options, such as the type of siRNA, required processing, and desired quantity.\nRegion: Region where the design aligns to one of the indicated targeted transcripts. This field will\nindicate \"N/A\" if the targeted gene is a non-protein-coding gene or if a nucleotide sequence was provided as the Identifier Type in Step 1.\nStart Position: Position of the siRNA design relative to transcription starting site of one of the\nindicated targeted transcripts.\nGC% : Percentage of the 19-base target sequence that is G or C.\nScore: Algorithmic indicator of the likelihood of successful silencing with this siRNA design. This score does not quantify expected percent knockdown but is a prediction based on characteristics of the sequence.",
+    "source": "siDesign_center - user guide.docx",
+    "section": "Results / The following species-specific protein-coding transcript databases (RefSeq) are available for BLAST analyses: Human (H. sapiens), Mouse (M. musculus), Rat (R. norvegicus), Zebrafish (D. rerio), Fruitfly (D. melanogaster), Worm (C. elegans), Cow (B. taurus), Rhesus monkey (M. mulatta), Chimpanzee (P. troglodytes), Dog (C. lupus familiaris), Chicken (G. gallus), Chinese Hamster (C. griseus)",
+    "parent_content": ""
+  },
+  {
+    "content": "Min # mismatches (Antisense): The lowest number of mismatches of the 19-base antisense strand to a sequence record other than the required targets, as determined by BLAST analysis. For example, a score of 3 in this field would indicate that the antisense strand has no more than a 16/19 base match to any non-required transcript accession in the BLAST database.\nMin # mismatches (Sense): Similar to above but for the sense strand.",
+    "source": "siDesign_center - user guide.docx",
+    "section": "Results / Low Seed Frequency: Yes/No indicator of whether the target sequence has a low seed sequence frequency within the 3'UTR of the target or host genome. siRNA with low frequency seed regions will have reduced risk of off-target effects relative to higher frequencies 1. When possible, choosing target sequences with a “Yes” here is recommended.",
+    "parent_content": ""
+  },
+  {
+    "content": "Start over: this will clear the input so that new design parameters can be entered.\nModify: this will go back to the design steps with the original design parameters pre-filled to allow adjustments.",
+    "source": "siDesign_center - user guide.docx",
+    "section": "Results / Requires Sense Modification: This is a yes/no indicator of whether the siRNA design should be synthesized with a chemical modification to inhibit sense-strand uptake. This requirement is indicated when (a) The sense strand has fewer than 2 mismatches to non-targeted sequence record in the BLAST database or (b) analysis indicates that the design favors sense strand over antisense strand entry into RISC. If \"No BLAST\" was selected, only criteria (b) will be applied.",
+    "parent_content": ""
+  },
+  {
+    "content": "1. Anderson, E, et al., \"Low Genomic 3' UTR Seed Complement Frequency Predicts siRNA Target\nSpecificity\". Poster at Keystone Symposia: MicroRNAs and siRNAs: Biological Functions and Mechanism. (January 2007)",
+    "source": "siDesign_center - user guide.docx",
+    "section": "References / Requires Sense Modification: This is a yes/no indicator of whether the siRNA design should be synthesized with a chemical modification to inhibit sense-strand uptake. This requirement is indicated when (a) The sense strand has fewer than 2 mismatches to non-targeted sequence record in the BLAST database or (b) analysis indicates that the design favors sense strand over antisense strand entry into RISC. If \"No BLAST\" was selected, only criteria (b) will be applied.",
+    "parent_content": ""
+  },
+  {
+    "content": "By accessing or using this site, you acknowledge and consent to the following:\nThe use of this site is provided free of charge to the research community for basic research and educational purposes only. No other use is permitted.\nThe use of this site is made available without warranty of any kind, expressed or implied, including, but not limited to, merchantability or fitness for a particular purpose. No representation is made that the use of this site shall not infringe the patent rights, copyrights, or other intellectual\nproperty rights of any third party. In no event shall we be liable for incidental or consequential damages of any kind, including economic damage or injury.",
+    "source": "siDesign_center - user guide.docx",
+    "section": "References / Disclaimer",
+    "parent_content": ""
+  },
+  {
+    "content": "Explicit Off-Target Minimization: Uniquely and directly addresses seed-dependent off-target effects—a major concern in RNAi experiments—using a thermodynamic (Tm-based) criterion rather than just sequence frequency or simple BLAST.\nHigh Specificity Assurance: The three-step pipeline robustly combines efficacy rules with dual-mechanism specificity filters (thermodynamic + sequence mismatch), aiming for highly specific siRNAs.\nFast and User-Friendly Web Server: Utilizes pre-computed homology searches for human transcripts, delivering results within seconds and providing clear visual output of candidates and potential off-target matches.\nHigh Genome Coverage: Using default parameters, it can design at least one qualified siRNA for >94% of human RefSeq mRNAs, balancing specificity with practical applicability.",
+    "source": "siDirect_2.1 - user guide.docx",
+    "section": "siDirect 2.1 - Raw Article Summary / Advantages:",
+    "parent_content": "Tool Name: siDirect 2.0\nDeveloper/Unit: Yuki Naito, Kumiko Ui-Tei et al. (University of Tokyo, Japan)\nCore Principles:\n·Three-Step Selection Pipeline: Employs a sequential filtering strategy\nStep 1 (Functionality): Selects siRNAs based on established empirical rules for high RNAi activity (Ui-Tei rules).\nStep 2 (Seed-Dependent Off-Target Reduction): A novel filter that selects siRNAs based on the thermodynamic stability (melting temperature, Tm) of the seed-target duplex. SiRNAs with seed duplex Tm < 21.5°C for both guide and passenger strands are chosen to minimize seed-mediated off-target effects.\nStep 3 (Target Specificity): Eliminates siRNAs that have near-perfect matches (default: <2 mismatches over 19 nt) to non-target transcripts, using a fast, custom homology search algorithm.\n·Focus on Seed Region Thermodynamics:\nThe key innovation is the correlation between seed-target duplex stability (Tm) and off-target potential. Lower Tm equates to significantly reduced off-target silencing.\n·Dual-Strand Analysis:\nConsiders the potential off-target effects from both the guide and passenger strands of the siRNA duplex."
+  },
+  {
+    "content": "Primary Focus on Human: The tool and its pre-computed databases are optimized for human mRNA targets. Performance for other species is not its primary strength.\nRule-Based Efficacy Filter: The first functional filter relies on the Ui-Tei empirical rules, which, while effective, may not capture all sequence features influencing potency as comprehensively as later machine-learning models trained on larger datasets.\nFixed Thermodynamic Threshold: The critical Tm cutoff of 21.5°C, while experimentally supported, is a fixed benchmark. The optimal threshold might vary for different cell types or experimental conditions.\nChallenges with Gene Families: As acknowledged, designing specific siRNAs for genes within highly conserved multigene families (e.g., histones, ribosomal proteins) remains difficult and may require manual inspection of the off-target list.",
+    "source": "siDirect_2.1 - user guide.docx",
+    "section": "siDirect 2.1 - Raw Article Summary / Limitations:",
+    "parent_content": "Tool Name: siDirect 2.0\nDeveloper/Unit: Yuki Naito, Kumiko Ui-Tei et al. (University of Tokyo, Japan)\nCore Principles:\n·Three-Step Selection Pipeline: Employs a sequential filtering strategy\nStep 1 (Functionality): Selects siRNAs based on established empirical rules for high RNAi activity (Ui-Tei rules).\nStep 2 (Seed-Dependent Off-Target Reduction): A novel filter that selects siRNAs based on the thermodynamic stability (melting temperature, Tm) of the seed-target duplex. SiRNAs with seed duplex Tm < 21.5°C for both guide and passenger strands are chosen to minimize seed-mediated off-target effects.\nStep 3 (Target Specificity): Eliminates siRNAs that have near-perfect matches (default: <2 mismatches over 19 nt) to non-target transcripts, using a fast, custom homology search algorithm.\n·Focus on Seed Region Thermodynamics:\nThe key innovation is the correlation between seed-target duplex stability (Tm) and off-target potential. Lower Tm equates to significantly reduced off-target silencing.\n·Dual-Strand Analysis:\nConsiders the potential off-target effects from both the guide and passenger strands of the siRNA duplex."
+  },
+  {
+    "content": "Tool Name: siDirect 2.0\nDeveloper/Unit: Yuki Naito, Kumiko Ui-Tei et al. (University of Tokyo, Japan)\nCore Principles:\n·Three-Step Selection Pipeline: Employs a sequential filtering strategy\nStep 1 (Functionality): Selects siRNAs based on established empirical rules for high RNAi activity (Ui-Tei rules).\nStep 2 (Seed-Dependent Off-Target Reduction): A novel filter that selects siRNAs based on the thermodynamic stability (melting temperature, Tm) of the seed-target duplex. SiRNAs with seed duplex Tm < 21.5°C for both guide and passenger strands are chosen to minimize seed-mediated off-target effects.\nStep 3 (Target Specificity): Eliminates siRNAs that have near-perfect matches (default: <2 mismatches over 19 nt) to non-target transcripts, using a fast, custom homology search algorithm.\n·Focus on Seed Region Thermodynamics:\nThe key innovation is the correlation between seed-target duplex stability (Tm) and off-target potential. Lower Tm equates to significantly reduced off-target silencing.\n·Dual-Strand Analysis:\nConsiders the potential off-target effects from both the guide and passenger strands of the siRNA duplex.",
+    "source": "siDirect_2.1 - user guide.docx",
+    "section": "siDirect 2.1 - Raw Article Summary",
+    "parent_content": ""
+  },
+  {
+    "content": "(To follow the tutorial for parameter design with visualized images, please visit https://sidirect2.rnai.jp/doc/)\nI. Introduction\nsiDirect is a web server that provides efficient and target-specific siRNA design for mammalian RNAi. In version 2.0 (2009), the siRNA design algorithm was extensively updated to reduce off-target silencing effects. This update was based on our finding that the capability of siRNAs to induce off-target effects is highly correlated with the thermodynamic stability of the 'seed' duplex (reference 6). The updated siRNA design algorithm, incorporating these mechanistic features, is combined with the previously reported reliable algorithms.",
+    "source": "siDirect_2.1 - user guide.docx",
+    "section": "User Guide / Limitations:",
+    "parent_content": ""
+  },
+  {
+    "content": "1. Enter the accession number for human claudin 17 (NM_012131).\n2. Click 'retrieve sequence' to obtain the nucleotide sequence.\n3. Alternatively, you can directly paste a nucleotide sequence. Accepted input types are FASTA or a plain nucleotide sequence up to 10 kbp.\n4. Click 'design siRNA'.",
+    "source": "siDirect_2.1 - user guide.docx",
+    "section": "II. Example 1 | Designing siRNAs for human claudin 17 (CLDN17) / Limitations:",
+    "parent_content": ""
+  },
+  {
+    "content": "A. siRNA target positions.\nB. siRNA target sequences (21nt + 2nt overhang).\nC. Oligonucleotide sequences (21nt guide strand and 21nt passenger strand).\nD. siRNA efficacy predictions. siRNAs with U, R, A satisfy the functional siRNA design algorithms of Ui-Tei et al. (reference 3), Reynolds et al. (reference 4), and Amarzguioui et al. (reference 5), respectively.\nE. Calculated Tm of the siRNA seed region. Selecting an siRNA with a lower seed Tm reduces off-target effects. → Ui-Tei et al. (reference 6)\nF. Off-target search results. The minimum number of mismatches against any off-targets in the human transcripts. Searches are performed for 19nt sequences at positions 2-20 of both strands of the siRNA duplex, because these 19 nucleotides are thought to be involved in target mRNA recognition.\nG. The number of hits with a perfect match (19/19 matches), one mismatch (18/19 matches), two mismatches (17/19 matches), or three mismatches (16/19 matches) is shown. A number '1' in the 0(+) column usually indicates a perfect match with the intended target mRNA (e.g., claudin 17).\nH. Graphical view of designed siRNAs.\nI. Tab-delimited siRNA list. You can copy-paste the results into Excel or text editors, etc.",
+    "source": "siDirect_2.1 - user guide.docx",
+    "section": "II. Example 1 | Designing siRNAs for human claudin 17 (CLDN17) / 5. Results:",
+    "parent_content": ""
+  },
+  {
+    "content": "7. Design sense and antisense RNA oligonucleotides from the siDirect results.",
+    "source": "siDirect_2.1 - user guide.docx",
+    "section": "II. Example 1 | Designing siRNAs for human claudin 17 (CLDN17) / 6. List of off-target candidates for individual siRNAs. The alignment between each off-target candidate and the siRNA sequence clarifies the locations of mismatches. Hits with a perfect match (19/19 matches), one mismatch (18/19 matches), two mismatches (17/19 matches), or three mismatches (16/19 matches) are shown. Searches are performed for 19nt sequences at positions 2-20 of each strand of the siRNA duplex.",
+    "parent_content": ""
+  },
+  {
+    "content": "1. Enter the accession number for human vimentin (NM_003380).\n2. Click 'retrieve sequence' to obtain the nucleotide sequence.\n3. Alternatively, you can directly paste a nucleotide sequence.\nAccepted input types are FASTA or a plain nucleotide sequence up to 10 kbp.\n4. Check 'Avoid contiguous A's or T's 4 nt or more'. This prevents transcription termination by pol III promoters.\n5. Check 'Custom pattern' and input 'NNGNNNNNNNNNNNNNNNNNNNN' in the field. This fixes the third letter of the target sequence (i.e., shRNA transcription start) to 'G'.\n6. Check 'Only show siRNAs that match all checked criteria'.\n7. Click 'design siRNA'.",
+    "source": "siDirect_2.1 - user guide.docx",
+    "section": "III. Example 2 | Designing shRNA vectors (with pol III promoter) for human vimentin (VIM) / 6. List of off-target candidates for individual siRNAs. The alignment between each off-target candidate and the siRNA sequence clarifies the locations of mismatches. Hits with a perfect match (19/19 matches), one mismatch (18/19 matches), two mismatches (17/19 matches), or three mismatches (16/19 matches) are shown. Searches are performed for 19nt sequences at positions 2-20 of each strand of the siRNA duplex.",
+    "parent_content": ""
+  },
+  {
+    "content": "The diagram below illustrates the siRNA selection process in siDirect version 2. All possible 23-mer subsequences, corresponding to the complementary sequence of the 21-nt guide strand and the 2-nt 3′ overhang of the passenger strand within the target sequence, are generated and filtered in three selection steps.",
+    "source": "siDirect_2.1 - user guide.docx",
+    "section": "IV. Methods / 6. List of off-target candidates for individual siRNAs. The alignment between each off-target candidate and the siRNA sequence clarifies the locations of mismatches. Hits with a perfect match (19/19 matches), one mismatch (18/19 matches), two mismatches (17/19 matches), or three mismatches (16/19 matches) are shown. Searches are performed for 19nt sequences at positions 2-20 of each strand of the siRNA duplex.",
+    "parent_content": ""
+  },
+  {
+    "content": "In the first step, highly functional siRNA sequences are selected using our algorithm (reference 3). We have revealed that efficient RNAi can be induced when the siRNA satisfies the following three sequence conditions simultaneously: A/U at the 5′ terminus of the guide strand; G/C at the 5′ terminus of the passenger strand; and a minimum of 4 A/U residues within the 5′ terminal 7 bp of the guide strand. Additionally, the presence of a G/C stretch longer than 9 bp should be avoided. The proportion of functional siRNA sequences selected by this algorithm is 14.7% of all 23-mer sequences derived from RefSeq 30 human transcripts.",
+    "source": "siDirect_2.1 - user guide.docx",
+    "section": "IV. Methods / Step 1: Selection of highly functional siRNAs",
+    "parent_content": ""
+  },
+  {
+    "content": "We have found a significant correlation between off-target effects and the thermodynamic stability (Tm) of the seed-target duplex formed between the nucleotides positioned at 2-8 from the 5′ end of the siRNA guide strand and its target sequence (reference 6). In the second step, to avoid off-target effects, the Tm for the seed-target duplex is calculated using the nearest neighbor model and the thermodynamic parameters for RNA duplex formation. As shown in our previous report, a\ncalculated Tm of 21.5 ºC serves as a benchmark to distinguish nearly off-target-free seed sequences from the off-target-positive ones, thus being used as the initial standard. Moreover, it has been revealed that RNAi silencing is occasionally induced by passenger strands of functional siRNAs, which also participate in seeddependent off-target gene silencing. Thus, siRNAs with a seed-target Tm below 21.5 ºC for both the guide and passenger strands are selected. As a result, 3.0% of all human 23-mer sequences remain available. The calculated Tm value for each siRNA is provided on the siDirect result page.",
+    "source": "siDirect_2.1 - user guide.docx",
+    "section": "IV. Methods / Step 2: Reduction of seed-dependent off-target effects",
+    "parent_content": ""
+  },
+  {
+    "content": "Several studies have indicated that the impact of single-base mismatches between the siRNA guide strand and the target mRNA varies, depending on the positions of the mismatch and/or the sequence of the siRNA. However, it is obvious that even when the Tm value of the seed-target duplex is sufficiently low, target gene silencing can still occur if the non-seed region is completely complementary. Therefore, in the third step, siRNAs that possess near-perfect matches to any other nontargeted transcripts are excluded. In siDirect version 2, off-target searches are conducted for 19-mer sequences at positions 2-20 of both strands of the siRNA duplex, because these 19 nucleotides are thought to be involved in target mRNA recognition.",
+    "source": "siDirect_2.1 - user guide.docx",
+    "section": "IV. Methods / Step 3: Elimination of near-perfect matched genes",
+    "parent_content": ""
+  },
+  {
+    "content": "siDirect v2.0 web server (Nov, 2009)\nsiDirect web server (May, 2005) [discontinued]\nsiDirect web server (May, 2004) [discontinued]",
+    "source": "siDirect_2.1 - user guide.docx",
+    "section": "Previous releases / Since widely-used BLAST algorithms frequently overlook near-perfect match candidates, siDirect utilizes our fast and sensitive algorithm (reference 7 and GGGenome). Additionally, all near-perfect match hits are precomputed for all functional human siRNAs and stored in the SQLite database to enhance computational efficiency. This enables siDirect to generate a list of siRNA candidates within seconds. The output page provides the minimum number of mismatches against any near-perfect match candidates for each siRNA. Clicking on an individual siRNA displays a detailed list of candidate genes. By default, siRNA sequences with at least two mismatches to any other non-targeted transcripts are selected.",
+    "parent_content": ""
+  },
+  {
+    "content": "GGGenome: ultrafast DNA sequence search engine maintained by our group.\nhttps://GGGenome.dbcls.jp/\nCRISPRdirect: target-specific CRISPR guide RNA design software maintained by our group.\nhttps://crispr.dbcls.jp/",
+    "source": "siDirect_2.1 - user guide.docx",
+    "section": "Previous releases / Useful tools",
+    "parent_content": ""
+  },
+  {
+    "content": "siDirect web server\nIf you use siDirect in your work, please cite references 1 and 2.\n1. Naito Y, Yoshimura J, Morishita S, Ui-Tei K. (2009) siDirect 2.0: updated software for designing functional siRNA with reduced seed-dependent off-target effect. BMC Bioinformatics 10, 392.\n2. Naito Y, Yamada T, Ui-Tei K, Morishita S, Saigo K. (2004) siDirect: highly effective, target-specific siRNA design software for mammalian RNA interference. Nucleic Acids Res., 32, W124-W129.",
+    "source": "siDirect_2.1 - user guide.docx",
+    "section": "Previous releases / References",
+    "parent_content": ""
+  },
+  {
+    "content": "3. Ui-Tei K, Naito Y, Takahashi F, Haraguchi T, Ohki-Hamazaki H, Juni A, Ueda R, Saigo K. (2004) Guidelines for the selection of highly effective siRNA sequences for mammalian and chick RNA interference. Nucleic Acids Res., 32, 936-948.\n4. Reynolds A, Leake D, Boese Q, Scaringe S, Marshall WS, Khvorova A. (2004) Rational siRNA design for RNA interference. Nat. Biotechnol., 22, 326-330.\n5. Amarzguioui M, Prydz H. (2004) An algorithm for selection of functional siRNA sequences. Biochem. Biophys. Res. Commun., 316, 1050-1058. Reducing off-target effects\n6. Ui-Tei K, Naito Y, Nishi K, Juni A, Saigo K. (2008) Thermodynamic stability and Watson-Crick base pairing in the seed duplex are major determinants of the efficiency of the siRNA-based off-target effect. Nucleic Acids Res. 36, 7100-7109.\n7. Yamada T, Morishita S. (2005) Accelerated off-target search algorithm for siRNA. Bioinformatics, 21, 1316-1324.",
+    "source": "siDirect_2.1 - user guide.docx",
+    "section": "Previous releases / Designing functional siRNAs",
+    "parent_content": ""
+  },
+  {
+    "content": "Researchers from academic organizations are eligible to use siDirect freely for academic purposes. However, if users from academic, non-profit, or commercial organizations design or utilize siDirect for any commercial purposes, such as including it in a commercial product sake or profits research, they are required to make licensing agreements by contacting license@rnai.jp.",
+    "source": "siDirect_2.1 - user guide.docx",
+    "section": "Previous releases / Licenses",
+    "parent_content": ""
+  },
+  {
+    "content": "Specialized for Vector-Based shRNA Design: Unlike general siRNA design tools, it is explicitly optimized for designing sequences compatible with DNA vector systems (shRNA), particularly InvivoGen's own psiRNA™ plasmids, addressing key considerations like Pol III promoter requirements.\nIntegrated with Validated Reagents: The algorithm is directly linked to InvivoGen's collection of pre-validated, ready-to-use psiRNA plasmids, which claim >70% silencing efficiency, offering a streamlined path from design to experimental use.\nCommercially Supported & User-Friendly: Provides a straightforward, web-based interface that integrates design with specificity checks (BLAST), lowering the barrier for researchers needing to design shRNA constructs without deep bioinformatics expertise.",
+    "source": "siRNA_wizard_3.1 - user guide.docx",
+    "section": "siRNA Wizard - Raw Article Summary / Advantages:",
+    "parent_content": "Tool Name: siRNA Wizard\nDeveloper / Unit: InvivoGen\nCore Principles:\n·Designs siRNA/shRNA sequences based on established criteria: thermodynamic asymmetry (lower stability at the 5' end of the antisense strand), avoidance of specific unfavorable terminal nucleotides, and optimal GC content.\n·Incorporates promoter-specific constraints, requiring the first nucleotide of the shRNA transcript to be a purine (A or G) for efficient RNA Pol III expression, with specific recommendations for H1 vs. U6 promoters.\n·Employs a dual BLAST filtering strategy to minimize off-target effects: 1) against an mRNA database to discard sequences with >13 contiguous bases of identity to non-target genes, and 2) against a miRNA seed database to avoid unintended microRNA-like targeting."
+  },
+  {
+    "content": "Proprietary and Vendor-Locked: The algorithm is a commercial black box, and its primary utility and optimizations are tightly coupled with InvivoGen's proprietary plasmid system, offering less transparency and flexibility compared to open-source academic tools like OligoWalk.\nLimited Algorithmic Transparency and Generality: While it applies known design rules, it lacks the published, rigorous thermodynamic predictive model and high positive predictive value metrics of tools like OligoWalk. Its efficacy is primarily demonstrated through its own commercial plasmids.\nFocused Application Scope: Primarily geared towards generating shRNA inserts for InvivoGen's vectors. For researchers using synthetic siRNAs or alternative vector backbones, other tools (e.g., Dharmacon's siDESIGN Center for synthetic siRNA, or broad academic tools) may offer more appropriate or flexible design parameters.",
+    "source": "siRNA_wizard_3.1 - user guide.docx",
+    "section": "siRNA Wizard - Raw Article Summary / Limitations:",
+    "parent_content": "Tool Name: siRNA Wizard\nDeveloper / Unit: InvivoGen\nCore Principles:\n·Designs siRNA/shRNA sequences based on established criteria: thermodynamic asymmetry (lower stability at the 5' end of the antisense strand), avoidance of specific unfavorable terminal nucleotides, and optimal GC content.\n·Incorporates promoter-specific constraints, requiring the first nucleotide of the shRNA transcript to be a purine (A or G) for efficient RNA Pol III expression, with specific recommendations for H1 vs. U6 promoters.\n·Employs a dual BLAST filtering strategy to minimize off-target effects: 1) against an mRNA database to discard sequences with >13 contiguous bases of identity to non-target genes, and 2) against a miRNA seed database to avoid unintended microRNA-like targeting."
+  },
+  {
+    "content": "Tool Name: siRNA Wizard\nDeveloper / Unit: InvivoGen\nCore Principles:\n·Designs siRNA/shRNA sequences based on established criteria: thermodynamic asymmetry (lower stability at the 5' end of the antisense strand), avoidance of specific unfavorable terminal nucleotides, and optimal GC content.\n·Incorporates promoter-specific constraints, requiring the first nucleotide of the shRNA transcript to be a purine (A or G) for efficient RNA Pol III expression, with specific recommendations for H1 vs. U6 promoters.\n·Employs a dual BLAST filtering strategy to minimize off-target effects: 1) against an mRNA database to discard sequences with >13 contiguous bases of identity to non-target genes, and 2) against a miRNA seed database to avoid unintended microRNA-like targeting.",
+    "source": "siRNA_wizard_3.1 - user guide.docx",
+    "section": "siRNA Wizard - Raw Article Summary",
+    "parent_content": ""
+  },
+  {
+    "content": "Selected region\nFor better efficacity, it is recommended to avoid 5' and 3'UTRs. These regions contain binding sequences for regulatory proteins that may affect the accessibility of the RNA target sequence to the RISC complex. However, we and others have successfully silenced the expression of several genes by targeting the 5' or 3'UTRs (1, 2, 3, 4). Therefore, 5' and 3'UTRs could also be considered when selecting a region on your target gene.",
+    "source": "siRNA_wizard_3.1 - user guide.docx",
+    "section": "siRNA design guidelines / Limitations:",
+    "parent_content": ""
+  },
+  {
+    "content": "siRNA-mediated RNAi is based on using dsRNA < 30 nt to avoid nonspecific silencing. According to Hannon et al. siRNA of 25-29 nt are generally more effective than shorter ones. However, we and others found that hairpin siRNAs with duplex lengths of 19-21 nt are as effective as longer hairpin siRNAs (5, 6, 7).",
+    "source": "siRNA_wizard_3.1 - user guide.docx",
+    "section": "siRNA design guidelines / siRNA size",
+    "parent_content": ""
+  },
+  {
+    "content": "Statistical analysis of published siRNA sequences reveals that functional duplexes display lower internal stability at the 5' antisense end relative to the rest of the sequence than non-functional duplexes (8, 9). Duplexes with a G at the 5'end and a A or T at the 3' end of the sense strand are favored (displayed in blue). Duplexes with a A at the 5' end and a A or T at the 3' end are less favored (displayed in black in \"Advanced Search\"). And duplexes with a G or C at the 3'end are discarded.",
+    "source": "siRNA_wizard_3.1 - user guide.docx",
+    "section": "siRNA design guidelines / Thermodynamic properties of siRNA",
+    "parent_content": ""
+  },
+  {
+    "content": "The first nucleotide of the siRNA sequence can either be an A or a G. The pyrimidines C and T should be avoided because expression of RNAs from RNA polymerase III promoters is only efficient when the first transcribed nucleotide is a purine. In cases where your siRNA sequence starts with a C or T, we recommend to add an A as the first nucleotide. This addition will not affect the activity of your siRNA since it will generate a T at the end of the antisense siRNA strand that will be included in the termination signal maintaining its complementarity with the target sequence. This point is important since according to current knowledge recognition of the specific gene target is achieved by the antisense siRNA strand. When using vector with the 7SK promoter, a G as the starting nucleotide should be preferred to a A. On the contrary, when using vector with the H1 promoter, a A as the starting nucleotide is more efficient than a G. That's the reason why we recommend to use 7SK vectors, since a G as starting nucleotide is preferred for thermodynamic stability (see above).",
+    "source": "siRNA_wizard_3.1 - user guide.docx",
+    "section": "siRNA design guidelines / Starting nucleotide",
+    "parent_content": ""
+  },
+  {
+    "content": "It is usually recommended to choose sequences with low GC content (between 30% and 55%). However, there are many examples of active siRNAs with high GC content (5, 11, 12)",
+    "source": "siRNA_wizard_3.1 - user guide.docx",
+    "section": "siRNA design guidelines / GC content of the siRNA sequence",
+    "parent_content": ""
+  },
+  {
+    "content": "In order to increase specificity, siRNA Wizard filter candidate siRNA sequence to remove non-unique sequences by BLAST against an unique and comprehensive mRNA database. According to Jackson et al. (13) canditate siRNA presenting more than 13 contiguous nucleotides of sequence identity with another mRNA are discarded. Due to the increase of the database that drastically reduce the number of siRNA candidate, only siRNA presenting homology with more than 5 Unigene sequence are discarded. The list of homolog genes to each putative siRNA with their expression profiles and link to Unigene cluster enables the user to choose siRNA corresponding to his/her needs.",
+    "source": "siRNA_wizard_3.1 - user guide.docx",
+    "section": "siRNA design guidelines / BLAST against mRNA databases",
+    "parent_content": ""
+  },
+  {
+    "content": "To avoid off target effect, siRNA Wizard filter candidate siRNA sequence to remove sequence displaying a known miRNA SEED recognition region at 3' end.",
+    "source": "siRNA_wizard_3.1 - user guide.docx",
+    "section": "siRNA design guidelines / BLAST against miRNA SEED databases",
+    "parent_content": ""
+  },
+  {
+    "content": "We and others have tested a variety of sequences for the loop between the two complementary regions of a shRNA, ranging from 3 to 9 nt in length. Similar effectiveness have been obtained for loops of 5, 7 or 9 nt. We use a 7 nt loop sequence (TCAAGAG) for the psiRNA vectors.",
+    "source": "siRNA_wizard_3.1 - user guide.docx",
+    "section": "siRNA design guidelines / Loop for short hairpin siRNAs (shRNA)",
+    "parent_content": ""
+  },
+  {
+    "content": "2016 - Cancer Gene Ther., 23(4):73 - 82. - Precise and efficient siRNA design: a key point in competent gene silencing. (Fakhr E. et al.)\n2016 - Stem Cells Dev., 25(13):959 - 74. - Id2 Mediates Differentiation of Labyrinthine Placental Progenitor Cell Line, SM10. (Selesniemi K. et al.)\n2016 - PLoS One., 11(10):e0164720. - Novel Strategy to Control Transgene Expression Mediated by a Sendai Virus - Based Vector Using a Nonstructural C Protein and Endogenous MicroRNAs. (Sano M. et al.)\n2016 - Cancer Res., 76(1):171 - 81. d - Eva1 Maintains the Stem - like Character of Glioblastoma - Initiating Cells by Activating the Noncanonical NF - κB Signaling Pathway. (Ohtsu N. et al.)\n2016 - Methods Mol Biol., 1364:277 - 90. - Efficient Gene Suppression in Dorsal Root Ganglia and Spinal Cord Using Adeno - Associated Virus Vectors Encoding Short - Hairpin RNA. (Enomoto M. et al.)\n2014 - J Virol., 88(4):1897 - 913 - Cellular vimentin regulates construction of dengue virus replication complexes through interaction with NS4A protein. (Teo CS, Chu JJ)",
+    "source": "siRNA_wizard_3.1 - user guide.docx",
+    "section": "References: / Loop for short hairpin siRNAs (shRNA)",
+    "parent_content": ""
+  },
+  {
+    "content": "2003 - Inhibition of intracellular hepatitis C virus replication by synthetic and vector - derived small interfering RNAs. EMBO reports AOP. (Yokota T. et al.)\n2003 - A lentivirus - based system to functionally silence genes in primary mammalian cells, stem cells and transgenic mice by RNA interference. Nature Genetics 33:401 - 406 ( Rubinson DA. et al)\n2003 - Simultaneous inhibition of GSK3a and GSKb using hairpin siRNA expression vectors. Molecular Therapy 7(2):228 - 236 (Yu JY. et al)\n2003 - RNA interference targeting Fas protects mice from fulminant hepatitis. Nature Medicine 9(3):347 - 351 (Song E. et al)\n2003 - Functional siRNAs and miRNAs Exhibit Strand Bias. Cell 115(2):209 - 216 (Khvorova, A. et al)\n2003 - Asymmetry in the Assembly of the RNAi Enzyme Complex. Cell 115(2):199 - 208 (Schwarz, D.S. at al)\n2003 - A general method for gene knockdown in mice by using lentiviral vectors expressing small interfering RNA. PNAS 100(4):1844 - 1848 (Tiscornia G. et al)",
+    "source": "siRNA_wizard_3.1 - user guide.docx",
+    "section": "References: / 2003 - Expression profiling reveals off - target gene regulation by RNAi. Nature Biotechnology 21(6): 635 - 637 (Jackson A.L. et al)",
+    "parent_content": ""
+  },
+  {
+    "content": "2002 - Gene silencing using micro - RNA designed hairpins. RNA 8:842 - 850 ( Mcmanus MT. et al)\n2002 - Successful inactivation of endogenous Oct - 314 and c - mos genes in mouse preimplantation embryos and oocytes using short interfering RNAs. BBRC 296:1372 - 1377 (Kim MH. et al)\n2002 - Small interfering RNA and gene silencing in transgenic mice and rats. FEBS Letters 532:227 - 230 (Hasuwa H. et al)\n2002 - Comparison of antisense oligonucleotides and siRNAs in cell culture and in vivo. BBRC 296:1000 - 1004 (Bertrand JR. et al)",
+    "source": "siRNA_wizard_3.1 - user guide.docx",
+    "section": "References: / 2002 - RNA interference by expression of short - interfering RNAs and hairpin RNAs in mammalian cells, PNAS 99(9):6047 - 6052 (Yu JY. et al)",
+    "parent_content": ""
+  }
+]

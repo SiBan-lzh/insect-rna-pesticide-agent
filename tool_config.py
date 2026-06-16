@@ -92,6 +92,19 @@ RNASTRUCTURE_DATAPATH = Path(os.getenv(
 ))
 
 # ============================================================
+# RAG — Chroma vector index for knowledge retrieval
+# ============================================================
+RAGBASE_ROOT = Path(os.getenv(
+    "RAGBASE_ROOT",
+    PROJECT_ROOT / "ragbase"
+))
+
+RAG_CHROMA_DIR = Path(os.getenv(
+    "RAG_CHROMA_DIR",
+    RAGBASE_ROOT / "chroma_db"
+))
+
+# ============================================================
 # PubMed E-utilities
 # ============================================================
 PUBMED_EMAIL = os.getenv("PUBMED_EMAIL", "user@example.com")

@@ -29,6 +29,7 @@ from .clean_seq import clean_seq_tool
 from .search_skills import search_skills_tool
 from .list_tools import list_tools_tool
 from .lookup_data import lookup_data_tool
+from .search_knowledge import search_knowledge_tool
 
 # ============================================================
 # Tool registry
@@ -51,6 +52,7 @@ ALL_TOOLS = [
     search_skills_tool,
     list_tools_tool,
     lookup_data_tool,
+    search_knowledge_tool,
 ]
 
 # ============================================================
@@ -83,6 +85,6 @@ TOOL_CATEGORIES = {
     },
     "auxiliary": {
         "label": "🛠️ Auxiliary tools",
-        "tools": [search_skills_tool, list_tools_tool, lookup_data_tool],
+        "tools": [search_skills_tool, list_tools_tool, lookup_data_tool, search_knowledge_tool],
     },
 }
