@@ -27,36 +27,39 @@ from langchain_core.language_models import BaseChatModel
 from langgraph.checkpoint.memory import MemorySaver
 from langchain.agents import create_agent
 
-from skill.skill_loader import build_skills
-from tools import ALL_TOOLS
+from skills import build_skills
+from tools import TOOL_REGISTRY
 
 # ============================================================
 # Role prompt
 # ============================================================
 AGENT_ROLE = """You are an RNAi pesticide design expert assistant.
 
-You have access to 17 bioinformatics tools covering:
-- Target discovery: BLAST against insect genomes, annotation lookup, CDS extraction, sequence clipping
-- dsRNA design: siRNA thermodynamic scanning (OligoWalk), PCR primer design (Primer3)
-- Safety assessment: BLAST against non-target organisms, sequence retrieval, pairwise alignment (Clustal)
-- Literature: PubMed search, PubMed fetch, OpenAlex search
-- Phylogenetics: Kinship analysis
-- Knowledge: search_skills — retrieve domain-specific design guides on demand
-- Data: lookup_data — check availability of locally stored genome databases
+You have 4 discovery tools — call these FIRST before using specialized tools:
+- `list_tools` — browse available bioinformatics tools, their descriptions and parameters
+- `list_skills` — list available skill documents (design guides, protocols)
+- `list_ragbase` — list available knowledge bases (experimental records, literature)
+- `list_database` — check available local genome data by species
+
+After discovering what's available:
+- Use `read_skill` to load full skill document content
+- Use `search_knowledge` to search a specific knowledge base
+- Use specialized tools (BLAST, OligoWalk, Primer3, etc.) for analysis
 
 Guidelines:
-1. Plan your approach before calling tools. Break complex tasks into steps.
+1. Plan your approach. Use discovery tools first.
 2. Call tools one at a time or in parallel when independent.
 3. Interpret tool outputs honestly — report what tools actually measured.
 4. When making recommendations, use appropriate hedging language (suggest, may, candidate).
 5. Never claim experimental validation from computational predictions alone.
-6. IMPORTANT — Your tool list is FINITE and EXACT. There is NO "parallel" tool and NO "multi_tool_use.parallel" wrapper. The ability to call multiple tools in the same step is a built-in platform capability, not a separate tool. Never mention, list, or describe "parallel" as if it were a registered tool.
-7. Use `search_skills` when you need detailed domain knowledge (e.g., dsRNA design parameters, primer design constraints, safety assessment protocols). Use `list_tools` when you need to discover available tools or inspect a tool's parameter schema.
+6. Your tool list is FINITE and EXACT. There is NO "parallel" tool wrapper.
+   The ability to call multiple tools in the same step is a built-in platform capability.
+7. Use `read_skill` when you need detailed domain knowledge. Use `list_tools` to inspect tool schemas.
 """
 
 
 def build_rnai_agent(
-    llm: BaseChatModel | None = None,
+    llm: BaseChatModel,
     checkpointer=None,
     skills: tuple[str, ...] | None = None,
 ):
@@ -64,23 +67,19 @@ def build_rnai_agent(
 
     Behavioral skills (principles, evidence, tool, recommendation) are always
     injected into the system prompt. Domain-specific skills (dsrna_design, etc.)
-    are retrieved on demand via the `search_skills` tool.
+    are retrieved on demand via the `read_skill` tool.
 
     Args:
-        llm: Language model instance. Uses get_default_llm() if None.
+        llm: Language model instance.
         checkpointer: LangGraph checkpointer (default: MemorySaver).
         skills: Behavioral skill names to always inject into system prompt.
                 Default: ("principles", "evidence", "tool", "recommendation").
                 Domain skills (e.g., "dsrna_design") are NOT included here —
-                the LLM retrieves them via search_skills tool when needed.
+                the LLM retrieves them via `read_skill` tool when needed.
 
     Returns:
         Compiled LangGraph agent (create_react_agent).
     """
-    if llm is None:
-        from llm_config import get_default_llm
-        llm = get_default_llm()
-
     if skills is None:
         skills = ("principles", "evidence", "tool", "recommendation")
 
@@ -91,7 +90,7 @@ def build_rnai_agent(
     # Create the agent
     agent = create_agent(
         model=llm,
-        tools=ALL_TOOLS,
+        tools=TOOL_REGISTRY,
         system_prompt=system_prompt,
         checkpointer=checkpointer or MemorySaver(),
     )
@@ -133,6 +132,14 @@ def _sanitize_checkpoint(agent, config) -> None:
 
 if __name__ == "__main__":
     import uuid
+
+    from tool_config import validate_paths
+    missing = validate_paths(verbose=False)
+    if missing:
+        print(f"⚠️  {len(missing)} data paths not found on disk:")
+        for name in missing:
+            print(f"     {name}")
+        print()
 
     thread_id = f"cli-{uuid.uuid4().hex[:8]}"
     config = {"configurable": {"thread_id": thread_id}}

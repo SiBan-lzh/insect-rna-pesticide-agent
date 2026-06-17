@@ -47,10 +47,6 @@ CLAUDE.md
 # ============================================================
 # 参考文档与外部资源（非项目代码）
 # ============================================================
-cc-install/
-langgraph-deep-research/
-LangGraph_Architecture_Analysis.md
-RPA_project.txt
 old_tools/
 old_prompt/
 

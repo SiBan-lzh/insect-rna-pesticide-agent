@@ -1,21 +1,21 @@
 """
-lookup_data.py — Tool to check availability of locally stored bioinformatics data.
+list_database.py — Tool to check availability of locally stored bioinformatics data.
 
 The LLM calls this tool when it needs to know whether a specific species' genome
 data (BLAST DB, GFF3 annotation, CDS sequences, etc.) exists in the local
 database/ directory before running analysis tools.
 
 Usage:
-    from tools.lookup_data import lookup_data_tool
+    from tools.list_database import list_database_tool
 
     # Check if Bombyx_mori has a BLAST database
-    result = lookup_data_tool.invoke({
+    result = list_database_tool.invoke({
         "species": "Bombyx_mori",
         "data_type": "blast_insect"
     })
 
     # List all available species for a data type
-    result = lookup_data_tool.invoke({
+    result = list_database_tool.invoke({
         "data_type": "blast_nto"
     })
 """
@@ -43,7 +43,7 @@ from tool_config import (
 # ============================================================
 # Pydantic input schema
 # ============================================================
-class LookupDataInput(BaseModel):
+class ListDatabaseInput(BaseModel):
     """Local data lookup parameters."""
 
     species: Optional[str] = Field(
@@ -109,7 +109,7 @@ def _list_files_in_dir(data_dir: Path, ext: str = "") -> list[str]:
     )
 
 
-def lookup_data(
+def list_database(
     species: Optional[str] = None,
     data_type: str = "blast_insect",
 ) -> str:
@@ -149,7 +149,6 @@ def lookup_data(
             species_clean = species.replace(" ", "_")
             species_dir = data_dir / species_clean
             if species_dir.is_dir():
-                # Count files inside
                 files = [f.name for f in species_dir.iterdir() if f.is_file()]
                 return (
                     f"[{data_type}] Species '{species_clean}' — AVAILABLE\n"
@@ -160,11 +159,10 @@ def lookup_data(
                 return (
                     f"[{data_type}] Species '{species_clean}' — NOT AVAILABLE\n"
                     f"  Expected at: {species_dir}\n"
-                    f"  Hint: Use lookup_data(data_type='{data_type}') without "
+                    f"  Hint: Use list_database(data_type='{data_type}') without "
                     f"species to list all available species."
                 )
         else:
-            # List all available species
             species_list = _list_species_in_dir(data_dir)
             if not species_list:
                 return (
@@ -181,7 +179,6 @@ def lookup_data(
     # Mode 2: flat file lookup (FLAT_FILE_TYPES)
     if data_type in FLAT_FILE_TYPES:
         if species and data_type == "nto_list":
-            # NTO list files are JSON, try matching by keyword
             files = _list_files_in_dir(data_dir, ".json")
             species_lower = species.lower().replace(" ", "_")
             matches = [f for f in files if species_lower in f.lower()]
@@ -198,7 +195,6 @@ def lookup_data(
                     + f"\n\nPath: {data_dir}"
                 )
 
-        # Generic flat file listing
         files = _list_files_in_dir(data_dir)
         if not files:
             return (
@@ -216,27 +212,27 @@ def lookup_data(
     return f"Unexpected error for data_type='{data_type}'."
 
 
-class LookupDataTool(BaseTool):
+class ListDatabaseTool(BaseTool):
     """Tool for checking availability of locally stored bioinformatics data."""
 
-    name: str = "lookup_data"
+    name: str = "list_database"
     description: str = (
         "Check whether specific bioinformatics data exists in the local database. "
         "Call this BEFORE running analysis tools to verify that the required genome "
         "data (BLAST database, GFF3 annotation, CDS sequences) is available for a "
         "given species. Can also list all available species for each data type, or "
         "show available NTO species lists and kinship/taxonomy data. "
-        "Example: lookup_data(species='Bombyx_mori', data_type='blast_insect')."
+        "Example: list_database(species='Bombyx_mori', data_type='blast_insect')."
     )
-    args_schema: type[BaseModel] = LookupDataInput
+    args_schema: type[BaseModel] = ListDatabaseInput
 
     def _run(self, data_type: str, species: Optional[str] = None) -> str:
         """Run the data lookup."""
-        return lookup_data(species, data_type)
+        return list_database(species, data_type)
 
     async def _arun(self, data_type: str, species: Optional[str] = None) -> str:
         """Async variant."""
         return self._run(data_type, species)
 
 
-lookup_data_tool = LookupDataTool()
+list_database_tool = ListDatabaseTool()

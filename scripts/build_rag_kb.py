@@ -627,7 +627,7 @@ def build_index(kb_path_str: str):
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Usage: python scripts/build_rag_embeddings.py <kb_folder_path>")
-        print("Example: python scripts/build_rag_embeddings.py ./ragbase/insectbase_record")
+        print("Example: python scripts/build_rag_embeddings.py ./ragbase/your_kb_folder")
         sys.exit(1)
 
     build_index(sys.argv[1])

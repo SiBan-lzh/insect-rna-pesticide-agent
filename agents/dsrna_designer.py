@@ -34,7 +34,7 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.types import Send
 from typing_extensions import Annotated, TypedDict
 
-from skill.skill_loader import build_skills
+from skills.skill_loader import build_skills
 from tools import oligowalk_tool, primer3_tool
 
 logger = logging.getLogger("RPA_Agent.DSRNADesigner")

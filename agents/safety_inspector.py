@@ -36,7 +36,7 @@ from langgraph.types import Send
 from typing_extensions import Annotated, TypedDict
 
 from tool_config import NTO_BLAST_DB, NTOS_REFSEQ_DB
-from skill.skill_loader import build_skills
+from skills.skill_loader import build_skills
 from tools import clustal_tool, fetch_nto_seq_tool, nto_blast_tool
 
 logger = logging.getLogger("RPA_Agent.SafetyInspector")

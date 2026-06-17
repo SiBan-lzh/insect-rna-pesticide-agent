@@ -5,6 +5,9 @@ tool_config.py — Centralized bioinformatics tool data path config.
 import os
 from pathlib import Path
 
+from dotenv import find_dotenv, load_dotenv
+load_dotenv(find_dotenv(".env", usecwd=True), override=True)
+
 
 # ============================================================
 # Project root
@@ -105,6 +108,19 @@ RAG_CHROMA_DIR = Path(os.getenv(
 ))
 
 # ============================================================
+# Skills & Tools directories
+# ============================================================
+SKILLS_DIR = Path(os.getenv(
+    "SKILLS_DIR",
+    PROJECT_ROOT / "skills"
+))
+
+TOOLS_DIR = Path(os.getenv(
+    "TOOLS_DIR",
+    PROJECT_ROOT / "tools"
+))
+
+# ============================================================
 # PubMed E-utilities
 # ============================================================
 PUBMED_EMAIL = os.getenv("PUBMED_EMAIL", "user@example.com")
@@ -115,3 +131,23 @@ PUBMED_BASE_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
 # OpenAlex API
 # ============================================================
 OPENALEX_BASE_URL = "https://api.openalex.org"
+
+
+# ============================================================
+# Startup validation
+# ============================================================
+def validate_paths(verbose: bool = False) -> list[str]:
+    """Check all Path-type module variables and report missing ones.
+
+    Uses module introspection so new Path variables are auto-covered.
+    Returns list of missing path names.
+    """
+    missing: list[str] = []
+    for name, val in list(globals().items()):
+        if isinstance(val, Path):
+            ok = val.exists()
+            if verbose or not ok:
+                print(f"  {'✅' if ok else '❌'} {name} = {val}")
+            if not ok:
+                missing.append(name)
+    return missing

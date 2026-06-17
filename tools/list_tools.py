@@ -42,7 +42,7 @@ class ListToolsInput(BaseModel):
         "- 'safety' — NTO BLAST, Clustal, sequence fetch\n"
         "- 'literature' — PubMed, OpenAlex\n"
         "- 'kinship' — species phylogeny\n"
-        "- 'auxiliary' — search_skills, list_tools, lookup_data",
+        "- 'discovery' — list_tools, list_skills, read_skill, list_ragbase, list_database, search_knowledge",
     )
     tool_name: Optional[str] = Field(
         default=None,
@@ -57,12 +57,12 @@ class ListToolsInput(BaseModel):
 # ============================================================
 def _get_categories():
     """Return dict: category_key -> list_of_tools_in_that_category."""
-    from tools import ALL_TOOLS, TOOL_CATEGORIES
+    from tools import TOOL_CATEGORIES, TOOL_REGISTRY
 
     cat_map = {}
     for key, cat in TOOL_CATEGORIES.items():
         cat_map[key] = list(cat["tools"])
-    cat_map["all"] = list(ALL_TOOLS)
+    cat_map["all"] = list(TOOL_REGISTRY)
     return cat_map
 
 
@@ -77,8 +77,8 @@ def _get_category_labels():
 
 
 def _get_all_tools():
-    from tools import ALL_TOOLS
-    return ALL_TOOLS
+    from tools import TOOL_REGISTRY
+    return TOOL_REGISTRY
 
 
 def _get_tool_by_name(name: str):

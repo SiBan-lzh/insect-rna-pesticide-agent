@@ -1,18 +1,12 @@
+---
+name: dsrna_design
+description: Step-by-step guide for designing dsRNA fragments and PCR primers using OligoWalk and Primer3.
+category: domain
+required_tools: [oligowalk, primer3]
+tags: [dsrna, sirna, oligowalk, primer3, fragment design, pcr, hotspot]
+---
+
 # dsRNA Design Guide
-
----
-
-## Metadata
-
-**Short Description**: Step-by-step guide for designing dsRNA fragments and PCR primers using OligoWalk and Primer3 tools.
-
-**Authors**: RPA Team
-
-**Version**: 1.0
-
-**Last Updated**: June 2026
-
----
 
 ## Overview
 

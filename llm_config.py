@@ -5,7 +5,7 @@ Usage:
     from llm_config import get_llm, get_default_llm, Settings
 
     llm = get_llm()
-    llm = get_llm(Settings(model_name="gpt-4o"))
+    llm = get_llm(Settings(model_name="gpt-5.4"))
     llm = get_default_llm()
 """
 
@@ -15,7 +15,7 @@ import os
 from functools import lru_cache
 from typing import Callable, Optional
 
-from dotenv import find_dotenv, load_dotenv
+from dotenv import dotenv_values, find_dotenv, load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -25,10 +25,17 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Load .env — find_dotenv walks up from this file to locate .env
 # so the script works regardless of which directory it is run from
-load_dotenv(find_dotenv(".env", usecwd=True), override=True)
-for _k, _v in list(os.environ.items()):
-    if "$" in _v:
-        os.environ[_k] = os.path.expandvars(_v)
+_dotenv_path = find_dotenv(".env", usecwd=True)
+load_dotenv(_dotenv_path, override=True)
+
+# Expand ${VAR} references, but only for keys actually declared in .env —
+# NOT the entire os.environ. This avoids touching unrelated system/Docker/
+# proxy env vars (e.g. http_proxy) that happen to contain a "$" character.
+if _dotenv_path:
+    for _k in dotenv_values(_dotenv_path):
+        _v = os.environ.get(_k, "")
+        if "$" in _v:
+            os.environ[_k] = os.path.expandvars(_v)
 
 
 class Settings(BaseSettings):
@@ -38,6 +45,7 @@ class Settings(BaseSettings):
     model_name: str = ""
     api_key: str = ""
     base_url: Optional[str] = None
+    max_tokens: int = 32768
 
     @model_validator(mode="after")
     def _check(self):
@@ -60,7 +68,7 @@ def build_openai(s: Settings) -> ChatOpenAI:
         model=s.model_name,
         api_key=s.api_key,
         base_url=s.base_url or "https://api.openai.com/v1",
-        max_tokens=32768,
+        max_tokens=s.max_tokens,
     )
 
 
@@ -68,7 +76,7 @@ def build_anthropic(s: Settings) -> ChatAnthropic:
     kwargs: dict = {"model": s.model_name, "api_key": s.api_key}
     if s.base_url:
         kwargs["base_url"] = s.base_url
-    kwargs["max_tokens"] = 32768
+    kwargs["max_tokens"] = s.max_tokens
     return ChatAnthropic(**kwargs)
 
 
@@ -76,7 +84,7 @@ def build_google(s: Settings) -> ChatGoogleGenerativeAI:
     return ChatGoogleGenerativeAI(
         model=s.model_name,
         google_api_key=s.api_key,
-        max_output_tokens=32768,
+        max_output_tokens=s.max_tokens,
     )
 
 
