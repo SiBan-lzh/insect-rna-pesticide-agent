@@ -1,9 +1,9 @@
 ---
 name: dsrna_design
+category: rnai
 description: Step-by-step guide for designing dsRNA fragments and PCR primers using OligoWalk and Primer3.
-category: domain
-required_tools: [oligowalk, primer3]
-tags: [dsrna, sirna, oligowalk, primer3, fragment design, pcr, hotspot]
+keywords: [dsrna, sirna, oligowalk, primer, fragment design, sirna hotspot, pcr]
+required_tools_tag: [sequence_processing, dsrna_design]
 ---
 
 # dsRNA Design Guide
@@ -24,7 +24,7 @@ The workflow consists of four phases:
 
 ### Normalization
 
-Before running any tool, normalize the sequence:
+Before scanning or designing, invoke {clean_seq} to normalize the sequence:
 - Convert to uppercase
 - Replace U with T
 - Strip whitespace

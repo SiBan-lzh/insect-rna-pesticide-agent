@@ -1,9 +1,9 @@
 """
 skill_loader.py — Skill document loader with frontmatter parsing.
 
-Single path: every .skill file carries YAML frontmatter and is
-auto-discovered into SKILL_REGISTRY via recursive directory scan.
-load_skill() / build_skills() read content out of SKILL_REGISTRY.
+Two independent paths:
+  1. SKILL_REGISTRY — auto-discovered from .skill files with YAML frontmatter
+  2. load_skill() / build_skills() — raw file reading, no frontmatter parsing
 
 Usage:
     from skills.skill_loader import SKILL_REGISTRY, SKILL_CATEGORIES, build_skills
@@ -12,6 +12,7 @@ Usage:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from functools import lru_cache
 from pathlib import Path
 
 from tool_config import SKILLS_DIR
@@ -27,8 +28,8 @@ class SkillDoc:
     name: str
     description: str
     category: str = "domain"
-    keywords: list[str] = field(default_factory=list)
-    required_tools_tag: list[str] = field(default_factory=list)
+    required_tools: list[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
     content: str = ""
 
 
@@ -43,7 +44,7 @@ def _parse_frontmatter(text: str) -> tuple[dict, str]:
 
     Returns:
         (metadata_dict, body_without_frontmatter).
-        If no frontmatter found, or parsing fails, returns ({}, text).
+        If no frontmatter found, returns ({}, text).
     """
     if not text.startswith("---"):
         return {}, text
@@ -71,22 +72,20 @@ def _parse_frontmatter(text: str) -> tuple[dict, str]:
 
 
 # ============================================================
-# Skill discovery — recursive scan of all subdirectories
+# Skill discovery
 # ============================================================
 def _discover_skills(skill_dir: Path = SKILLS_DIR) -> dict[str, SkillDoc]:
-    """Recursively scan skill_dir for .skill files and build registry.
+    """Scan skill_dir and build SKILL_REGISTRY from frontmatter.
 
-    Every .skill file is expected to carry YAML frontmatter.
-    Files without valid frontmatter are skipped with a warning.
+    Files without YAML frontmatter are skipped (behavioral skills).
     """
     registry: dict[str, SkillDoc] = {}
 
-    for path in sorted(skill_dir.glob("**/*.skill")):
+    for path in sorted(skill_dir.glob("*.skill")):
         raw = path.read_text(encoding="utf-8")
         meta, body = _parse_frontmatter(raw)
 
         if not meta or "name" not in meta:
-            print(f"[skill_loader] WARNING: {path.relative_to(skill_dir)} has no valid frontmatter, skipped.")
             continue
 
         name = meta["name"]
@@ -94,8 +93,8 @@ def _discover_skills(skill_dir: Path = SKILLS_DIR) -> dict[str, SkillDoc]:
             name=name,
             description=meta.get("description", ""),
             category=meta.get("category", "domain"),
-            keywords=meta.get("keywords", meta.get("tags", [])),
-            required_tools_tag=meta.get("required_tools_tag", []),
+            required_tools=meta.get("required_tools", []),
+            tags=meta.get("tags", []),
             content=body,
         )
 
@@ -110,7 +109,7 @@ SKILL_REGISTRY: dict[str, SkillDoc] = _discover_skills()
 SKILL_CATEGORIES: dict[str, dict] = {
     "behavior": {
         "label": "Behavior standards",
-        "skills": ["behavior1"],
+        "skills": ["principles", "evidence", "tool", "recommendation"],
     },
     "rnai": {
         "label": "RNAi workflow",
@@ -120,39 +119,41 @@ SKILL_CATEGORIES: dict[str, dict] = {
 
 
 # ============================================================
-# Skill content access — reads from SKILL_REGISTRY, not disk
+# Raw file reading (independent path — no frontmatter parsing)
 # ============================================================
-def load_skill(name: str) -> str:
-    """Return the body content of a single skill by name.
+@lru_cache(maxsize=None)
+def load_skill(name: str, skill_dir: Path = SKILLS_DIR) -> str:
+    """Load a single .skill file as raw text.
 
-    Looks up SKILL_REGISTRY — the skill must have been discovered via
-    frontmatter at import time. Raises KeyError if not found, with a
-    hint listing available names.
+    Reads the full file content as-is. No frontmatter parsing.
+    Used for behavioral skills that have no frontmatter.
 
     Args:
-        name: Skill name as declared in its frontmatter (no .skill extension).
+        name: Skill name (with or without .skill extension).
+        skill_dir: Directory containing .skill files.
 
     Returns:
-        The skill's content (frontmatter stripped).
+        Full file content as string.
     """
-    doc = SKILL_REGISTRY.get(name)
-    if doc is None:
-        available = ", ".join(sorted(SKILL_REGISTRY.keys()))
-        raise KeyError(f"Skill '{name}' not found. Available: {available}")
-    return doc.content
+    path = skill_dir / (name if name.endswith(".skill") else f"{name}.skill")
+    return path.read_text(encoding="utf-8")
 
 
-def build_skills(*names: str, separator: str = "\n\n---\n\n") -> str:
-    """Load and concatenate multiple skills' content by name.
+def build_skills(
+    *names: str,
+    skill_dir: Path = SKILLS_DIR,
+    separator: str = "\n\n---\n\n",
+) -> str:
+    """Load and concatenate multiple skill files.
 
-    Used to assemble the behavioral-skill block injected into the
-    agent's system prompt (multiple skills are concatenated together).
+    Used for behavioral skills injected into system prompt.
 
     Args:
-        *names: Skill names to load, in order.
+        *names: Skill names to load.
+        skill_dir: Directory containing .skill files.
         separator: Separator between concatenated skills.
 
     Returns:
         Concatenated skill content.
     """
-    return separator.join(load_skill(n) for n in names)
+    return separator.join(load_skill(n, skill_dir) for n in names)

@@ -65,15 +65,14 @@ def build_rnai_agent(
 ):
     """Build a single ReAct agent with all tools bound.
 
-    Behavioral skills (principles, evidence, tool, recommendation) are always
-    injected into the system prompt. Domain-specific skills (dsrna_design, etc.)
-    are retrieved on demand via the `read_skill` tool.
+    Behavioral skills are always injected into the system prompt.
+    Domain-specific skills are retrieved on demand via the `read_skill` tool.
 
     Args:
         llm: Language model instance.
         checkpointer: LangGraph checkpointer (default: MemorySaver).
         skills: Behavioral skill names to always inject into system prompt.
-                Default: ("principles", "evidence", "tool", "recommendation").
+                Default: ("behavior1",).
                 Domain skills (e.g., "dsrna_design") are NOT included here —
                 the LLM retrieves them via `read_skill` tool when needed.
 
@@ -81,7 +80,7 @@ def build_rnai_agent(
         Compiled LangGraph agent (create_react_agent).
     """
     if skills is None:
-        skills = ("principles", "evidence", "tool", "recommendation")
+        skills = ("behavior1",)
 
     # Build system prompt: role + skill documents
     skill_content = build_skills(*skills)
