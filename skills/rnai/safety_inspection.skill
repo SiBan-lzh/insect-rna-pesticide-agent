@@ -1,0 +1,372 @@
+---
+name: safety_inspection
+category: rnai
+description: Step-by-step guide for ecological safety assessment of dsRNA sequences against non-target organisms (NTOs) using BLAST, sequence retrieval, and Clustal alignment.
+keywords: [safety, nto, off-target, blast, clustal, risk assessment, ecological safety, non-target organism]
+required_tools_tag: [sequence_processing, off_target_analysis]
+---
+
+# Ecological Safety Inspection Guide
+
+## Overview
+
+This guide covers the complete ecological safety assessment workflow for RNAi pesticide development. It integrates BLAST homology searching, transcript/genomic sequence retrieval, Clustal pairwise alignment, and a deterministic risk-scoring engine to evaluate off-target risks in non-target organisms (NTOs).
+
+The workflow consists of two levels:
+
+**Main Workflow — five phases:**
+1. **Field Classification** — interpret user's habitat description and classify field type(s)
+2. **Candidate Species Build** — resolve field types to NTO species lists (JSON-based)
+3. **Off-Target Analysis (per species)** — parallel fan-out for each candidate species
+4. **Risk Aggregation** — group species results and compute summary statistics
+5. **Report Generation** — produce a natural-language ecological safety report
+
+**Per-Species Sub-Workflow — five steps:**
+1. **Homology Search** — BLAST dsRNA sequence against the NTO genome
+2. **Hit Evaluation** — select fetchable BLAST hits (identity_pct > 80)
+3. **Sequence Retrieval** — extract subject sequences for each risk hit
+4. **Pairwise Alignment** — Clustal alignment, detect continuous perfect-match regions >=21nt
+5. **Risk Scoring** — deterministic rule engine assigns risk level
+
+---
+
+## Phase 1: Field Classification
+
+### Task
+
+Classify the user's field/habitat description into one or more field types. Always append "EPA" as a mandatory entry.
+
+### Field Type Mapping
+
+| User Description | Field Type(s) | NTO JSON File |
+|-----------------|---------------|---------------|
+| Rice paddies, wetland ecosystems | `rice_field` | `ricefield_NTOs.json` |
+| Corn/maize fields | `corn_field` | `cornfield_NTOs.json` |
+| Wheat fields | `wheat_field` | `wheatfield_NTOs.json` |
+| Tomato fields, greenhouses | `tomatofield` | `tomatofield_NTOs.json` |
+| Mandatory entry (all assessments) | `EPA` | `EPA_NTOs.json` |
+
+### Rules
+
+- Multiple field types can apply simultaneously (e.g., a rice-corn rotation area includes both).
+- **EPA is always included** regardless of the user's description.
+- Use LLM to classify the user's natural-language description into field type strings.
+- The result is a list of field types that will be resolved to NTO JSON filenames.
+
+### Sequence Preparation
+
+Before starting the assessment, normalize the dsRNA sequence:
+
+```
+normalize_dsrna_sequence(seq):
+    1. Convert to uppercase
+    2. Replace U with T
+    3. Strip all whitespace
+    4. Validate: only A, T, C, G, N are allowed
+    5. If empty → assessment aborted with error
+    6. If invalid characters → assessment aborted with error
+```
+
+---
+
+## Phase 2: Candidate Species Build
+
+### Task
+
+Resolve the classified field types to NTO species lists stored as JSON files, then load and deduplicate candidate species.
+
+### Data Source
+
+NTO species lists are stored as JSON files in `database/NTOs_lists/`:
+
+- `ricefield_NTOs.json` — species relevant to rice field ecosystems
+- `cornfield_NTOs.json` — species relevant to corn field ecosystems
+- `wheatfield_NTOs.json` — species relevant to wheat field ecosystems
+- `tomatofield_NTOs.json` — species relevant to tomato field ecosystems
+- `EPA_NTOs.json` — EPA-listed non-target organisms (always included)
+
+### JSON Format
+
+Each file contains:
+```json
+{
+    "organisms": [
+        {
+            "scientific_name": "Apis_mellifera",
+            "category": "beneficial_insect",
+            "chinese_name": "西方蜜蜂",
+            "english_name": "Honey bee"
+        },
+        ...
+    ]
+}
+```
+
+### Deduplication Rules
+
+- Deduplicate by `scientific_name` across all loaded JSON files.
+- If the same species appears in multiple files, merge the `source_files` list.
+- Check local database availability: does `{NTO_BLAST_DB}/{species}/{species}.nsq` exist AND does `{NTOS_REFSEQ_DB}/{species}/` contain `.fa` files?
+
+---
+
+## Phase 3: Off-Target Analysis (Per Species)
+
+This is the core analysis pipeline, run independently for each candidate species. It can be parallelized across all species.
+
+### Step 3.1: Homology Search — `nto_blast`
+
+**Tool: `nto_blast`**
+
+**Parameters:**
+- `sequence`: the normalized dsRNA query sequence
+- `species`: the target NTO scientific name
+
+**What the output means:**
+- `results`: list of BLAST hits, each with `subject_id`, `identity_pct`, `alignment_length`, `s_start`, `s_end`, `e_value`
+- `hits_count`: total number of BLAST hits found
+- `status`: "success" if the BLAST search completed
+
+**Error handling:**
+- If the tool fails, retry up to 3 times.
+- After 3 failures, mark this species as "error" and skip to risk scoring.
+
+### Step 3.2: Hit Evaluation — Select Fetchable Hits
+
+This step filters BLAST hits to identify which warrant sequence retrieval.
+
+**Filter rule:**
+- Keep only hits where `identity_pct > 80`
+- **Coverage is intentionally NOT used as a filter** — a short alignment can still contain a dangerous >=21nt perfect-match region.
+
+**Why coverage is excluded:**
+A short alignment with high identity may harbor a 21nt+ continuous match that would be missed if coverage were a gate. Identity_pct alone is the minimum quality gate to avoid fetching obviously non-homologous noise.
+
+**Output:**
+- `risk_hits`: list of filtered hits (with `filter_rule` annotation)
+- `blast_summary`: `{hits_count, best_identity_pct, risk_hits_count}`
+
+**Routing:**
+- If `risk_hits` is not empty → proceed to sequence retrieval
+- If `risk_hits` is empty → skip directly to risk scoring (no fetchable hits = negligible)
+
+### Step 3.3: Sequence Retrieval — `fetch_nto_seq`
+
+**Tool: `fetch_nto_seq`**
+
+**Parameters:**
+- `species`: the NTO scientific name
+- `hits`: list of `{subject_id, s_start, s_end}` for each risk hit
+
+**What the output means:**
+- `results`: list of retrieved sequences, each with `subject_id`, `sequence`, `start`, `end`
+- `status`: "success" if retrieval completed
+
+**Error handling:**
+- If retrieval fails, retry up to 3 times.
+- If no sequences could be retrieved, mark this species as "error" and proceed to risk scoring.
+
+### Step 3.4: Pairwise Alignment — `clustal`
+
+**Tool: `clustal`**
+
+**Parameters:**
+- `sequences`: an array of two sequences — the dsRNA query and the retrieved NTO sequence
+- `window_size`: 21 (standard siRNA length)
+
+**What the output means:**
+- `analysis.max_continuous_match`: the longest continuous perfect-match length found
+- `alignment`: FASTA-formatted alignment string showing the pairwise alignment
+- `status`: "success" if alignment completed
+
+**Run for each retrieved sequence:**
+Execute one Clustal alignment per successfully retrieved NTO sequence. Each alignment compares the dsRNA query against one NTO transcript/genomic region.
+
+**Interpretation:**
+- The `max_continuous_match` value is the critical metric for risk scoring.
+- A continuous perfect-match of >=21nt indicates potential off-target siRNA binding.
+
+**Error handling:**
+- If Clustal fails for a specific sequence, log the error but continue with other sequences.
+- Retry up to 3 times if all alignments fail.
+
+### Step 3.5: Risk Scoring — Deterministic Rule Engine
+
+This step assigns a risk level using deterministic rules only. **No LLM involvement.**
+
+#### Per-Species Risk Rules
+
+```
+score_species_risk(longest_match, has_fetchable_hits, has_tool_error):
+
+    if has_tool_error:
+        return "error"
+
+    if not has_fetchable_hits:
+        return "negligible"
+
+    if longest_match >= 21:
+        return "high"
+
+    if longest_match >= 19:
+        return "medium"
+
+    return "low"
+```
+
+| Condition | Risk Level | Meaning |
+|-----------|-----------|---------|
+| Tool error after retries | `error` | Analysis incomplete |
+| No BLAST hits with identity >80% | `negligible` | No detectable homology |
+| Longest perfect match >=21nt | `high` | Critical off-target risk — full-length siRNA could bind |
+| Longest perfect match >=19nt | `medium` | Moderate off-target concern |
+| All other cases | `low` | Minimal off-target concern |
+
+#### Rule Trace (recorded in output)
+
+```json
+{
+    "hit_filter": "identity_pct > 80 (coverage excluded)",
+    "risk_rule": "no hit => negligible; >=21 => high; >=19 => medium; else low",
+    "computed_by": "rule_engine"
+}
+```
+
+#### Species Result Output
+
+Each species produces a structured result containing:
+- `species`, `display_name`, `category` — species identifiers
+- `risk_level` — the computed risk level string
+- `longest_match` — the maximum continuous perfect-match length
+- `blast_summary` — summary of BLAST results (hits count, best identity, alignments count)
+- `alignment_visuals` — alignment data for report visualization
+- `rule_trace` — explanation of which rules were applied
+- `status` — "success", "negligible", or "error"
+
+---
+
+## Phase 4: Risk Aggregation
+
+### Task
+
+Collect all per-species results, group by risk level, and compute summary statistics.
+
+### Overall Risk Derivation
+
+```
+derive_overall_risk_level(species_results):
+
+    if "high" in all_levels:
+        return "high"
+    if "medium" in all_levels:
+        return "medium"
+    if "low" in all_levels:
+        return "low"
+    if "error" in all_levels:
+        return "incomplete"
+    return "negligible"
+```
+
+### Grouping
+
+```
+group_species_by_risk(species_results):
+    high_risk   = species with risk_level == "high"
+    medium_risk = species with risk_level == "medium"
+    low_risk    = species with risk_level in {"low", "negligible"}
+```
+
+### Summary Statistics
+
+- `species_count`: total species analyzed
+- `high_count`: number of high-risk species
+- `medium_count`: number of medium-risk species
+- `low_count`: number of low-risk species
+- `error_count`: number of species where analysis failed
+
+---
+
+## Phase 5: Report Generation
+
+### Task
+
+Generate a comprehensive natural-language ecological safety assessment report from the aggregated data.
+
+### Report Structure (Required Sections in Order)
+
+1. **Identified Species List**: All NTO species analyzed, grouped by field type, with scientific name and category.
+
+2. **BLAST Results Summary**: For each species, a table of subject sequence IDs, alignment scores, identity percentages, and genomic coordinates.
+
+3. **Sequence Retrieval Status**: Which homologous sequences were successfully retrieved and which failed.
+
+4. **Pairwise Alignment and Off-Target Detection**: For species with alignment data, present a visual alignment using `|` (pipe) symbols to mark continuous perfect-match regions. Highlight regions >=21nt as critical off-target risks. Include match coordinates and orientation for each alignment.
+
+5. **Final Risk Conclusion**: A summary table with species name, assigned risk level, longest continuous match length, and rule-based justification. If the overall assessment is "high" or "medium", provide specific mitigation recommendations.
+
+### Important Constraints
+
+- **Do NOT change any risk level** — they are computed by the rule engine, not by LLM.
+- **Tool facts are authoritative** — BLAST statistics, alignment scores, and risk levels must be reported as-is.
+- **Evidence hierarchy**:
+  - Level 1 (Facts): BLAST identity%, hit counts, alignment lengths, max_continuous_match — report exactly as measured.
+  - Level 2 (Interpretation): "Species X shows high off-target risk due to >=21nt perfect match" — encouraged heuristic reasoning.
+  - Level 3 (Hypothesis): Use cautiously. Never claim experimental outcomes.
+  - Level 4 (Experimental Conclusion): Strictly prohibited. Never say "this dsRNA will cause off-target effects in vivo".
+
+### Vocabulary Rules
+
+**Allowed:**
+- suggest, may, potentially, candidate, recommended, prioritized
+- "The data suggest a high off-target risk for Apis mellifera"
+- "Mitigation is recommended for species with >=21nt perfect matches"
+
+**Prohibited:**
+- prove, demonstrate, superior, guarantee, confirmed, effective, validated
+- Never claim experimental outcomes from computational predictions
+
+### Input Validation Failure
+
+If the dsRNA sequence fails normalization (empty or invalid characters), generate an error report:
+```json
+{
+    "status": "failed",
+    "risk_level": "incomplete",
+    "report_text": "[Safety assessment aborted: {error message}]"
+}
+```
+
+---
+
+## Complete Workflow Example
+
+```
+User: "Assess off-target risk for this dsRNA in rice field:
+       AATAGTATAATGGCGAAAAGGAAGTCGCAGATGCAAACTTT"
+
+Agent actions:
+1. Classify "rice field" → field_types = ["rice_field", "EPA"]
+2. Normalize dsRNA sequence
+3. Load ricefield_NTOs.json and EPA_NTOs.json → candidate species list
+4. For each candidate species (in parallel):
+   a. Run nto_blast(sequence=dsRNA, species=species_name)
+   b. Filter hits: identity_pct > 80
+   c. If hits exist, run fetch_nto_seq(species=species_name, hits=selected_hits)
+   d. For each retrieved sequence, run clustal(sequences=[dsRNA_query, nto_seq], window_size=21)
+   e. Compute risk level via rule engine
+5. Aggregate: group species by risk level
+6. Generate final report with alignment visualizations
+```
+
+## Computation Source Reference
+
+| Component | Method |
+|-----------|--------|
+| Field type classification | LLM |
+| NTO species retrieval | JSON reader (from NTOs_lists/) |
+| Homology search | nto_blast |
+| Sequence retrieval | fetch_nto_seq (samtools-based) |
+| Pairwise alignment | clustal |
+| Per-species risk scoring | Rule engine (deterministic) |
+| Overall risk aggregation | Rule engine (deterministic) |
+| Report generation | LLM |

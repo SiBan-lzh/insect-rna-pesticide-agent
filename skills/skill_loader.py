@@ -114,7 +114,7 @@ SKILL_CATEGORIES: dict[str, dict] = {
     },
     "rnai": {
         "label": "RNAi workflow",
-        "skills": ["dsrna_design"],
+        "skills": ["dsrna_design", "safety_inspection"],
     },
 }
 
