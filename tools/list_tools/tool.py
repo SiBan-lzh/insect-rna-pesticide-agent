@@ -44,6 +44,17 @@ def _get_category_labels():
     return labels
 
 
+def _get_tool_tag_map():
+    """Return dict: tool_name -> category_label."""
+    from tools import TOOL_CATEGORIES
+
+    tag_map = {}
+    for key, cat in TOOL_CATEGORIES.items():
+        for t in cat["tools"]:
+            tag_map[t.name] = cat["label"]
+    return tag_map
+
+
 def _get_all_tools():
     from tools import TOOL_REGISTRY
     return TOOL_REGISTRY
@@ -140,11 +151,17 @@ def list_tools(category: str = "all", tool_name: Optional[str] = None) -> str:
         return f"No tools in category '{category}'."
 
     label = category_labels.get(category, category)
+    tag_map = _get_tool_tag_map()
     lines = [f"{label} ({len(tools_in_category)}):"]
     lines.append("")
     for t in tools_in_category:
         desc_short = t.description.split(".")[0].strip()
-        lines.append(f"  {t.name} — {desc_short}.")
+        # Show tag only in 'all' mode (redundant in single-category view)
+        if category == "all":
+            tool_tag = tag_map.get(t.name, "other")
+            lines.append(f"  {t.name} — [{tool_tag}] {desc_short}.")
+        else:
+            lines.append(f"  {t.name} — {desc_short}.")
     lines.append("")
     lines.append("Use list_tools(tool_name='<name>') for detailed parameters.")
     return "\n".join(lines)
