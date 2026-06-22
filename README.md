@@ -23,21 +23,33 @@ OligoWalk is pre-compiled and bundled under `database/RNAstructure/` — no sepa
 
 ```
 langgraph/
-├── tools/              # LangChain BaseTool wrappers (9 instances)
-│   ├── __init__.py     # tool registry + Harness permission whitelists
-│   ├── insect_blast.py # BLAST against target insect genomes
-│   ├── nto_blast.py    # BLAST against non-target organism genomes
-│   ├── primer3.py      # PCR primer design (primer3-py)
-│   ├── oligowalk.py    # siRNA thermodynamic scoring (OligoWalk)
-│   ├── insect_anno.py  # GFF3 gene annotation (bedtools)
-│   ├── clustal.py      # pairwise alignment & off-target detection (clustalo)
-│   ├── fetch_seq.py    # sequence extraction (samtools + CDS search)
-│   └── kinship.py      # species phylogenetic relationship (ETE4)
-├── database/           # reference data (BLAST DBs, GFF3, FASTA, tree, taxa)
-├── tool_config.py      # centralized path configuration (env-var overridable)
-├── tools_test.py       # integration test suite (16 test cases)
-├── requirements.txt    # Python package dependencies
-└── old_tools/          # original Docker/FastAPI implementations (reference only)
+├── agents/             # Single ReAct Agent (agent.py)
+│   ├── __init__.py
+│   └── agent.py        # Main agent + CLI entry point
+├── skills/             # Domain skill documents (.skill)
+│   ├── skill_loader.py # Auto-discover skills via frontmatter
+│   ├── behavior/       # Behavioral standards
+│   └── rnai/           # RNAi design workflows
+├── tools/              # LangChain BaseTool wrappers (20 tools)
+│   ├── tool_loader.py  # Auto-discover tools from subdirectory
+│   ├── insect_blast/   # BLAST against target insect genomes
+│   ├── nto_blast/      # BLAST against non-target organism genomes
+│   ├── primer3/        # PCR primer design (primer3-py)
+│   ├── oligowalk/      # siRNA thermodynamic scoring (OligoWalk)
+│   ├── clustal/        # Pairwise alignment & off-target detection
+│   ├── fetch_insect_cds/ # Fetch insect CDS by transcript ID
+│   ├── fetch_nto_seq/  # Sequence extraction (samtools)
+│   ├── kinship/        # Species phylogenetic relationship (ETE4)
+│   ├── pubmed_esearch/ # PubMed literature search
+│   ├── pubmed_efetch/  # PubMed article details
+│   ├── openalex_search/ # OpenAlex academic search
+│   ├── ...             # Plus discovery tools (list_tools, list_skills, etc.)
+├── ragbase/            # RAG knowledge base (Chroma + BGE embeddings)
+├── scripts/            # Utility scripts (build/remove RAG KB)
+├── database/           # Reference data (BLAST DBs, GFF3, FASTA, etc.)
+├── llm_config.py       # LLM factory (OpenAI-compatible)
+├── tool_config.py      # Centralized path configuration reference
+└── .env                # Environment variables (API keys, paths)
 ```
 
 ## Tools

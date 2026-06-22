@@ -14,7 +14,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from tool_config import SKILLS_DIR
+# Skills directory — loader lives in skills/, so parent is the dir
+SKILLS_DIR = Path(__file__).parent.resolve()
 
 
 # ============================================================
