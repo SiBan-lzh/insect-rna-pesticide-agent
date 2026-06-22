@@ -1,0 +1,308 @@
+---
+name: target_find
+category: rnai
+description: Step-by-step guide for cross-species RNAi target discovery using phylogenetic kinship analysis, RAG literature retrieval, and target cleaning to identify potential new RNAi targets.
+keywords: [target, kinship, cross-species, rnai, ortholog, rag, literature, target cleaning]
+required_tools_tag: [phylogenetic_analysis, discovery, literature_search]
+---
+
+# Cross-Species RNAi Target Discovery Guide
+
+## Overview
+
+This guide covers the complete cross-species RNAi target discovery workflow for pesticide development. It integrates phylogenetic kinship analysis with RAG-based literature retrieval to identify potential new RNAi target genes in a target pest species by leveraging validated RNAi evidence from its closely related species.
+
+The workflow consists of five phases:
+1. **Kinship Analysis** — identify closely related species via phylogenetic tree
+2. **RAG Evidence Retrieval** — search rnai_records for each candidate species
+3. **Evidence Expansion** — if insufficient results, broaden the kinship scope
+4. **Target Categorization** — group retrieved records by target gene function
+5. **Target Cleaning** — filter out already-studied targets in the original species
+6. **Report Generation** — output the final list of potential new RNAi targets
+
+---
+
+## Phase 1: Kinship Analysis
+
+### Task
+
+Identify 5-8 closely related species for the target pest species using the `kinship` tool. The tool returns only standard binomial species names (Genus species) that are directly usable for downstream RAG retrieval.
+
+### Tool: `kinship`
+
+**Parameters:**
+- `target_species`: the target insect's Latin scientific name (e.g., `Bombyx_mori` or `Bombyx mori`)
+- `target_total`: number of closest relatives to return (default 8, range 1-50)
+
+**What the output means:**
+- `results`: list of related species, each with:
+  - `species_name`: standard binomial Latin name
+  - `query_name`: lowercased version, ready for RAG search
+  - `relation`: taxonomic proximity label (Congeneric / Confamilial / Consubordinal / Conordinal / Consuperordinal)
+  - `divergence_time_mya`: estimated divergence time in million years ago
+- `search_mode`: how the kinship was computed
+  - `tree_based` — target was found in the phylogeny tree directly
+  - `proxy_based_{rank}` — target was absent, a proxy species at the specified rank was used as anchor
+- `proxy_used`: whether a proxy species was used (true/false)
+- `proxy_species`: the proxy species name if applicable
+- `genus`: the target's genus
+
+**Understanding `proxy_based` mode:**
+If `proxy_used` is `true`, the target species was not present in the core evolutionary tree. The tool found the phylogenetically closest representative (the proxy species) at a higher taxonomic rank (e.g., family level) and used it as an anchor. This proxy information must be explicitly stated in the output.
+
+### Candidate Species Table
+
+Organize the kinship results into a structured table:
+
+| Latin Name | Taxonomic Proximity | Divergence Time (Mya) |
+|-----------|-------------------|----------------------|
+| _Spodoptera_frugiperda_ | Congeneric | 2.5 |
+| _Spodoptera_exigua_ | Congeneric | 4.8 |
+| _Helicoverpa_armigera_ | Confamilial | 15.3 |
+| ... | ... | ... |
+
+**If proxy was used**, place a prominent note above the table:
+> ⚠️ Proxy species: _Spodoptera_littoralis_ (proxy_based_family). Target _Spodoptera_frugiperda_ was not in the core tree; divergence times are estimated via this proxy.
+
+### Quality Gate
+
+- Verify that all returned species are standard binomial names (Genus species).
+- The tool already filters out genus-level and undescribed names — but verify the output.
+- If the tool returns fewer than 3 species, proceed anyway (the RAG retrieval phase will trigger expansion if needed).
+
+---
+
+## Phase 2: RAG Evidence Retrieval
+
+### Task
+
+For each candidate species, search the `rnai_records` knowledge base to retrieve validated RNAi experimental records. Target 5-10 records per species.
+
+### Tool: `search_knowledge`
+
+**Parameters:**
+- `query`: the candidate species' Latin name as the primary query (e.g., "Spodoptera frugiperda RNAi")
+- `knowledge_base`: `"rnai_records"`
+- `top_k`: 10 (to maximize coverage per species)
+- `semantic_weight`: use the knowledge base's recommended default (0.4)
+
+**What the output means:**
+Each returned record typically contains:
+- `species`: the insect species studied
+- `target_gene`: the gene targeted by RNAi
+- `primer_sequences` or `dsRNA_sequence`: the sequences used
+- `phenotype`: observed phenotypic effects
+- `mortality_rate`: reported mortality percentage
+- `delivery_method`: how dsRNA was delivered (injection, feeding, soaking, etc.)
+- `developmental_stage`: the stage at which RNAi was applied
+- `interference_efficiency`: measured knockdown efficiency
+- `vector`: delivery vector if used
+- `reference`: source literature reference
+
+### Handling Missing Results
+
+It is expected that some species may have zero records in rnai_records (no prior RNAi research). This is normal.
+
+**Count the number of species that returned at least one record.**
+- If **≥3 species** have records → proceed to Phase 3.
+- If **<3 species** have records → proceed to Phase 2b (Evidence Expansion).
+
+---
+
+## Phase 2b: Evidence Expansion
+
+### Trigger
+
+Fewer than 3 candidate species returned any records from rnai_records.
+
+### Strategy
+
+Go back to Phase 1 and expand the kinship search:
+
+1. Re-run `kinship` with a larger `target_total` (e.g., 15-20) to include more distant relatives.
+2. Focus on species from broader taxonomic ranks (Confamilial, Consubordinal) that may have been studied more extensively.
+3. Re-run the RAG retrieval (Phase 2) for the expanded list.
+4. If still <3 species have records, repeat with further expansion (target_total up to 30-50).
+
+### Fallback
+
+If after maximum expansion still fewer than 3 species have records:
+- Proceed to Phase 3 with whatever records are available.
+- Note in the final report that the evidence base is limited and results should be interpreted cautiously.
+
+---
+
+## Phase 3: Target Categorization
+
+### Task
+
+Group all retrieved records by the biological function of the target gene. This creates structured tables that make it easy to identify which functional categories have been validated in related species.
+
+### How to Categorize
+
+1. Collect all unique target gene names from all retrieved records.
+2. Group them by biological function based on:
+   - Gene name and its known function (e.g., chitin synthase → chitin metabolism; V-ATPase → energy metabolism)
+   - If the function is unclear from the gene name alone, use the record's context (phenotype, species) to infer the category.
+3. For each functional category, create a table with the following columns:
+
+**Category: {Functional Category Name}**
+
+| Related Species | Divergence Time (Mya) | Target Gene | dsRNA/Primer Sequence | Phenotype | Mortality Rate | Delivery Method | Developmental Stage | Reference |
+|----------------|----------------------|-------------|----------------------|-----------|---------------|----------------|-------------------|-----------|
+| _S. frugiperda_ | 2.5 | CHS1 | seq... | Abnormal molting | 85% | Injection | Larva | PMID: xxx |
+| _S. exigua_ | 4.8 | CHS1 | seq... | Growth arrest | 72% | Feeding | Larva | PMID: yyy |
+
+### Rules
+
+- Each functional category gets its own table with a clear header.
+- Include **all available fields** from the retrieved records — do not omit columns.
+- If a field is missing for a specific record, mark it as "N/A".
+- Sort records within each table by divergence time (closest relative first).
+- At the end of each table, note how many records fall into this category.
+
+---
+
+## Phase 4: Target Cleaning
+
+### Task
+
+For each categorized target gene, determine whether it has already been studied in the **original target pest species**. Targets already studied in the target species should be marked as "already investigated" — these are targets that researchers should avoid, as they represent known rather than novel RNAi targets.
+
+### How to Clean
+
+For each unique target gene name from Phase 3, perform a targeted search using **both** of the following approaches (parallel):
+
+**Approach A — RAG Search:**
+- Tool: `search_knowledge`
+- Query: `"{target_gene_name} {target_species}"` (e.g., "CHS1 Spodoptera frugiperda")
+- Knowledge base: `rnai_records`
+- top_k: 5
+
+**Approach B — Online Literature Search:**
+- Tool: `pubmed_esearch` or `openalex_search`
+- Query: `"{target_gene} RNAi {target_species}"` or `"{target_gene} interference {target_species}"`
+- If the initial query returns no results, broaden to: `"{target_gene} {target_species}"`
+
+### Classification
+
+For each target gene, determine its status:
+
+| Status | Definition |
+|--------|-----------|
+| **already_investigated** | Records found where the target gene was studied in the original target species specifically |
+| **potential_new_target** | No records found for this gene in the original target species, but validated in related species |
+| **uncertain** | Ambiguous results — note what was found and let the researcher decide |
+
+### Annotation
+
+Append a new column to each Phase 3 table:
+
+| ... | Status in Target Species | Evidence Note |
+|-----|------------------------|--------------|
+| ... | potential_new_target | No records found for CHS1 in _S. frugiperda_ |
+| ... | already_investigated | PMID: zzz — CHS1 studied in _S. frugiperda_ with 78% mortality |
+
+---
+
+## Phase 5: Report Generation
+
+### Task
+
+Generate a comprehensive cross-species RNAi target discovery report. The report must include all of the following sections.
+
+### Report Structure
+
+**1. Kinship Overview**
+- Target species and genus
+- Number of related species identified
+- Search mode (tree-based or proxy-based)
+- If proxy used: proxy species name and taxonomic climbing level
+- Full kinship table with Latin name, taxonomic proximity, divergence time
+
+**2. RAG Retrieval Summary**
+- Number of candidate species searched
+- Number of species with records found
+- Number of records retrieved total
+- Per-species summary table
+
+**3. Evidence Expansion (if triggered)**
+- Original attempt results
+- Expansion strategy used
+- Final species coverage
+
+**4. Categorized Target Tables**
+One table per functional category, with all fields:
+- Related Species, Divergence Time (Mya), Target Gene, dsRNA/Primer Sequence, Phenotype, Mortality Rate, Delivery Method, Developmental Stage, Reference
+
+**5. Target Cleaning Results**
+For each target gene, its status in the original target species:
+- **potential_new_target** — validated in related species, not found in target species
+- **already_investigated** — already studied in target species (mark as "avoid")
+- **uncertain** — ambiguous, note the details
+
+**6. Final Potential New Target List**
+A clean summary table of all targets classified as `potential_new_target`:
+- Target Gene
+- Functional Category
+- Validated in (related species with divergence times)
+- Highest reported mortality rate
+- Recommended delivery method(s)
+- Notes
+
+### Vocabulary Rules
+
+**Allowed:**
+- suggest, may, potentially, candidate, recommended, prioritized
+- "CHS1 is a promising candidate for further validation"
+- "These targets represent potential new RNAi candidates for _S. frugiperda_"
+
+**Prohibited:**
+- prove, demonstrate, superior, guarantee, confirmed, effective, validated (unless citing specific experimental data)
+- Never claim that a potential new target will work in the target species without experimental validation
+
+### Evidence Hierarchy
+
+- **Level 1 (Facts)**: Kinship divergence times, RAG record contents, tool outputs — report exactly as measured.
+- **Level 2 (Interpretation)**: "CHS1 has been validated in 3 congeneric species with >75% mortality, suggesting it is a strong candidate" — encouraged heuristic reasoning.
+- **Level 3 (Hypothesis)**: Use cautiously. "This target may show similar efficacy in the target species" requires supporting evidence.
+- **Level 4 (Experimental Conclusion)**: Strictly prohibited. Never claim "this dsRNA will cause mortality in the target species" without experimental data.
+
+---
+
+## Complete Workflow Example
+
+```
+User: "Find potential RNAi targets for Spodoptera frugiperda"
+
+Agent actions:
+1. Run kinship(target_species="Spodoptera_frugiperda", target_total=8)
+   → Get 8 related species with divergence times and relations
+
+2. For each candidate species:
+   Run search_knowledge(query="{species_name} RNAi", knowledge_base="rnai_records", top_k=10)
+   → Collect all retrieved records
+
+3. Check: how many species had records?
+   If <3 species → re-run kinship with target_total=20, retry step 2
+
+4. Group all retrieved records by target gene function
+   → Create per-category tables
+
+5. For each unique target gene:
+   a. Search rnai_records for "{gene_name} Spodoptera frugiperda"
+   b. Search pubmed for "{gene_name} RNAi Spodoptera frugiperda"
+   → Mark as already_investigated or potential_new_target
+
+6. Generate final report with all sections
+```
+
+## Computation Source Reference
+
+| Component | Method |
+|-----------|--------|
+| Kinship analysis | ETE4 phylogeny tree + NCBI taxonomy |
+| Evidence retrieval | RAG hybrid search (Chroma + BM25) |
+| Online literature search | PubMed E-utilities / OpenAlex API |
+| Target cleaning | RAG search + online literature cross-reference |
+| Report generation | LLM synthesis |
