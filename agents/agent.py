@@ -28,7 +28,7 @@ from langgraph.checkpoint.memory import MemorySaver
 from langchain.agents import create_agent
 
 from skills import build_skills
-from tools import TOOL_REGISTRY
+from tools import SYSTEM_TOOLS, TOOL_REGISTRY
 
 # ============================================================
 # Role prompt
@@ -87,9 +87,10 @@ def build_rnai_agent(
     system_prompt = f"{AGENT_ROLE}\n\n{skill_content}"
 
     # Create the agent
+    all_tools = TOOL_REGISTRY + SYSTEM_TOOLS
     agent = create_agent(
         model=llm,
-        tools=TOOL_REGISTRY,
+        tools=all_tools,
         system_prompt=system_prompt,
         checkpointer=checkpointer or MemorySaver(),
     )

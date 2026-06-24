@@ -72,7 +72,7 @@ def _parse_metadata(md_path: Path) -> dict | None:
 # ============================================================
 # Tool discovery
 # ============================================================
-def _discover_tools(tools_dir: Path = TOOLS_DIR) -> Tuple[List[BaseTool], dict[str, str]]:
+def _discover_tools(tools_dir: Path = TOOLS_DIR) -> Tuple[List[BaseTool], dict[str, str], List[BaseTool]]:
     """Scan tools/ subdirectories and discover tools.
 
     For each subdirectory containing both metadata.md and tool.py:
@@ -85,6 +85,7 @@ def _discover_tools(tools_dir: Path = TOOLS_DIR) -> Tuple[List[BaseTool], dict[s
     """
     registry: list[BaseTool] = []
     name_to_tag: dict[str, str] = {}
+    system_tools: list[BaseTool] = []
 
     for entry in sorted(tools_dir.iterdir()):
         if not entry.is_dir():
@@ -124,8 +125,11 @@ def _discover_tools(tools_dir: Path = TOOLS_DIR) -> Tuple[List[BaseTool], dict[s
                 continue
             instance = getattr(module, var_name, None)
             if isinstance(instance, BaseTool):
-                registry.append(instance)
-                name_to_tag[tool_name] = tag
+                if tag == "system":
+                    system_tools.append(instance)
+                else:
+                    registry.append(instance)
+                    name_to_tag[tool_name] = tag
                 found = True
                 break
 
@@ -143,7 +147,7 @@ def _discover_tools(tools_dir: Path = TOOLS_DIR) -> Tuple[List[BaseTool], dict[s
             seen.add(t.name)
             unique_registry.append(t)
 
-    return unique_registry, name_to_tag
+    return unique_registry, name_to_tag, system_tools
 
 
 # ============================================================
@@ -184,4 +188,5 @@ def _categorize(
 _TOOL_REGISTRY_TUPLE = _discover_tools()
 TOOL_REGISTRY: list[BaseTool] = _TOOL_REGISTRY_TUPLE[0]
 _NAME_TO_TAG: dict[str, str] = _TOOL_REGISTRY_TUPLE[1]
+SYSTEM_TOOLS: list[BaseTool] = _TOOL_REGISTRY_TUPLE[2]
 TOOL_CATEGORIES: dict[str, dict] = _categorize(TOOL_REGISTRY, _NAME_TO_TAG)
