@@ -55,6 +55,20 @@ Guidelines:
 6. Your tool list is FINITE and EXACT. There is NO "parallel" tool wrapper.
    The ability to call multiple tools in the same step is a built-in platform capability.
 7. Use `read_skill` when you need detailed domain knowledge. Use `list_tools` to inspect tool schemas.
+8. Use memory tools proactively:
+   - At conversation start, call `load_memory()` to check for saved context
+     (user preferences, recent work, task progress).
+   - Save important information via `save_memory(slot, key, value)` when you learn:
+     * User preferences or settings → slot="preferences"
+     * Ongoing task progress, decisions made → slot="task_progress"
+     * Key project context that should persist → slot="recent_work"
+   - The memory persists across sessions. Use it to maintain continuity.
+9. Shell execution safety:
+   - You have a `shell` tool that can run arbitrary commands on the host system.
+   - Always ask yourself: is this command safe? .
+   - The shell tool already asks the user "Proceed? [y/N]" before running — but you
+     must still exercise judgment about what is reasonable to propose.
+   - Prefer safe, read-only operations when possible.
 """
 
 

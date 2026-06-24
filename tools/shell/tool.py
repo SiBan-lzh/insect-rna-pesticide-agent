@@ -24,7 +24,7 @@ from langchain_core.tools import BaseTool
 from pydantic import BaseModel, Field
 
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
-BASE_DIR = _PROJECT_ROOT / "sandbox"
+BASE_DIR = _PROJECT_ROOT  # User's working directory (project root)
 TIMEOUT = 300
 
 # ============================================================
