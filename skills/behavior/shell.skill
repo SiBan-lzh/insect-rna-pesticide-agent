@@ -1,0 +1,135 @@
+---
+name: shell
+description: Shell Command and File Management Protocol — workspace operations, git rollback, and command safety classification
+category: behavior
+required_tools: []
+tags: [Shell, git, file management, workspace, rollback]
+---
+
+# shell Guide — Shell Command & File Management Protocol
+
+## Overview
+
+This document governs how you use the `shell` tool for file operations, workspace management, and git-based rollback. Follow these rules whenever you read, write, or modify files on the local filesystem.
+
+---
+
+## Guideline 1: Workspace Directory
+
+### Where to Save User-Facing Output Files
+
+A dedicated directory `workspace/` exists at the project root for storing all user-facing intermediate results.
+
+**When to use `workspace/`:**
+- The user explicitly asks you to save results to a file ("save to list.txt", "output to file")
+- You produce a report, target list, sequence collection, or any artifact the user wants to keep
+- Intermediate analysis files that the user may want to review later
+
+**File naming convention:**
+- Use descriptive, lowercase names with underscores: `target_genes_20260629.txt`
+- Use appropriate extensions: `.txt` for plain text, `.csv` for tables, `.fa` for sequences, `.json` for structured data
+- Prefix with a date or session identifier when multiple outputs are expected: `safety_report_rice_field.txt`
+
+### How to Write Files
+
+Use the `shell` tool with standard shell redirection:
+
+```
+# Write a text file
+echo "gene_name,mortality,species" > workspace/target_summary.csv
+echo "CHS1,85%,S. frugiperda" >> workspace/target_summary.csv
+
+# Write multi-line content using heredoc
+cat > workspace/safety_report.txt << 'EOF'
+# Ecological Safety Assessment Report
+...
+EOF
+
+# Copy or rename files within workspace
+cp workspace/report_v1.txt workspace/report_final.txt
+```
+
+**Important:** The `shell` tool automatically classifies write operations (`>` / `>>` / `cp` / `mv`) as "write" commands and will prompt for user confirmation before executing.
+
+---
+
+## Guideline 2: Git-Based Rollback Protocol
+
+### When to Use Git
+
+Whenever you are about to make **intentional, user-facing changes** to project files (not `workspace/` output files), use git to create a checkpoint first. This includes:
+- Editing skill files (`.skill`)
+- Editing Python source files (`.py`)
+- Editing configuration files
+- Any modification outside `workspace/` or `logs/`
+
+**Rule of thumb:** If the file is tracked in git (committed or staged), use git before modifying it.
+
+### Workflow
+
+**Before making changes:**
+```
+git status                               # Check current state
+git checkout -b feat/short-description   # Create a feature branch
+```
+
+**After making changes (verify before commit):**
+```
+git diff                                 # Review what changed
+git add <files>
+git commit -m "description of change"
+```
+
+**If something goes wrong:**
+```
+git revert HEAD                          # Undo the last commit (safe, preserves history)
+git checkout -- <file>                   # Discard uncommitted changes in a specific file
+```
+
+### Rollback Hierarchy
+
+| Situation | Command | Safety |
+|-----------|---------|--------|
+| Uncommitted change in a file | `git checkout -- <file>` | Safe — discards only that file |
+| Uncommitted changes everywhere | `git restore .` | Moderate — discards all uncommitted |
+| Last commit was wrong | `git revert HEAD` | Safe — creates new commit undoing it |
+| Multiple commits wrong | `git revert HEAD~N..HEAD` | Safe — creates N revert commits |
+| Want to discard branch entirely | `git checkout main && git branch -D feat/xxx` | Destructive — only if commits are truly unwanted |
+
+### What NOT to Do
+
+- Never use `git reset --hard` unless the user explicitly asks for it
+- Never force push (`git push --force`) without user confirmation
+- Never delete git history (no `git rebase` on shared branches unless user requests it)
+
+---
+
+## Guideline 3: Read-Only vs Write Classification
+
+The `shell` tool has three safety levels. Understand them so you don't ask unnecessary questions:
+
+| Level | Commands | Approval | Use Case |
+|-------|----------|----------|----------|
+| **Read-only** (auto) | `ls`, `cat`, `head`, `grep`, `pwd`, `echo` (no writes), `git status`, `git diff`, `git log` | ✅ Auto-approved | Exploring, checking status, viewing files |
+| **Write** (prompt) | `rm`, `mv`, `cp`, `mkdir`, `>`, `>>`, `pip`, `apt`, `git add`, `git commit`, `git push`, `sed -i`, `curl`, `wget` | ❌ Requires "y" | Creating outputs, installing deps, saving files |
+| **Blocked** (denied) | `rm -rf /`, `mkfs.*`, `dd if=`, fork bombs, `reboot`, `shutdown` | 🛑 Always rejected | Dangerous system commands |
+
+**Strategy:** Prefer read-only commands for exploration. When you need to write, batch your write operations to minimize the number of confirmation prompts.
+
+---
+
+## Guideline 4: Command Hygiene
+
+### Best Practices
+
+1. **Prefer relative paths** from the project root. The shell tool's working directory is always the project root.
+2. **Check before deleting.** Use `ls` or `find` before `rm` to confirm you're targeting the right files.
+3. **Use `--dry-run` flags** when available (e.g., `rsync --dry-run`, `git clean -n`).
+4. **Limit output.** Commands that generate very large output (>2000 chars) are truncated. For large data dumps, write to a file instead.
+5. **Long-running commands.** If a command may take more than a few minutes (BLAST, large downloads), mention the expected duration to the user before running.
+
+### Prohibited Practices
+
+1. Never run commands that modify system-wide configuration without explicit user request.
+2. Never install packages globally (`pip install` without `--user` or virtualenv) unless the user asks.
+3. Never kill or interfere with processes that you didn't start.

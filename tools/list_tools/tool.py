@@ -188,9 +188,4 @@ class ListToolsTool(BaseTool):
         """Run the tool listing."""
         return list_tools(category, tool_name)
 
-    async def _arun(self, category: str = "all", tool_name: Optional[str] = None) -> str:
-        """Async variant."""
-        return self._run(category, tool_name)
-
-
 list_tools_tool = ListToolsTool()

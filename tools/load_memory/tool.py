@@ -2,10 +2,10 @@
 load_memory/tool.py — Load information from long-term memory.
 
 Retrieves records from ChromaDB (agent_memory collection).
-Supports optional slot filtering and semantic search via natural language query.
-When query is empty, returns all records for the given slot (or all slots).
+Each memory_name maps to a separate physical directory under memory/,
+providing topic isolation between different projects.
 
-ChromaDB path: memory/chroma_db/
+ChromaDB path: memory/<memory_name>/
 Collection:    agent_memory
 """
 
@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from pathlib import Path
 from typing import Optional
 
@@ -20,29 +21,34 @@ from langchain_core.tools import BaseTool
 from pydantic import BaseModel, Field
 
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
-CHROMA_DIR = _PROJECT_ROOT / "memory" / "chroma_db"
-COLLECTION_NAME = "agent_memory"
+_COLLECTION_NAME = "agent_memory"
+
+
+def _safe_memory_dir(memory_name: str) -> Path:
+    """Sanitize memory_name and return the corresponding directory."""
+    safe = re.sub(r'[^a-zA-Z0-9_-]', '_', memory_name)
+    return _PROJECT_ROOT / "memory" / safe
 
 logger = logging.getLogger("RPA_Tools.LoadMemory")
 
 # ============================================================
-# Lazy ChromaDB client (shared with save_memory)
+# ChromaDB client cache (one client per memory_name)
 # ============================================================
-_client = None
-_collection = None
+_clients: dict[str, tuple] = {}  # memory_name -> (client, collection)
 
 
-def _get_collection():
-    """Lazy-init ChromaDB persistent client and collection."""
-    global _client, _collection
-    if _collection is not None:
-        return _collection
+def _get_collection(memory_name: str):
+    """Lazy-init ChromaDB persistent client for the given memory_name."""
+    if memory_name in _clients:
+        return _clients[memory_name][1]
 
     import chromadb
-    CHROMA_DIR.mkdir(parents=True, exist_ok=True)
-    _client = chromadb.PersistentClient(path=str(CHROMA_DIR))
-    _collection = _client.get_or_create_collection(name=COLLECTION_NAME)
-    return _collection
+    mem_dir = _safe_memory_dir(memory_name)
+    mem_dir.mkdir(parents=True, exist_ok=True)
+    client = chromadb.PersistentClient(path=str(mem_dir))
+    collection = client.get_or_create_collection(name=_COLLECTION_NAME)
+    _clients[memory_name] = (client, collection)
+    return collection
 
 
 # ============================================================
@@ -51,6 +57,11 @@ def _get_collection():
 class LoadMemoryInput(BaseModel):
     """Memory retrieval parameters."""
 
+    memory_name: str = Field(
+        description="Topic label identifying which storage directory to read from. "
+        "Must match the memory_name used when saving (e.g. 'target-spodoptera', "
+        "'dsrna-bemisia', 'preferences')."
+    )
     slot: Optional[str] = Field(
         default=None,
         description="Filter by slot category. If omitted, returns records from all slots."
@@ -70,16 +81,21 @@ class LoadMemoryTool(BaseTool):
     name: str = "load_memory"
     description: str = (
         "Load information from long-term memory. "
+        "Requires memory_name to identify which topic storage to read from "
+        "(must match the memory_name used when saving). "
         "Optionally filter by slot (e.g. 'preferences', 'recent_work') "
         "and/or use a natural language query for semantic search. "
         "Returns a formatted summary of matching memory records."
     )
     args_schema: type = LoadMemoryInput
 
-    def _run(self, slot: Optional[str] = None, query: str = "") -> str:
+    def _run(self, memory_name: str, slot: Optional[str] = None, query: str = "") -> str:
         """Load memory records from ChromaDB."""
+        if not memory_name or not memory_name.strip():
+            return '{"status": "error", "error": "memory_name is required."}'
+
         try:
-            collection = _get_collection()
+            collection = _get_collection(memory_name)
         except Exception as exc:
             logger.exception("Failed to initialize ChromaDB")
             return f"ERROR: Memory system unavailable: {exc}"

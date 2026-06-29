@@ -91,6 +91,9 @@ def _discover_skills(skill_dir: Path = SKILLS_DIR) -> dict[str, SkillDoc]:
             continue
 
         name = meta["name"]
+        if not name or not name.strip():
+            print(f"[skill_loader] WARNING: {path.relative_to(skill_dir)} has empty 'name' in frontmatter, skipped.")
+            continue
         registry[name] = SkillDoc(
             name=name,
             description=meta.get("description", ""),
@@ -111,7 +114,7 @@ SKILL_REGISTRY: dict[str, SkillDoc] = _discover_skills()
 SKILL_CATEGORIES: dict[str, dict] = {
     "behavior": {
         "label": "Behavior standards",
-        "skills": ["behavior1"],
+        "skills": ["analysis-standards", "shell", "memory"],
     },
     "rnai": {
         "label": "RNAi workflow",

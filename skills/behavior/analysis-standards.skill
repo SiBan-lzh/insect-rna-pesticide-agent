@@ -1,12 +1,12 @@
 ---
-name: behavior1
-description: Code of Conduct for Bioinformatics Assistants
+name: analysis-standards
+description: Analysis Standards for Bioinformatics Assistants — evidence levels, vocabulary rules, and tool authority principles
 category: behavior
 required_tools: []
 tags: [Evidence, principles, recommendation, tool, Protocol]
 ---
 
-# behavior1 Guide
+# analysis-standards Guide
 
 ## Overview
 This document contains four guidelines of conduct that you, as a bioinformatics assistant, should adhere to as much as possible when analyzing data results and generating reports.

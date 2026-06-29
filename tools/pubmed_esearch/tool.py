@@ -141,6 +141,26 @@ class PubmedEsearchTool(BaseTool):
     )
     args_schema: type = PubmedEsearchInput
 
+    # ============================================================
+    # Format helper: standardise to {status, pmids, ...}
+    # ============================================================
+    @staticmethod
+    def _format_result(result: dict) -> str:
+        """Wrap search_pubmed() output into standard status/error format."""
+        if result.get("success"):
+            return json.dumps({
+                "status": "success",
+                "pmids": result.get("pmids", []),
+                "total_count": result.get("total_count", "0"),
+                "message": result.get("message", ""),
+            }, ensure_ascii=False, indent=2)
+        else:
+            return json.dumps({
+                "status": "error",
+                "error": result.get("message", "PubMed search failed"),
+                "pmids": [],
+            }, ensure_ascii=False, indent=2)
+
     def _run(
         self,
         query: str,
@@ -161,12 +181,12 @@ class PubmedEsearchTool(BaseTool):
 
         try:
             result = search_pubmed(query, max_results, min_year, max_year, email, api_key)
-            return json.dumps(result, ensure_ascii=False, indent=2)
+            return self._format_result(result)
         except Exception as e:
             logger.exception("PubMed ESearch failed")
             return json.dumps({
-                "success": False,
-                "message": f"Internal error: {e}",
+                "status": "error",
+                "error": f"Internal error: {e}",
                 "pmids": [],
             }, ensure_ascii=False, indent=2)
 

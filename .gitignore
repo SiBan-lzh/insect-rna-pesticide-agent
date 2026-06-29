@@ -60,7 +60,10 @@ ragbase/chroma_db/
 # 运行产物（自动生成）
 # ============================================================
 logs/
-memory/chroma_db/
+!logs/.gitkeep
+memory/*/
+workspace/
+!workspace/.gitkeep
 
 # ============================================================
 # Jupyter / Notebook
@@ -73,3 +76,5 @@ memory/chroma_db/
 # ============================================================
 *.log
 *.tmp
+*.bak
+*副本*

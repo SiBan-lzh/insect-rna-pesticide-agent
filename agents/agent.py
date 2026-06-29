@@ -17,6 +17,8 @@ Usage:
 
 from __future__ import annotations
 
+import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -55,13 +57,16 @@ Guidelines:
 6. Your tool list is FINITE and EXACT. There is NO "parallel" tool wrapper.
    The ability to call multiple tools in the same step is a built-in platform capability.
 7. Use `read_skill` when you need detailed domain knowledge. Use `list_tools` to inspect tool schemas.
-8. Use memory tools proactively:
-   - At conversation start, call `load_memory()` to check for saved context
-     (user preferences, recent work, task progress).
-   - Save important information via `save_memory(slot, key, value)` when you learn:
-     * User preferences or settings → slot="preferences"
-     * Ongoing task progress, decisions made → slot="task_progress"
-     * Key project context that should persist → slot="recent_work"
+8. Use memory tools proactively with topic isolation:
+   - At conversation start, call `load_memory(memory_name="preferences")`
+     and `load_memory(memory_name="<current-topic>")` to check for saved context.
+   - Choose a short, meaningful `memory_name` based on the current topic
+     (e.g. "target-spodoptera", "dsrna-bemisia", "safety-rice-field").
+   - Save important information via `save_memory(memory_name, slot, key, value)`:
+     * User preferences or settings → memory_name="preferences", slot="preferences"
+     * Ongoing task progress, decisions made → memory_name="<topic>", slot="task_progress"
+     * Key project context that should persist → memory_name="<topic>", slot="recent_work"
+   - Different topics MUST use different memory_name values for physical isolation.
    - The memory persists across sessions. Use it to maintain continuity.
 9. Shell execution safety:
    - You have a `shell` tool that can run arbitrary commands on the host system.
@@ -86,7 +91,7 @@ def build_rnai_agent(
         llm: Language model instance.
         checkpointer: LangGraph checkpointer (default: MemorySaver).
         skills: Behavioral skill names to always inject into system prompt.
-                Default: ("behavior1",).
+                Default: ("analysis-standards",).
                 Domain skills (e.g., "dsrna_design") are NOT included here —
                 the LLM retrieves them via `read_skill` tool when needed.
 
@@ -94,7 +99,7 @@ def build_rnai_agent(
         Compiled LangGraph agent (create_react_agent).
     """
     if skills is None:
-        skills = ("behavior1",)
+        skills = ("analysis-standards", "shell", "memory")
 
     # Build system prompt: role + skill documents
     skill_content = build_skills(*skills)
@@ -147,13 +152,14 @@ def _sanitize_checkpoint(agent, config) -> None:
 if __name__ == "__main__":
     import uuid
 
-    from tool_config import validate_paths
-    missing = validate_paths(verbose=False)
-    if missing:
-        print(f"⚠️  {len(missing)} data paths not found on disk:")
-        for name in missing:
-            print(f"     {name}")
-        print()
+    # Run startup checks from tests/ directory
+    _tests_dir = _PROJECT_ROOT / "tests"
+    if _tests_dir.is_dir():
+        for _script in sorted(_tests_dir.glob("*.py")):
+            subprocess.run(
+                [sys.executable, str(_script)],
+                capture_output=False, text=True,
+            )
 
     thread_id = f"cli-{uuid.uuid4().hex[:8]}"
     config = {"configurable": {"thread_id": thread_id}}

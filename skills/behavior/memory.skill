@@ -1,0 +1,107 @@
+---
+name: memory
+description: Memory Management Protocol — topic-isolated memory with named stores
+category: behavior
+required_tools: []
+tags: [memory, save, load, topic isolation, persistence]
+---
+
+# memory Guide — Memory Management Protocol
+
+## Overview
+
+You have two memory tools: `save_memory` and `load_memory`. Each call requires a
+`memory_name` parameter that acts as a **topic label** — different topics get
+different storage directories, keeping information physically isolated.
+
+Think of `memory_name` as a named notebook for a specific project or topic.
+
+---
+
+## Guideline 1: When to Use Memory
+
+### Use `save_memory` when you learn:
+
+- **User preferences** → `memory_name="preferences"`, slot="preferences"
+  - Language preferences, output format preferences, working style
+  - Save with key like "output_format" or "language"
+
+- **Task progress** → `memory_name="<topic>"`, slot="task_progress"
+  - Decisions made, steps completed, results so far
+  - Save with key like "current_step" or "findings"
+
+- **Key project context** → `memory_name="<topic>"`, slot="recent_work"
+  - Important findings, gene lists, sequence IDs discussed
+  - Save with key like "target_genes" or "design_summary"
+
+### Use `load_memory` at conversation start:
+
+- Always call `load_memory` with an appropriate `memory_name` at the beginning
+  of a session to check for saved context.
+- If you're continuing a previous topic, use the same `memory_name` to retrieve
+  past work.
+- Use `query` parameter for semantic search: `load_memory(memory_name="target-spodoptera", query="gene candidates")`.
+
+---
+
+## Guideline 2: Choosing a `memory_name`
+
+The `memory_name` should be a **short, meaningful label** based on the topic
+of conversation. This creates physical isolation between different projects.
+
+### Naming Rules
+
+- Use only lowercase letters, digits, and hyphens
+- Be specific enough to avoid collision with other topics
+- Be short enough to type easily (1–3 words recommended)
+
+### Examples
+
+| Topic | Recommended `memory_name` |
+|-------|--------------------------|
+| Finding RNAi targets in Spodoptera frugiperda | `target-spodoptera` |
+| Designing dsRNA for Bemisia tabaci | `dsrna-bemisia` |
+| Safety assessment for a rice field ecosystem | `safety-rice-field` |
+| Literature search on coleopteran RNAi | `literature-coleoptera` |
+| User's general preferences | `preferences` |
+
+### What NOT to Do
+
+- ❌ Use the same `memory_name` for unrelated topics (causes memory clutter)
+- ❌ Use generic names like "project" or "test" (not descriptive enough)
+- ❌ Include special characters or spaces (they get sanitized anyway)
+
+---
+
+## Guideline 3: Topic Isolation Principle
+
+**Different topics → Different `memory_name` → Different physical directories**
+
+Each `memory_name` maps to a separate ChromaDB directory under `memory/`:
+```
+memory/target-spodoptera/    ← all target-spodoptera memories
+memory/dsrna-bemisia/        ← all dsrna-bemisia memories
+memory/safety-rice-field/    ← all safety-rice-field memories
+memory/preferences/          ← user preferences (persists across all topics)
+```
+
+This means:
+- Information from one topic never leaks into another
+- You can safely switch between topics without cross-contamination
+- Each topic's memory stays clean and relevant
+
+### Conversation Start Pattern
+
+When starting a session, first determine the topic, then:
+
+```python
+# Step 1: Load relevant past context
+load_memory(memory_name="target-spodoptera", query="recent progress")
+
+# Step 2: Load user preferences (always useful)
+load_memory(memory_name="preferences", query="output format")
+
+# Step 3: Continue working, save new findings
+save_memory(memory_name="target-spodoptera", slot="recent_work",
+            key="candidate_genes", value="CHS1, CHS2 identified as top candidates")
+```

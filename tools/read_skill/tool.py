@@ -66,9 +66,4 @@ class ReadSkillTool(BaseTool):
         """Run the skill reading."""
         return read_skill(skill_name)
 
-    async def _arun(self, skill_name: str) -> str:
-        """Async variant."""
-        return self._run(skill_name)
-
-
 read_skill_tool = ReadSkillTool()

@@ -221,9 +221,4 @@ class ListDatabaseTool(BaseTool):
         """Run the data lookup."""
         return list_database(species, data_type)
 
-    async def _arun(self, data_type: str, species: Optional[str] = None) -> str:
-        """Async variant."""
-        return self._run(data_type, species)
-
-
 list_database_tool = ListDatabaseTool()

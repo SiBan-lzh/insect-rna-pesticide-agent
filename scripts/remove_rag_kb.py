@@ -27,7 +27,17 @@ logging.basicConfig(
 )
 logger = logging.getLogger("remove_rag")
 
-from tool_config import RAG_CHROMA_DIR
+# ============================================================
+# Paths (self-contained — no tool_config dependency)
+# ============================================================
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+RAG_CHROMA_DIR = Path(os.getenv(
+    "RAG_CHROMA_DIR",
+    _PROJECT_ROOT / "ragbase" / "chroma_db",
+))
 
 
 def delete_kb(kb_path_str: str, auto_yes: bool = False):

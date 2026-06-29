@@ -154,9 +154,4 @@ class ListRagbaseTool(BaseTool):
         """Run the KB listing."""
         return list_ragbase()
 
-    async def _arun(self, **kwargs) -> str:
-        """Async variant."""
-        return self._run()
-
-
 list_ragbase_tool = ListRagbaseTool()

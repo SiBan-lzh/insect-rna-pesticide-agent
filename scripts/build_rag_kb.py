@@ -29,9 +29,16 @@ logging.basicConfig(
 logger = logging.getLogger("build_rag")
 
 # ============================================================
-# Paths
+# Paths (self-contained — no tool_config dependency)
 # ============================================================
-from tool_config import RAG_CHROMA_DIR
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+RAG_CHROMA_DIR = Path(os.getenv(
+    "RAG_CHROMA_DIR",
+    _PROJECT_ROOT / "ragbase" / "chroma_db",
+))
 
 CHROMA_DIR = RAG_CHROMA_DIR
 

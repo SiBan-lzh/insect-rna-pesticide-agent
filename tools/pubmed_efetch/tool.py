@@ -205,6 +205,25 @@ class PubmedEfetchTool(BaseTool):
     )
     args_schema: type = PubmedEfetchInput
 
+    # ============================================================
+    # Format helper: standardise to {status, articles, ...}
+    # ============================================================
+    @staticmethod
+    def _format_result(result: dict) -> str:
+        """Wrap fetch_articles() output into standard status/error format."""
+        if result.get("success"):
+            return json.dumps({
+                "status": "success",
+                "articles": result.get("articles", []),
+                "message": result.get("message", ""),
+            }, ensure_ascii=False, indent=2)
+        else:
+            return json.dumps({
+                "status": "error",
+                "error": result.get("message", "PubMed fetch failed"),
+                "articles": [],
+            }, ensure_ascii=False, indent=2)
+
     def _run(
         self,
         pmids: str,
@@ -215,19 +234,19 @@ class PubmedEfetchTool(BaseTool):
 
         if not pmids or not pmids.strip():
             return json.dumps({
-                "success": False,
-                "message": "PMID is empty.",
+                "status": "error",
+                "error": "PMID is empty.",
                 "articles": [],
             }, ensure_ascii=False, indent=2)
 
         try:
             result = fetch_articles(pmids, email, api_key)
-            return json.dumps(result, ensure_ascii=False, indent=2)
+            return self._format_result(result)
         except Exception as e:
             logger.exception("PubMed EFetch failed")
             return json.dumps({
-                "success": False,
-                "message": f"Internal error: {e}",
+                "status": "error",
+                "error": f"Internal error: {e}",
                 "articles": [],
             }, ensure_ascii=False, indent=2)
 

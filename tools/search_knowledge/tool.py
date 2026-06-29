@@ -320,15 +320,4 @@ class SearchKnowledgeTool(BaseTool):
         """Run the knowledge search."""
         return search_knowledge(query, knowledge_base, top_k, semantic_weight)
 
-    async def _arun(
-        self,
-        query: str,
-        knowledge_base: str,
-        top_k: int = 5,
-        semantic_weight: Optional[float] = None,
-    ) -> str:
-        """Async variant."""
-        return self._run(query, knowledge_base, top_k, semantic_weight)
-
-
 search_knowledge_tool = SearchKnowledgeTool()

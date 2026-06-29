@@ -210,9 +210,4 @@ class CleanSeqTool(BaseTool):
                 "error": f"Internal error: {e}",
             }, ensure_ascii=False, indent=2)
 
-    async def _arun(self, sequence: str, seq_type: str = "dna") -> str:
-        """Async variant."""
-        return self._run(sequence, seq_type)
-
-
 clean_seq_tool = CleanSeqTool()

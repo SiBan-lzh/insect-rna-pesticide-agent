@@ -26,7 +26,7 @@ class ListSkillsInput(BaseModel):
         default="all",
         description="Skill category filter. Categories:\n"
         "- 'all' — every registered skill\n"
-        "- 'behavior' — behavior standards (principles, evidence, tool, recommendation)\n"
+        "- 'behavior' — behavior standards (analysis, shell, memory, file management, git rollback)\n"
         "- 'rnai' — RNAi workflow guides (e.g., dsrna_design)",
     )
 
@@ -107,10 +107,5 @@ class ListSkillsTool(BaseTool):
     def _run(self, category: str = "all") -> str:
         """Run the skill listing."""
         return list_skills(category)
-
-    async def _arun(self, category: str = "all") -> str:
-        """Async variant."""
-        return self._run(category)
-
 
 list_skills_tool = ListSkillsTool()
