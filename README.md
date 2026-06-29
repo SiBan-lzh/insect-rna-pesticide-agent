@@ -1,5 +1,7 @@
 # Insect RNAi Pesticide Agent
 
+> **v0.0.3** — Modular tools & skills, topic-isolated memory, shell safety, skill-based workflow guides
+
 A multi-agent system for designing RNAi-based insecticides. Built with LangGraph.
 
 ## Quick Install
@@ -19,6 +21,15 @@ python tools_test.py
 
 OligoWalk is pre-compiled and bundled under `database/RNAstructure/` — no separate install needed.
 
+## Quick Start
+
+```bash
+# Start the interactive CLI
+python agents/agent.py
+```
+
+The agent will run startup checks automatically, then present an interactive prompt.
+
 ## Project Structure
 
 ```
@@ -28,10 +39,20 @@ langgraph/
 │   └── agent.py        # Main agent + CLI entry point
 ├── skills/             # Domain skill documents (.skill)
 │   ├── skill_loader.py # Auto-discover skills via frontmatter
-│   ├── behavior/       # Behavioral standards
-│   └── rnai/           # RNAi design workflows
-├── tools/              # LangChain BaseTool wrappers (20 tools)
-│   ├── tool_loader.py  # Auto-discover tools from subdirectory
+│   ├── behavior/       # Behavioral standards (analysis-standards, shell, memory)
+│   └── rnai/           # RNAi design workflows (dsrna_design, safety_inspection, target_find)
+├── tools/              # LangChain BaseTool wrappers (24 tools, modular subdirectories)
+│   ├── tool_loader.py  # Auto-discover tools from subdirectories
+│   ├── shell/          # Shell execution with safety classification
+│   ├── save_memory/    # Topic-isolated long-term memory (save)
+│   ├── load_memory/    # Topic-isolated long-term memory (load)
+│   ├── list_tools/     # Tool discovery
+│   ├── list_skills/    # Skill document discovery
+│   ├── list_database/  # Local genome data discovery
+│   ├── list_ragbase/   # RAG knowledge base discovery
+│   ├── read_skill/     # Load skill document content
+│   ├── search_knowledge/ # RAG knowledge base search
+│   ├── clean_seq/      # Sequence cleaning
 │   ├── insect_blast/   # BLAST against target insect genomes
 │   ├── nto_blast/      # BLAST against non-target organism genomes
 │   ├── primer3/        # PCR primer design (primer3-py)
@@ -43,13 +64,15 @@ langgraph/
 │   ├── pubmed_esearch/ # PubMed literature search
 │   ├── pubmed_efetch/  # PubMed article details
 │   ├── openalex_search/ # OpenAlex academic search
-│   ├── ...             # Plus discovery tools (list_tools, list_skills, etc.)
+│   └── ...             # Plus insect_anno, clip_seq
 ├── ragbase/            # RAG knowledge base (Chroma + BGE embeddings)
 ├── scripts/            # Utility scripts (build/remove RAG KB)
+├── tests/              # Environment checks and config validation
+├── benchmark/          # Workflow benchmark records
 ├── database/           # Reference data (BLAST DBs, GFF3, FASTA, etc.)
 ├── llm_config.py       # LLM factory (OpenAI-compatible)
-├── tool_config.py      # Centralized path configuration reference
-└── .env                # Environment variables (API keys, paths)
+├── .env                # Environment variables (API keys, paths)
+└── workspace/          # User-facing output files
 ```
 
 ## Tools
@@ -62,9 +85,12 @@ langgraph/
 | `oligowalk` | OligoWalk (bundled) | siRNA thermodynamic scoring (sliding window) |
 | `insect_anno` | bedtools | GFF3 gene feature annotation around BLAST hits |
 | `clustal` | clustalo | Pairwise alignment & continuous match detection |
-| `fetch_seq` | samtools | Extract NTO reference sequence regions |
+| `fetch_nto_seq` | samtools | Extract NTO reference sequence regions |
 | `fetch_insect_cds` | — (pure Python) | Fetch insect CDS by transcript ID |
 | `kinship` | ETE4 + NCBI taxa | Species relatedness (divergence time, taxonomy) |
+| `shell` | — | Shell execution with read/write/blocked classification |
+| `save_memory` | ChromaDB | Topic-isolated long-term memory save |
+| `load_memory` | ChromaDB | Topic-isolated long-term memory load |
 
 ## Workflows
 
@@ -80,28 +106,17 @@ Safety assessment pipeline:
 ## Quick Test
 
 ```bash
-python tools_test.py
-```
-
-Expected: `16 通过 / 0 失败  🎉 全部通过！`
-
-Test a single tool:
-
-```python
-from tools.insect_blast import insect_blast_tool
-
-result = insect_blast_tool.invoke({
-    "sequence": "ATGAAGCGGCAGAATGTACGA...",
-    "species": "Bombyx_mori",
-})
-print(result)
+# Environment check
+python tests/config_check.py
 ```
 
 ## Configuration
 
-Database paths are managed in `tool_config.py`. Override via environment variables:
+Configure via `.env` file at the project root:
 
 ```bash
-export DATABASE_ROOT=/path/to/your/database
-export INSECT_BLAST_DB=/path/to/blast/db
+# LLM configuration
+MODEL_PROVIDER=openai
+MODEL_NAME=gpt-4o
+API_KEY=sk-...
 ```
