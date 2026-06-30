@@ -1,0 +1,411 @@
+---
+name: delivery_design_cn
+category: rnai
+description: 基于昆虫生物学特征、靶标基因特性、实验条件和环境因素，设计最优 dsRNA 递送策略的分步指南。整合 rnai_records 知识库获取历史递送数据，以及 delivery_strategy 知识库获取决策规则。
+keywords: [递送, dsrna递送, 递送策略, 递送方法, 纳米载体, higs, 微生物表达, 饲喂, 注射, 浸泡]
+required_tools_tag: [discovery]
+---
+
+# dsRNA 递送策略设计指南
+
+## 概述
+
+本指南涵盖昆虫 RNAi 农药研发中完整的递送策略设计工作流。整合三个信息源：
+
+1. **`rnai_records` 知识库** — 目标物种和靶标基因的历史递送记录（递送方法、载体、虫态、寄主植物）
+2. **`delivery_strategy` 知识库** — 结构化决策表，涵盖 (a) 4 层递送方式层级树 和 (b) 5 层条件决策规则（将生物学/环境因素映射到推荐方法）
+3. **内嵌参考表**（见下文）— 压缩速查表，用于快速推理
+
+工作流包含六个阶段：
+
+1. **上下文收集** — 收集昆虫、靶标基因、实验条件信息
+2. **历史记录检索** — 查询 rnai_records 获取过往递送数据
+3. **害虫生物学推断** — 推断口器类型、取食结构、害虫虫态
+4. **递送策略筛选** — 查询 delivery_strategy KB 获取匹配规则
+5. **策略综合** — 综合证据，形成 2-3 种可行组合策略
+6. **报告生成** — 带依据的结构化输出
+
+---
+
+## 递送方式参考表（内嵌）
+
+该 4 层层级树定义了所有可用的 dsRNA 递送方法。
+
+| 场景 | 大类（L1） | 子类（L2） | 具体方式（L3） |
+|-------|--------------|-------------|---------------------|
+| **实验室验证** | Amplification | E. coli 或酵母 | 饲喂 / 注射 / 浸泡 / 涂抹 |
+| **dsRNA 农药设计或田间应用** | HIGS | 寄主植物内源表达 | 转基因 |
+| | HIGS | 植物病毒 | 寄主植物病毒载体 |
+| | Microbial expression | 生防菌 | 可定殖工程菌 / 根际微生物 |
+| | Microbial expression | 昆虫病毒 | 靶标昆虫病毒载体 |
+| | Microbial expression | 昆虫共生菌 | 靶标昆虫共生菌载体 |
+| | Nanocarrier | 天然纳米材料 | 壳聚糖 NPs / 粘土 NPs |
+| | Nanocarrier | 有机合成纳米材料 | 脂质体 / PNPs |
+| | Nanocarrier | 无机纳米材料 | SiNPs / LDH / MNPs / 碳纳米材料 |
+
+**场景优先规则：** 实验室验证 → 仅限 "Amplification" 大类。田间应用或农药设计 → 仅限 "HIGS"、"Microbial expression"、"Nanocarrier"。
+
+## 递送影响因素参考表（内嵌）
+
+这些条件规则根据用户的上下文确定应优先选择的递送方法。
+
+### 第 1 层 — 场景（必选）
+| 条件 | 规则 |
+|-----------|------|
+| scene = 实验室验证 | 仅从 "Amplification" 中选择 |
+| scene = dsRNA 农药设计或田间应用 | 仅从 "HIGS"、"Microbial expression"、"Nanocarrier" 中选择 |
+
+### 第 2 层 — 宿主/纳米材料可用性
+| 条件 | 规则 |
+|-----------|------|
+| 寄主植物转基因 = 是 | 优先选择 "HIGS" |
+| 寄主植物转基因 = 否 | 不能选择 "HIGS" |
+| 纳米材料 = 是 | 优先选择 "Nanocarrier" |
+| 纳米材料 = 否 | 不能选择 "Nanocarrier" |
+
+### 第 3 层 — 生物试剂可用性
+| 条件 | 规则 |
+|-----------|------|
+| 生防菌 = 是 | 优先选择 "Microbial expression" → "Biocontrol bacteria" |
+| 生防菌 = 否 | 不能选择 "Microbial expression" → "Biocontrol bacteria" |
+| 昆虫共生菌 = 是 | 优先选择 "Microbial expression" → "Insect symbiotic bacteria" |
+| 昆虫共生菌 = 否 | 不能选择 "Microbial expression" → "Insect symbiotic bacteria" |
+| 昆虫病毒 = 是 | 优先选择 "Microbial expression" → "Insect virus" |
+| 昆虫病毒 = 否 | 不能选择 "Microbial expression" → "Insect virus" |
+
+### 第 4 层 — 昆虫生物学特征
+| 条件 | 值 | 优先方法 |
+|-----------|-------|-------------------|
+| 虫态 | 卵 | 饲喂、注射 |
+| 虫态 | 幼虫 | 注射、浸泡、或壳聚糖 NPs、或脂质体 |
+| 虫态 | 蛹 | 注射 |
+| 虫态 | 成虫 | 饲喂、注射、涂抹、或 Nanocarrier |
+| 口器 | 咀嚼式或舐吸式 | 注射、微生物表达、纳米载体 |
+| 口器 | 刺吸式 | 饲喂、注射、HIGS、纳米载体 |
+| 取食结构 | 叶片 | 注射、微生物表达、纳米载体 |
+| 取食结构 | 韧皮部 | 饲喂、注射、HIGS、纳米载体 |
+| 取食结构 | 根部 | 注射、浸泡、涂抹、根际微生物、粘土 NPs |
+| 取食结构 | 内部组织 | 饲喂、HIGS |
+
+### 第 5 层 — 环境条件
+| 条件 | 值 | 规则 |
+|-----------|-------|------|
+| 温度 | 高 | 优先选择可定殖工程菌。不能选择脂质体。使用纳米载体时选择 SiNPs。 |
+| 温度 | 中 | 无偏向 |
+| 温度 | 低 | 不能选择脂质体 |
+| 光照 | 强 | 优先选择 SiNPs / LDH |
+| 光照 | 中 / 弱 | 无偏向 |
+| 湿度 | 高 | 优先选择天然纳米材料 |
+| 湿度 | 中 | 无偏向 |
+| 湿度 | 低 | 优先选择 HIGS → 寄主植物内源表达 |
+
+---
+
+## 阶段 1：上下文收集
+
+### 任务
+
+收集用户提供的所有可用上下文信息，用于驱动递送策略设计。
+
+**必填信息：**
+- `insect_name` — 靶标昆虫（常用名或拉丁学名，如 "Spodoptera frugiperda"）
+- `target_gene` — 靶标基因名称或登录号（如 "V-ATPase A"、"XP_123456.1"）
+
+**可选但有用的信息：**
+- `experimental_conditions` — 田间还是实验室？寄主植物？环境条件？
+- `scene` — 实验室验证还是田间应用/农药设计？
+- `target_stage` — 靶向哪个虫态（卵/幼虫/蛹/成虫）？
+- `host_plant_transgenic` — 是否有转基因寄主植物可用？
+- `nanocarrier_available` — 是否有纳米载体技术可用？
+- `biocontrol_bacteria`, `insect_symbiotic_bacteria`, `insect_virus` — 是否有可用生物试剂？
+- `environment` — 温度、光照、湿度条件？
+
+### 响应方式
+
+如果缺少 `insect_name` 或 `target_gene`，向用户询问。对于可选字段，有针对性地提问而非一次性询问所有内容：
+
+- "这是实验室验证还是田间应用？"
+- "你靶向的是哪个虫态？"
+- "寄主植物/取食基质是什么？"
+
+### 边界情况
+
+- **昆虫名称是常用名**（如 "fall armyworm"）：转换为拉丁学名（Spodoptera frugiperda）后再进行后续步骤。
+- **靶标基因是同义词**（如 "vATPase" 而非 "V-ATPase"）：使用标准命名法，并在报告中注明同义词。
+- **用户未提供条件**：默认采用实验室验证场景，注射为基准方法，并在报告中注明假设。
+
+---
+
+## 阶段 2：历史记录检索
+
+### 任务
+
+搜索 `rnai_records` 知识库，查找目标物种和靶标基因的过往递送实验记录。这提供了已有成功案例的实际证据。
+
+### 工具：`search_knowledge`
+
+**参数：**
+- `query`：将昆虫拉丁名和靶标基因与递送相关关键词组合。
+  - 示例：`"Spodoptera frugiperda V-ATPase delivery method injection feeding dsRNA concentration"`
+  - 示例：`"Bemisia tabaci RNAi delivery stage adult feeding host plant cotton"`
+- `knowledge_base`：`"rnai_records"`
+- `top_k`：8-12（确保充分覆盖递送相关记录）
+- `semantic_weight`：0.4（默认混合检索）
+
+**从结果中提取的内容：**
+每条记录可能包含以下字段：
+- `delivery_method` — dsRNA 的递送方式（注射、饲喂、浸泡、涂抹）
+- `vector` — 载体/运载工具（如 "E. coli HT115"、"壳聚糖纳米颗粒"、"脂质体"）
+- `developmental_stage` — 递送时的昆虫虫态
+- `concentration` — 使用的 dsRNA 浓度
+- `host_plant` — 饲喂递送时使用的寄主植物
+- `target_species` 和 `target_gene` — 用于验证
+
+### 结果处理
+
+- **有记录**：提取递送方法、载体、浓度、虫态和寄主植物。注意哪些方法产生了有效干扰。
+- **记录很少（0-2 条）**：扩大查询范围 — 去掉基因名，仅按物种搜索。尝试拉丁名和常用名。
+- **完全没有记录**：在报告中注明。进入阶段 3，依赖 delivery_strategy KB 规则和内嵌参考表。
+
+### 边界情况：知识库不可用
+
+如果 `rnai_records` KB 不可访问，告知用户，仅使用 delivery_strategy KB 和内嵌参考表进行后续步骤。
+
+---
+
+## 阶段 3：害虫生物学推断
+
+### 任务
+
+基于昆虫的分类学身份和已知生物学特征，推断以下特征：
+
+1. **口器类型**：咀嚼式/舐吸式 vs. 刺吸式
+2. **取食结构**：叶片 / 韧皮部 / 根部 / 内部组织
+3. **典型害虫虫态**：哪个虫态造成经济损害
+4. **寄主植物**：该物种的常见寄主植物
+
+### 推断方法
+
+运用昆虫学知识。关键启发式规则：
+
+| 昆虫目 | 口器类型 | 典型取食方式 |
+|-------------|---------------|-----------------|
+| Lepidoptera（鳞翅目，幼虫） | 咀嚼式 | 叶片、内部组织 |
+| Hemiptera（半翅目：蚜虫、粉虱、飞虱） | 刺吸式 | 韧皮部 |
+| Coleoptera（鞘翅目：甲虫、象鼻虫） | 咀嚼式 | 叶片、根部、内部组织 |
+| Diptera（双翅目：蝇、蚊） | 舐吸式 / 刺吸式 | 多样 |
+| Thysanoptera（缨翅目：蓟马） | 刺吸式 | 叶片、花 |
+| Orthoptera（直翅目：蝗虫） | 咀嚼式 | 叶片 |
+| Acari（蜱螨目：螨类） | 刺吸式 | 叶片 |
+
+### 结果处理
+
+记录推断出的特征。如果对某一特征不确定，标记为"不确定"并包含多个可能性 — 阶段 4 的 delivery_strategy KB 查询可以处理多个值。
+
+---
+
+## 阶段 4：递送策略筛选
+
+### 任务
+
+查询 `delivery_strategy` 知识库，根据用户的条件和第 3 阶段推断的昆虫生物学特征，找到匹配的决策规则和递送选项。
+
+### 工具：`search_knowledge`
+
+**递送选项查询参数：**
+- `query`：描述场景和期望类别。包含递送方式层级树中的关键词。
+  - 示例：`"laboratory verification amplification E. coli yeast feed injection"`
+  - 示例：`"field application nanocarrier natural nanomaterials chitosan NPs"`
+  - 示例：`"dsRNA pesticide design HIGS endogenous expression host plant transgenic"`
+- `knowledge_base`：`"delivery_strategy"`
+- `top_k`：5-8
+- `semantic_weight`：0.4
+
+**影响因素查询参数：**
+- `query`：使用因素框架描述条件。
+  - 示例：`"stage larva mouthparts chewing feeding leaf laboratory verification"`
+  - 示例：`"stage adult piercing-sucking phloem nanocarrier yes field application high temperature"`
+- `knowledge_base`：`"delivery_strategy"`
+- `top_k`：5-8
+- `semantic_weight`：0.4
+
+### 理解 KB 输出
+
+KB 存储决策表中的精确行。每条结果块包含类似以下字段：
+- `Level: 4 | Field Name: stage | Field Value: larva | Result: Prefer "Injection", "Soak" or "Nanocarrier"`
+- `Level: 2 | Field Name: host plant transgenic | Field Value: yes | Result: Prefer "HIGS"`
+
+这些块作为本指南中内嵌表的确认和参考。用它们来验证推理，并引用特定规则。
+
+### 结果处理
+
+- **找到规则**：与本指南中的内嵌参考表交叉验证，确保一致性。
+- **未找到规则**：查询可能过于具体 — 放宽搜索词（如仅用第 4 层的虫态而不加口器条件）。直接回退到内嵌表。
+
+---
+
+## 阶段 5：策略综合
+
+### 任务
+
+综合所有先前阶段的证据，设计 2-3 种可行的组合递送策略。
+
+### 综合逻辑
+
+**第 1 步 — 确定场景**
+- 如果用户说"实验室"或未指定场景 → 实验室验证 → 仅限 Amplification
+- 如果用户说"田间"或"农药" → 田间应用 → HIGS / 微生物表达 / 纳米载体
+
+**第 2 步 — 应用排除规则（第 1-3 层）**
+应用影响因素中的决策规则。例如：
+- 无转基因寄主植物 → 排除 HIGS
+- 无纳米材料可用 → 排除 Nanocarrier
+- 无生防菌 → 排除该子类
+
+**第 3 步 — 应用偏好规则（第 4-5 层）**
+基于昆虫生物学和环境条件，确定优先选择的方法。
+
+**第 4 步 — 与历史记录交叉验证**
+- 如果 rnai_records 显示某种方法对该物种/基因有效 → 优先考虑
+- 如果 rnai_records 显示某种方法无效 → 降低优先级或标记为有风险
+
+**第 5 步 — 组装组合策略**
+每个策略应指定：
+- 递送方法（来自选项树的 L3 层）
+- 载体/运载工具（如适用）
+- 靶向虫态
+- 浓度指导（如 rnai_records 中有相关数据）
+- 简要依据
+
+### 策略输出示例
+
+**策略 A：体外合成 dsRNA 注射**
+- 载体：无（裸 dsRNA 溶于缓冲液）
+- 靶向虫态：3-4 龄幼虫
+- 浓度：50-200 ng/mg（基于 rnai_records 中 Spodoptera 属的记录）
+- 依据：注射可绕过肠道屏障，精确控制剂量。鳞翅目昆虫中已有充分文献支持。适用于实验室验证。
+
+**策略 B：含 dsRNA 的 E. coli HT115 饲喂**
+- 载体：E. coli HT115（RNase III 缺陷株）
+- 靶向虫态：2-3 龄幼虫
+- 寄主植物：人工饲料或叶片圆片
+- 浓度：OD600 0.8-1.0 菌液
+- 依据：非侵入性，可规模化。E. coli 扩增是标准实验室方法。适用于实验室和初步田间试验。
+
+### 边界情况
+
+- **证据冲突**：如果 rnai_records 和决策规则不一致（如记录显示饲喂有效但规则优先推荐注射），提供两个选项并注明冲突。让用户决定。
+- **新害虫无记录**：完全基于决策规则和生物学推断制定策略。注明缺乏实证验证。
+- **多虫态靶向**：为每个虫态分别设计策略，或确定一个跨虫态通用的方法（如 HIGS 提供持续暴露）。
+
+---
+
+## 阶段 6：报告生成
+
+### 任务
+
+输出结构化的递送策略设计报告。使用以下格式：
+
+### 报告结构
+
+**1. 用户上下文摘要**
+- 靶标昆虫：[拉丁名]
+- 靶标基因：[基因名]
+- 场景：[实验室验证 / 田间应用 / 未指定 → 默认实验室]
+- 关键条件：[寄主植物、环境等]
+
+**2. 害虫生物学档案**
+- 口器类型：[咀嚼式 / 刺吸式 / 等]
+- 取食结构：[叶片 / 韧皮部 / 根部 / 内部组织]
+- 害虫虫态：[卵 / 幼虫 / 蛹 / 成虫]
+- 寄主植物：[列表]
+
+**3. 历史递送记录（来自 rnai_records）**
+- [如有记录]：递送方法、载体、虫态、浓度表格
+- [如无记录]："在 rnai_records 中未找到 [物种] + [基因] 的历史记录。策略基于决策规则和生物学推断。"
+
+**4. 决策规则应用**
+- 场景限制：[规则]
+- 触发的排除规则：[列表]
+- 触发的偏好规则：[列表]
+- 环境调整：[列表]
+
+**5. 推荐递送策略**
+
+| 策略 | 方法 | 载体/运载工具 | 靶向虫态 | 浓度 | 依据 |
+|----------|--------|---------------|-------------|---------------|---------------|
+| A | ... | ... | ... | ... | ... |
+| B | ... | ... | ... | ... | ... |
+| C（可选） | ... | ... | ... | ... | ... |
+
+**6. 备注和注意事项**
+- 任何局限性、假设或证据冲突
+- 田间应用前的验证建议
+- 后续步骤建议（如"先在实验室尝试策略 A，然后扩展为策略 B 进行田间试验"）
+
+### 词汇规则
+
+**允许使用：**
+- 推荐、建议、通常、常见、可选、可调
+- "注射被推荐用于实验室条件下的精确剂量控制"
+- "刺吸式口器昆虫中常报道采用饲喂递送"
+
+**禁止使用：**
+- 保证、最好、完美、最优（除非直接引用 KB 记录原文）
+- 未经实证验证，绝不断言某种策略能保证 RNAi 成功
+
+---
+
+## 完整工作流示例
+
+```
+用户："我需要为靶向 Spodoptera frugiperda（草地贪夜蛾）V-ATPase 的
+       RNAi 设计递送策略。这是实验室验证。"
+
+Agent 执行步骤：
+
+1. 阶段 1 — 上下文收集
+   → 昆虫：Spodoptera frugiperda
+   → 基因：V-ATPase
+   → 场景：实验室验证
+   → 缺失：靶向虫态、寄主植物 → 询问用户
+   用户回复："3 龄幼虫，取食玉米叶片"
+
+2. 阶段 2 — 历史记录检索
+   search_knowledge(query="Spodoptera frugiperda V-ATPase delivery injection feeding dsRNA",
+                    knowledge_base="rnai_records", top_k=10)
+   → 返回记录显示：注射（50-200 ng/mg）、E. coli 饲喂（OD600 0.8）、
+     多种浓度。最常见的是注射。
+
+3. 阶段 3 — 害虫生物学推断
+   → 鳞翅目 → 咀嚼式口器 → 叶片取食
+   → 害虫虫态：幼虫（3 龄）
+   → 寄主：玉米（Zea mays）
+
+4. 阶段 4 — 递送策略筛选
+   search_knowledge(query="stage larva mouthparts chewing feeding leaf laboratory verification",
+                    knowledge_base="delivery_strategy", top_k=5)
+   → 规则确认：幼虫 → 优先选择注射、浸泡或壳聚糖 NPs
+   → 实验室场景 → 仅 Amplification → E. coli 或酵母
+
+5. 阶段 5 — 策略综合
+   综合证据：
+   - 实验室场景 → 仅 Amplification 大类 → E. coli 或酵母
+   - 幼虫虫态 → 注射或浸泡或壳聚糖 NPs
+   - rnai_records：该物种最常见的是注射
+   → 策略 A：体外 dsRNA 注射（精确、有充分文献支持）
+   → 策略 B：E. coli HT115 饲喂（可规模化、非侵入性）
+
+6. 阶段 6 — 报告生成
+   → 输出包含所有章节的结构化报告
+```
+
+## 计算来源参考
+
+| 组件 | 方法 |
+|-----------|--------|
+| 历史递送记录 | Chroma 向量数据库 + BM25 混合搜索 `rnai_records` KB（4245 条记录） |
+| 递送选项及决策规则 | Chroma 向量数据库 + BM25 混合搜索 `delivery_strategy` KB（来自 2 张 Excel 表的 50 条规则） |
+| 内嵌参考表 | 硬编码于 skill 文件中，用于不依赖 KB 的快速 LLM 推理 |
+| 害虫生物学推断 | LLM 昆虫学知识 |
+| 策略综合 | LLM 多源证据整合 |

@@ -1,0 +1,302 @@
+[
+  {
+    "content": "Level: Level 1 | Field Name: scene | Field Value: laboratory verification | Result: Select only from \"Amplification\"",
+    "source": "delivery_influencing_factors.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level: Level 1 | Field Name: scene | Field Value: dsRNA pesticide design | Result: Select only from \"HIGS\", \"Microbial expression\", \"Nanocarrier\"",
+    "source": "delivery_influencing_factors.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level: Level 1 | Field Name: scene | Field Value: field application | Result: Select only from \"HIGS\", \"Microbial expression\", \"Nanocarrier\"",
+    "source": "delivery_influencing_factors.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level: Level 2 | Field Name: host plant transgenic | Field Value: yes | Result: Prefer \"HIGS\"",
+    "source": "delivery_influencing_factors.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level: Level 2 | Field Name: host plant transgenic | Field Value: no | Result: Cannot choose \"HIGS\"",
+    "source": "delivery_influencing_factors.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level: Level 2 | Field Name: nanocarrier | Field Value: yes | Result: Prefer \"Nanocarrier\"",
+    "source": "delivery_influencing_factors.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level: Level 2 | Field Name: nanocarrier | Field Value: no | Result: Cannot choose \"Nanocarrier\"",
+    "source": "delivery_influencing_factors.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level: Level 3 | Field Name: biocontrol bacteria | Field Value: yes | Result: Prefer \"Microbial expression\"-\"Biocontrol bacteria\"",
+    "source": "delivery_influencing_factors.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level: Level 3 | Field Name: biocontrol bacteria | Field Value: no | Result: Cannot choose \"Microbial expression\"-\"Biocontrol bacteria\"",
+    "source": "delivery_influencing_factors.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level: Level 3 | Field Name: insect symbiotic bacteria | Field Value: yes | Result: Prefer \"Microbial expression\"-\"Insect symbiotic bacteria\"",
+    "source": "delivery_influencing_factors.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level: Level 3 | Field Name: insect symbiotic bacteria | Field Value: no | Result: Cannot choose \"Microbial expression\"-\"Insect symbiotic bacteria\"",
+    "source": "delivery_influencing_factors.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level: Level 3 | Field Name: insect virus | Field Value: yes | Result: Prefer \"Microbial expression\"-\"Insect virus\"",
+    "source": "delivery_influencing_factors.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level: Level 3 | Field Name: insect virus | Field Value: no | Result: Cannot choose \"Microbial expression\"-\"Insect virus\"",
+    "source": "delivery_influencing_factors.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level: Level 4 | Field Name: stage | Field Value: egg | Result: Prefer \"Feed\", \"Injection\"",
+    "source": "delivery_influencing_factors.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level: Level 4 | Field Name: stage | Field Value: larva | Result: Prefer \"Injection\", \"Soak\" or \"Nanocarrier\"-\"Natural nanomaterials\"-\"Chitosan NPs\" or \"Organic synthetic nanomaterials\"- \"Liposomes\"",
+    "source": "delivery_influencing_factors.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level: Level 4 | Field Name: stage | Field Value: pupa | Result: Prefer \"Injection\"",
+    "source": "delivery_influencing_factors.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level: Level 4 | Field Name: stage | Field Value: adult | Result: Prefer \"Feed\", \"Injection\", \"Topical application\" or \"Nanocarrier\"",
+    "source": "delivery_influencing_factors.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level: Level 4 | Field Name: mouthparts | Field Value: chewling or sponging | Result: Prefer \"Injection\" or \"Microbial expression\" or \"Nanocarrier\"",
+    "source": "delivery_influencing_factors.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level: Level 4 | Field Name: mouthparts | Field Value: piercing-sucking | Result: Prefer \"Feed\", \"Injection\" or \"HIGS\" or \"Nanocarrier\"",
+    "source": "delivery_influencing_factors.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level: Level 4 | Field Name: feeding structures | Field Value: leaf | Result: Prefer \"Injection\" or \"Microbial expression\" or \"Nanocarrier\"",
+    "source": "delivery_influencing_factors.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level: Level 4 | Field Name: feeding structures | Field Value: phloem | Result: Prefer \"Feed\", \"Injection\" or \"HIGS\" or \"Nanocarrier\"",
+    "source": "delivery_influencing_factors.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level: Level 4 | Field Name: feeding structures | Field Value: root | Result: Prefer \"Injection\", \"Soak\", \"Topical application\" or \"Microbial expression\"-\"Biocontrol bacteria\"-\"Rhizosphere microbes\" or \"Nanocarrier\"-\"Natural nanomaterials\"-\"Clay NPs\"",
+    "source": "delivery_influencing_factors.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level: Level 4 | Field Name: feeding structures | Field Value: internal tissue | Result: Prefer \"Feed\" or \"HIGS\"",
+    "source": "delivery_influencing_factors.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level: Level 5 | Field Name: tempture | Field Value: high | Result: Prefer \"Biocontrol bacteria\"-\"Colonizable engineered bacteria\". Cannot choose \"Liposomes\", when using \"Nanocarrier\", choose \"Inorganic nanomaterials\"-\"SiNPs\"",
+    "source": "delivery_influencing_factors.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level: Level 5 | Field Name: tempture | Field Value: middle | Result: No bias",
+    "source": "delivery_influencing_factors.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level: Level 5 | Field Name: tempture | Field Value: low | Result: Cannot choose \"Liposomes\"",
+    "source": "delivery_influencing_factors.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level: Level 5 | Field Name: light | Field Value: high | Result: Prefer \"Nanocarrier\"-\"Inorganic nanomaterials\"-\"SiNPs\"/\"LDH\"",
+    "source": "delivery_influencing_factors.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level: Level 5 | Field Name: light | Field Value: middle | Result: No bias",
+    "source": "delivery_influencing_factors.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level: Level 5 | Field Name: light | Field Value: low | Result: No bias",
+    "source": "delivery_influencing_factors.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level: Level 5 | Field Name: humidity | Field Value: high | Result: Prefer \"Nanocarrier\"-\"Natural nanomaterials\"",
+    "source": "delivery_influencing_factors.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level: Level 5 | Field Name: humidity | Field Value: middle | Result: No bias",
+    "source": "delivery_influencing_factors.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level: Level 5 | Field Name: humidity | Field Value: low | Result: Prefer \"HIGS\"-\"Endogenous expression in host plants\"",
+    "source": "delivery_influencing_factors.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level 0: Laboratory verification | Level 1: Amplification | Level 2: E. coli or yeast | Level 3: Feed",
+    "source": "delivery_options.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level 0: Laboratory verification | Level 1: Amplification | Level 2: E. coli or yeast | Level 3: Injection",
+    "source": "delivery_options.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level 0: Laboratory verification | Level 1: Amplification | Level 2: E. coli or yeast | Level 3: Soak",
+    "source": "delivery_options.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level 0: Laboratory verification | Level 1: Amplification | Level 2: E. coli or yeast | Level 3: Topical application",
+    "source": "delivery_options.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level 0: dsRNA pesticide design or field application | Level 1: HIGS | Level 2: Endogenous expression in host plants | Level 3: Transgenic",
+    "source": "delivery_options.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level 0: dsRNA pesticide design or field application | Level 1: HIGS | Level 2: Plant virus | Level 3: Host plant virus",
+    "source": "delivery_options.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level 0: dsRNA pesticide design or field application | Level 1: Microbial expression | Level 2: Biocontrol bacteria | Level 3: Colonizable engineered bacteria",
+    "source": "delivery_options.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level 0: dsRNA pesticide design or field application | Level 1: Microbial expression | Level 2: Biocontrol bacteria | Level 3: Rhizosphere microbes",
+    "source": "delivery_options.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level 0: dsRNA pesticide design or field application | Level 1: Microbial expression | Level 2: Insect virus | Level 3: Target insect virus",
+    "source": "delivery_options.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level 0: dsRNA pesticide design or field application | Level 1: Microbial expression | Level 2: Insect symbiotic bacteria | Level 3: Target insect symbiotic bacteria",
+    "source": "delivery_options.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level 0: dsRNA pesticide design or field application | Level 1: Nanocarrier | Level 2: Natural nanomaterials | Level 3: Chitosan NPs",
+    "source": "delivery_options.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level 0: dsRNA pesticide design or field application | Level 1: Nanocarrier | Level 2: Natural nanomaterials | Level 3: Clay NPs",
+    "source": "delivery_options.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level 0: dsRNA pesticide design or field application | Level 1: Nanocarrier | Level 2: Organic synthetic nanomaterials | Level 3: Liposomes",
+    "source": "delivery_options.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level 0: dsRNA pesticide design or field application | Level 1: Nanocarrier | Level 2: Organic synthetic nanomaterials | Level 3: PNPs",
+    "source": "delivery_options.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level 0: dsRNA pesticide design or field application | Level 1: Nanocarrier | Level 2: Inorganic nanomaterials | Level 3: SiNPs",
+    "source": "delivery_options.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level 0: dsRNA pesticide design or field application | Level 1: Nanocarrier | Level 2: Inorganic nanomaterials | Level 3: LDH",
+    "source": "delivery_options.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level 0: dsRNA pesticide design or field application | Level 1: Nanocarrier | Level 2: Inorganic nanomaterials | Level 3: MNPs",
+    "source": "delivery_options.xlsx",
+    "section": "record",
+    "parent_content": ""
+  },
+  {
+    "content": "Level 0: dsRNA pesticide design or field application | Level 1: Nanocarrier | Level 2: Inorganic nanomaterials | Level 3: Carbon nanomaterials",
+    "source": "delivery_options.xlsx",
+    "section": "record",
+    "parent_content": ""
+  }
+]

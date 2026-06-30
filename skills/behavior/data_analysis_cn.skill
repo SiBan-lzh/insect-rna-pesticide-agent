@@ -1,0 +1,587 @@
+---
+name: data_analysis_cn
+description: 湿实验结果统计成表 + 分析 + 科研绘图的通用指南。涵盖 RT-qPCR 归一化、Kaplan-Meier 生存分析、相关性分析和常规统计，提供可直接运行的 Python 代码模板。
+category: behavior
+required_tools_tag: [system]
+---
+
+# 数据分析指南 — RNAi 湿实验结果
+
+## 概述
+
+本指南提供将 RNAi 湿实验原始数据转化为可发表的统计分析和可视化结果的完整工作流。涵盖昆虫 RNAi 研究中四种常见分析场景：
+
+1. **RT-qPCR 分析** — Ct 值归一化，ΔΔCt 相对表达量计算
+2. **生存分析** — Kaplan-Meier 曲线，LT50/LD50 估计
+3. **相关性分析** — 分子干扰效率 vs 表型性状
+4. **常规统计** — t 检验、ANOVA、非参数检验
+
+### 先决条件
+
+在运行任何分析之前，确认以下依赖：
+
+- **Python 包**：matplotlib, pandas, seaborn, statsmodels, lifelines
+  → 检查：`python -c "import matplotlib, pandas, seaborn, statsmodels, lifelines; print('OK')"`
+  → 安装：`pip install matplotlib pandas seaborn statsmodels lifelines`
+
+遵循 analysis-standards.skill 中的依赖检查协议。
+
+### 输出约定
+
+所有生成的图片保存到 `outputs/plots/` 目录，使用描述性文件名：
+- `outputs/plots/analysis_rtqpcr_{时间戳}.png`
+- `outputs/plots/analysis_survival_{时间戳}.png`
+- `outputs/plots/analysis_correlation_{时间戳}.png`
+- `outputs/plots/analysis_stats_{时间戳}.png`
+
+生成图片后，告知用户保存路径，方便用户打开查看
+（如 `! open outputs/plots/analysis_rtqpcr_20260630_143022.png`）。
+
+### 通过 `shell` 执行
+
+本指南中的所有代码均通过 `shell` 工具执行。使用以下模式：
+
+```
+save_path = "outputs/plots/analysis_TYPE_TIMESTAMP.png"
+os.makedirs(os.path.dirname(save_path), exist_ok=True)
+```
+
+`os.makedirs` 是例外情况——它确保首次使用时输出目录存在。后续所有代码块假设该目录已存在。
+
+---
+
+## 阶段 1：RT-qPCR 数据分析
+
+### 任务
+
+对原始 Ct 值进行归一化，计算靶标基因的相对表达量（fold-change）。对照组均值在最终可视化中必须归一化为 1.0，以清晰反映倍数变化。
+
+### 工具：`shell`
+
+通过 `shell` 工具将完整的分析脚本作为单个 Python 文件执行。
+
+### 示例代码
+
+```python
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import scipy.stats as stats
+import os
+from datetime import datetime
+
+# ---------- 科研绘图风格 ----------
+plt.rcParams.update({
+    'font.sans-serif': ['Arial', 'DejaVu Sans', 'Liberation Sans'],
+    'axes.unicode_minus': False,
+    'figure.dpi': 150,
+    'savefig.bbox': 'tight'
+})
+sns.set_theme(style="ticks")
+
+# ---------- 示例数据：替换为你的真实 Ct 数据 ----------
+# 列名：Sample, Gene, Ct
+# 通常：3 个处理组 × 3 个生物学重复
+# 内参基因（如 RPL18、Actin、GAPDH）+ 靶标基因
+data = pd.DataFrame({
+    'Sample':   ['C1','C2','C3','T1','T2','T3','N1','N2','N3'] * 2,
+    'Group':    (['Control']*3 + ['dsRNA-Target']*3 + ['dsRNA-Negative']*3) * 2,
+    'Gene':     ['RPL18']*9 + ['Target']*9,
+    'Ct': [
+        # RPL18（内参）
+        22.1, 22.3, 22.0,   # Control
+        22.2, 22.4, 22.1,   # dsRNA-Target
+        22.3, 22.5, 22.2,   # dsRNA-Negative
+        # 靶标基因
+        27.5, 27.8, 27.3,   # Control
+        29.8, 30.2, 29.5,   # dsRNA-Target
+        27.6, 27.9, 27.4,   # dsRNA-Negative
+    ]
+})
+
+# ---------- ΔΔCt 计算 ----------
+# 步骤 1：ΔCt = Ct(靶标) - Ct(内参)，每个样本独立计算
+ref = data[data['Gene'] == 'RPL18'][['Sample', 'Ct']].rename(
+    columns={'Ct': 'Ct_ref'})
+tgt = data[data['Gene'] == 'Target'][['Sample', 'Group', 'Ct']].rename(
+    columns={'Ct': 'Ct_tgt'})
+merged = pd.merge(tgt, ref, on='Sample')
+merged['dCt'] = merged['Ct_tgt'] - merged['Ct_ref']
+
+# 步骤 2：ΔΔCt = ΔCt(样本) - mean(ΔCt of Control 组)
+ctrl_mean = merged[merged['Group'] == 'Control']['dCt'].mean()
+merged['ddCt'] = merged['dCt'] - ctrl_mean
+
+# 步骤 3：相对表达量 = 2^(-ΔΔCt)
+merged['Fold_change'] = 2 ** (-merged['ddCt'])
+
+# ---------- 描述性统计 ----------
+summary = merged.groupby('Group')['Fold_change'].agg(['mean', 'std', 'sem'])
+summary = summary.reset_index()
+print("=== 相对表达量汇总（Control 组归一化为 1.0）===")
+print(summary.to_string(index=False))
+
+# ---------- t 检验 vs Control ----------
+ctrl_fc = merged[merged['Group'] == 'Control']['Fold_change']
+results = []
+for grp in ['dsRNA-Target', 'dsRNA-Negative']:
+    grp_fc = merged[merged['Group'] == grp]['Fold_change']
+    t_stat, p_val = stats.ttest_ind(ctrl_fc, grp_fc)
+    results.append({'Group': grp, 't_stat': round(t_stat, 3),
+                    'p_value': round(p_val, 4)})
+print("\n=== t 检验结果（与 Control 组比较）===")
+print(pd.DataFrame(results).to_string(index=False))
+
+# ---------- 绘图：柱状图 + 误差棒 ----------
+save_path = "outputs/plots/analysis_rtqpcr_" + \
+    datetime.now().strftime("%Y%m%d_%H%M%S") + ".png"
+os.makedirs(os.path.dirname(save_path), exist_ok=True)
+
+groups = summary['Group']
+means = summary['mean']
+sems = summary['sem']
+
+colors = ['#4C72B0', '#DD8452', '#55A868']
+fig, ax = plt.subplots(figsize=(6, 4))
+bars = ax.bar(groups, means, yerr=sems, capsize=5,
+              color=colors, edgecolor='black', linewidth=0.8)
+
+# 显著性标记
+sig_map = {'dsRNA-Target': '***', 'dsRNA-Negative': 'ns'}
+for bar, grp in zip(bars, groups):
+    sig = sig_map.get(grp, '')
+    if sig:
+        ax.text(bar.get_x() + bar.get_width()/2,
+                bar.get_height() + max(sems)*0.1,
+                sig, ha='center', va='bottom', fontsize=12)
+
+ax.axhline(y=1.0, color='gray', linestyle='--', linewidth=0.7, alpha=0.6)
+ax.set_ylabel('相对表达量（Fold Change）')
+ax.set_title('靶标基因干扰效率')
+sns.despine()
+plt.tight_layout()
+plt.savefig(save_path)
+plt.close()
+print(f"\n图片已保存至：{save_path}")
+```
+
+### 结果处理
+
+执行后检查输出：
+- **汇总表**：Control 组均值应为精确的 1.0（确认归一化正确）。处理组 < 1.0 表示干扰效果。
+- **t 检验 p 值**：p < 0.05 (*)、p < 0.01 (**)、p < 0.001 (***) 表示统计学显著干扰。
+- **SEM（标准误）**：以误差棒形式展示。若 SEM 大于均值的 30%，需注意潜在的高变异性。
+- **图片**：直观确认柱高和误差棒大小。
+
+### 边界情况
+
+- **高 Ct 值（>35）**：可能表示低表达或技术失败。标记需注意，未经合理解释不应纳入分析。
+- **组间样本数不均衡**：t 检验可处理不均衡设计，但需在报告中注明。
+- **多个靶标基因**：分别对每个靶标基因重复分析。
+- **缺少内参基因数据**：无法计算 ΔΔCt。告知用户需要稳定表达的内参基因（如 RPL18、Actin、GAPDH）。
+
+---
+
+## 阶段 2：生存分析（Kaplan-Meier）
+
+### 任务
+
+使用 Kaplan-Meier 生存曲线分析 RNAi 生物测定中的昆虫死亡数据。估计 LT50（中位生存时间），通过 log-rank 检验比较组间差异。
+
+### 工具：`shell`
+
+### 示例代码
+
+```python
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+from lifelines import KaplanMeierFitter, statistics
+from datetime import datetime
+import os
+
+plt.rcParams.update({
+    'font.sans-serif': ['Arial', 'DejaVu Sans'],
+    'axes.unicode_minus': False,
+    'figure.dpi': 150,
+    'savefig.bbox': 'tight'
+})
+sns.set_theme(style="ticks")
+
+# ---------- 示例数据：替换为你的真实生存数据 ----------
+# 列名：Duration（天数）, Event（1=死亡, 0=删失/存活）, Group（分组）
+# 4 组：dsRNA-Target, dsRNA-Negative, dsGFP, Buffer 对照
+# 每组 10 头虫，观察 14 天
+np.random.seed(42)
+
+def generate_survival_data(n=10, max_days=14, hazard_scale=1.0):
+    """生成模拟生存数据（Weibull 分布）。"""
+    raw_times = np.random.weibull(2.0, n) * 7 / hazard_scale
+    times = np.clip(np.ceil(raw_times), 1, max_days).astype(int)
+    events = np.ones(n, dtype=int)
+    return times, events
+
+data_list = []
+# dsRNA-Target（高死亡率）
+t, e = generate_survival_data(hazard_scale=2.5)
+data_list.append(pd.DataFrame({'Duration': t, 'Event': e,
+                                'Group': 'dsRNA-Target'}))
+# dsRNA-Negative（低死亡率）
+t, e = generate_survival_data(hazard_scale=0.8)
+data_list.append(pd.DataFrame({'Duration': t, 'Event': e,
+                                'Group': 'dsRNA-Negative'}))
+# dsGFP 对照（极低死亡率）
+t, e = generate_survival_data(hazard_scale=0.5)
+data_list.append(pd.DataFrame({'Duration': t, 'Event': e,
+                                'Group': 'dsGFP'}))
+# Buffer 对照
+t, e = generate_survival_data(hazard_scale=0.4)
+data_list.append(pd.DataFrame({'Duration': t, 'Event': e,
+                                'Group': 'Buffer'}))
+df = pd.concat(data_list, ignore_index=True)
+
+# ---------- Kaplan-Meier 拟合 ----------
+colors = {'dsRNA-Target': '#DD8452', 'dsRNA-Negative': '#55A868',
+          'dsGFP': '#4C72B0', 'Buffer': '#C44E52'}
+fig, ax = plt.subplots(figsize=(7, 5))
+
+kmf_results = []
+for grp in ['dsRNA-Target', 'dsRNA-Negative', 'dsGFP', 'Buffer']:
+    grp_data = df[df['Group'] == grp]
+    kmf = KaplanMeierFitter()
+    kmf.fit(grp_data['Duration'], grp_data['Event'], label=grp)
+    kmf.plot_survival_function(ax=ax, color=colors[grp], linewidth=2)
+
+    # 估算 LT50
+    idx = np.searchsorted(kmf.survival_function_.values[::-1, 0], 0.5)
+    if idx < len(kmf.survival_function_):
+        lt50 = kmf.survival_function_.index[-idx-1] if idx > 0 else '>14'
+    else:
+        lt50 = '>14'
+    kmf_results.append({'Group': grp, 'LT50 (天)': str(lt50)})
+
+ax.set_xlabel('处理后天数')
+ax.set_ylabel('生存概率')
+ax.set_title('Kaplan-Meier 生存曲线')
+ax.set_ylim(0, 1.05)
+ax.legend(loc='lower left')
+sns.despine()
+plt.tight_layout()
+
+# ---------- Log-rank 检验 ----------
+from lifelines.statistics import multivariate_logrank_test
+# 两两比较：每个处理组 vs Buffer
+buffer_data = df[df['Group'] == 'Buffer']
+for grp in ['dsRNA-Target', 'dsRNA-Negative', 'dsGFP']:
+    grp_data = df[df['Group'] == grp]
+    combined = pd.concat([buffer_data, grp_data])
+    result = multivariate_logrank_test(
+        combined['Duration'], combined['Group'], combined['Event'])
+    print(f"Log-rank {grp} vs Buffer: chi2={result.test_statistic:.2f}, "
+          f"p={result.p_value:.4f}")
+
+print("\n=== LT50 汇总 ===")
+print(pd.DataFrame(kmf_results).to_string(index=False))
+
+save_path = "outputs/plots/analysis_survival_" + \
+    datetime.now().strftime("%Y%m%d_%H%M%S") + ".png"
+os.makedirs(os.path.dirname(save_path), exist_ok=True)
+plt.savefig(save_path)
+plt.close()
+print(f"\n图片已保存至：{save_path}")
+```
+
+### 结果处理
+
+- **LT50**：中位生存时间。处理组 LT50 越短，提示 RNAi 诱导的死亡率越高。若 LT50 超过实验周期，报告为 ">14 天"（或实际周期）。
+- **Log-rank p 值**：p < 0.05 表示生存曲线间存在显著差异。同时报告卡方统计量和 p 值。
+- **删失**：部分昆虫存活至实验结束，标记为右删失（Event=0）。K-M 估计器正确处理此情况。
+
+### 边界情况
+
+- **各组均无死亡**：K-M 曲线保持在 1.0。无法估计 LT50。报告为"实验窗口内未观察到死亡"。
+- **处理组 100% 死亡**：K-M 曲线降至 0。报告最后一只昆虫死亡的具体天数。
+- **小样本（每组 < 5 头）**：K-M 估计存在较大不确定性。标记此局限性。
+- **观察间隔不规律**：若观察时间不是每天记录，相应调整 Duration 列。
+
+---
+
+## 阶段 3：相关性分析
+
+### 任务
+
+分析分子干扰效率（mRNA 表达水平）与表型结果（死亡率、体重变化、发育延迟）之间的关系。使用适当的回归模型。
+
+### 工具：`shell`
+
+### 示例代码
+
+```python
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import scipy.stats as stats
+from datetime import datetime
+import os
+
+plt.rcParams.update({
+    'font.sans-serif': ['Arial', 'DejaVu Sans'],
+    'axes.unicode_minus': False,
+    'figure.dpi': 150,
+    'savefig.bbox': 'tight'
+})
+sns.set_theme(style="ticks")
+
+# ---------- 示例数据：替换为你的真实数据 ----------
+# 每行 = 一个生物学重复（个体或混合样本）
+# Relative_expression: qPCR 测量的 mRNA 水平（归一化后，Control=1.0）
+# Mortality_pct: 终点的观测死亡率百分比
+np.random.seed(123)
+n = 12
+relative_expression = np.random.uniform(0.1, 1.0, n)
+# 负相关：表达量越低 → 死亡率越高
+mortality_pct = 100 - relative_expression * 80 + np.random.normal(0, 8, n)
+mortality_pct = np.clip(mortality_pct, 0, 100)
+
+df = pd.DataFrame({
+    'Sample': [f'S{i+1}' for i in range(n)],
+    '相对表达量': relative_expression,
+    '死亡率(%)': mortality_pct
+})
+
+# ---------- Pearson 相关 ----------
+r, p = stats.pearsonr(df['相对表达量'], df['死亡率(%)'])
+print(f"Pearson 相关：r = {r:.3f}, p = {p:.4f}")
+
+# ---------- 线性回归 ----------
+slope, intercept, r_value, p_value, std_err = stats.linregress(
+    df['相对表达量'], df['死亡率(%)'])
+print(f"线性回归：y = {slope:.2f}x + {intercept:.2f}")
+print(f"R² = {r_value**2:.3f}, p = {p_value:.4f}")
+
+# ---------- 绘图 ----------
+save_path = "outputs/plots/analysis_correlation_" + \
+    datetime.now().strftime("%Y%m%d_%H%M%S") + ".png"
+os.makedirs(os.path.dirname(save_path), exist_ok=True)
+
+fig, ax = plt.subplots(figsize=(6, 5))
+ax.scatter(df['相对表达量'], df['死亡率(%)'],
+           c='#4C72B0', s=80, edgecolor='black', linewidth=0.5, alpha=0.8)
+
+# 回归线
+x_fit = np.linspace(0, 1.1, 100)
+y_fit = slope * x_fit + intercept
+ax.plot(x_fit, y_fit, color='#DD8452', linewidth=2, linestyle='-')
+
+# 标注统计量
+ax.text(0.05, 0.95, f'Pearson r = {r:.3f}\np = {p:.4f}\nR² = {r_value**2:.3f}',
+        transform=ax.transAxes, fontsize=10, verticalalignment='top',
+        bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+
+ax.set_xlabel('相对 mRNA 表达量（归一化）')
+ax.set_ylabel('死亡率 (%)')
+ax.set_title('干扰效率 vs 死亡率')
+sns.despine()
+plt.tight_layout()
+plt.savefig(save_path)
+plt.close()
+
+print(f"\n图片已保存至：{save_path}")
+```
+
+### 结果处理
+
+- **Pearson r**：范围 -1 到 +1。负 r 值 = 越高干扰（越低表达）与越高死亡率相关。|r| > 0.7 = 强相关。
+- **p 值**：p < 0.05 表示统计显著相关。
+- **R²**：模型解释的方差比例。R² 越高 = 拟合越好。
+- **散点图**：目视检查异常值和非线性模式。
+
+### 边界情况
+
+- **非线性关系**：若散点图显示明显曲线，改用 Spearman 秩相关或非线性回归替代 Pearson。
+- **异常值**：用 Z 分数（|Z| > 3）或 IQR 方法识别。分别报告包含和排除异常值的分析结果。
+- **小样本（n < 6）**：相关估计不可靠。建议仅报告描述性统计和个体数据点。
+- **天花板/地板效应**：若许多数据点聚集在 0% 或 100% 死亡率，考虑改用逻辑回归。
+
+---
+
+## 阶段 4：常规统计分析
+
+### 任务
+
+对实验组间进行常见的统计比较：t 检验、ANOVA、非参数替代方法、多重比较校正。
+
+### 工具：`shell`
+
+### 示例代码
+
+```python
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import scipy.stats as stats
+from statsmodels.stats.multicomp import pairwise_tukeyhsd
+from datetime import datetime
+import os
+
+plt.rcParams.update({
+    'font.sans-serif': ['Arial', 'DejaVu Sans'],
+    'axes.unicode_minus': False,
+    'figure.dpi': 150,
+    'savefig.bbox': 'tight'
+})
+sns.set_theme(style="ticks")
+
+# ---------- 示例数据：替换为你的真实数据 ----------
+# 示例：RNAi 处理后昆虫体重（mg）
+np.random.seed(456)
+data = pd.DataFrame({
+    'Weight': list(np.random.normal(45, 5, 8)) +   # Control
+              list(np.random.normal(32, 6, 8)) +   # dsRNA-Target
+              list(np.random.normal(42, 5, 8)) +   # dsRNA-Negative
+              list(np.random.normal(44, 4, 8)),    # dsGFP
+    'Group': ['Control']*8 + ['dsRNA-Target']*8 +
+             ['dsRNA-Negative']*8 + ['dsGFP']*8
+})
+
+# ---------- 描述性统计 ----------
+desc = data.groupby('Group')['Weight'].agg(['mean', 'std', 'sem', 'count'])
+print("=== 描述性统计 ===")
+print(desc.to_string())
+
+# ---------- 单因素 ANOVA ----------
+groups = [g for _, g in data.groupby('Group')['Weight']]
+f_stat, p_anova = stats.f_oneway(*groups)
+print(f"\n单因素 ANOVA: F = {f_stat:.3f}, p = {p_anova:.4f}")
+
+# ---------- 事后检验：Tukey HSD ----------
+if p_anova < 0.05:
+    tukey = pairwise_tukeyhsd(data['Weight'], data['Group'], alpha=0.05)
+    print("\n=== Tukey HSD 事后检验 ===")
+    print(tukey)
+else:
+    print("\nANOVA 不显著 — 跳过事后检验。")
+
+# ---------- 非参数替代（若假设不满足） ----------
+kruskal = stats.kruskal(*groups)
+print(f"\nKruskal-Wallis（非参数）: H = {kruskal.statistic:.3f}, "
+      f"p = {kruskal.pvalue:.4f}")
+
+# ---------- 绘图 ----------
+save_path = "outputs/plots/analysis_stats_" + \
+    datetime.now().strftime("%Y%m%d_%H%M%S") + ".png"
+os.makedirs(os.path.dirname(save_path), exist_ok=True)
+
+fig, ax = plt.subplots(figsize=(6, 4))
+order = ['Control', 'dsRNA-Target', 'dsRNA-Negative', 'dsGFP']
+colors = ['#4C72B0', '#DD8452', '#55A868', '#C44E52']
+sns.boxplot(data=data, x='Group', y='Weight', order=order,
+            palette=colors, ax=ax, width=0.5)
+sns.stripplot(data=data, x='Group', y='Weight', order=order,
+              color='black', alpha=0.5, size=5, ax=ax)
+
+# 标注 ANOVA 结果
+ax.text(0.5, 0.95, f'ANOVA: F={f_stat:.2f}, p={p_anova:.4f}',
+        transform=ax.transAxes, fontsize=10, ha='center',
+        bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+
+ax.set_ylabel('体重 (mg)')
+ax.set_title('RNAi 处理对体重的影响')
+sns.despine()
+plt.tight_layout()
+plt.savefig(save_path)
+plt.close()
+
+print(f"\n图片已保存至：{save_path}")
+```
+
+### 结果处理
+
+- **ANOVA 显著性**：p < 0.05 表示至少有一个组存在差异。始终跟进事后检验（Tukey HSD）确定哪些组间存在差异。
+- **正态性假设**：若每组样本量 < 10，考虑 Shapiro-Wilk 检验。若违反，使用 Kruskal-Wallis 替代 ANOVA。
+- **方差齐性假设**：使用 Levene 检验。若违反，使用 Welch ANOVA 或非参数替代方法。
+- **多重比较**：始终进行多重比较校正（Tukey HSD 用于所有配对比较，Bonferroni 用于选定对比）。
+
+### 边界情况
+
+- **仅两组比较**：使用独立 t 检验替代 ANOVA。
+- **配对数据**（同一批个体处理前后测量）：使用配对 t 检验或重复测量 ANOVA。
+- **组内零方差**（所有值相同）：无法计算 t 检验。标记为潜在的数据录入错误。
+- **缺失值**：剔除缺失值，报告排除数量。未经合理解释不进行插补。
+
+---
+
+## 阶段 5：报告生成
+
+### 任务
+
+完成上述任一分析后，综合简洁的生物学解释。遵循以下指南：
+
+### 报告结构
+
+**1. 分析摘要**（1-2 句）
+- 分析了什么，哪些组进行了比较。
+
+**2. 关键统计发现**（2-3 句）
+- 报告检验统计量、p 值和效应量。
+- 使用标准符号：均值 ± SEM, t(df) = x.xx, p = 0.xxx
+- 显著性标记：*p < 0.05, **p < 0.01, ***p < 0.001
+
+**3. 生物学解释**（2-3 句）
+- 统计结果在生物学上意味着什么？
+- 联系 RNAi 机制、靶标基因功能和观察到的表型。
+- 使用适当的谨慎措辞（提示、表明、与...一致）。
+
+**4. 局限性和注意事项**（1-2 句）
+- 样本量、变异性、技术限制。
+- 所做的任何假设。
+
+### 词汇规则
+
+**允许使用：**
+- 提示、表明、与...一致、支持...假设
+- "数据显示 dsRNA-Target 处理显著降低了靶标基因表达"
+- "这些结果与有效的 RNAi 介导的干扰一致"
+
+**禁止使用：**
+- 证明、确认、展示（暗示决定性的实验证据）
+- "RNAi 是成功的"（无 Western blot 或蛋白水平确认）
+- "该基因被沉默了"（qPCR 测量的是 mRNA 水平，非蛋白）
+- 仅基于实验室数据保证田间应用效果
+
+### 质量控制清单
+
+最终确认报告前，核对：
+- [ ] Control 组归一化为 1.0（RT-qPCR）
+- [ ] 统计检验假设已检查（正态性、方差齐性）
+- [ ] 多重比较校正已应用
+- [ ] 效应量与 p 值一并报告
+- [ ] 所有工具输出准确报告，未修改
+- [ ] 局限性已确认
+- [ ] 图片文件已保存，路径已告知用户
+
+---
+
+## 计算来源参考
+
+| 组件 | 方法 |
+|-----------|--------|
+| RT-qPCR 归一化 | ΔΔCt 法（Livak & Schmittgen, 2001）；Control 组均值 → 1.0 |
+| 生存分析 | Kaplan-Meier 估计 + log-rank 检验（lifelines） |
+| 相关性 | Pearson / Spearman 相关 + 线性回归（scipy） |
+| 组间比较 | 单因素 ANOVA + Tukey HSD（statsmodels）；Kruskal-Wallis（scipy） |
+| 绘图 | Matplotlib + Seaborn（DejaVu Sans, 150 DPI, sns ticks 主题） |
+| 执行 | 通过 shell 工具运行 Python，输出保存至 outputs/plots/ |

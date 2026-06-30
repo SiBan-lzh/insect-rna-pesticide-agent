@@ -168,3 +168,38 @@ deterministic tool results or rule-engine computations.
    - BLAST: identity %, coverage %, e-value, alignment coordinates
    - Clustal: continuous perfect-match lengths, alignment strings
    - Kinship: divergence time, taxonomic proximity
+
+## Guideline5: Dependency Check Protocol
+
+### Principle
+
+Before executing any skill workflow, check that required tools and
+libraries are available in the environment. If missing, attempt
+auto-installation via `shell` tool.
+
+### Standard Check Pattern
+
+1. **Python packages**:
+   `python -c "import <pkg1>, <pkg2>; print('OK')"`
+   - Returns "OK" if all packages are available.
+   - If ImportError → install with `pip install <pkg1> <pkg2>`.
+
+2. **System binaries**:
+   `which <binary_name>` (e.g., `which blastn`, `which samtools`)
+   - Returns the binary path if available.
+   - If empty → install with `sudo apt-get install <package>` or conda.
+
+3. **If check fails**: Use the `shell` tool to run the appropriate
+   install command. For system-level tools, inform the user about
+   manual installation steps when auto-install is not feasible
+   (e.g., RNAstructure requires a web download).
+
+4. **Proceed only after all dependencies are confirmed**.
+   If a dependency cannot be installed automatically, inform the
+   user and explain what manual steps are needed.
+
+### Scope
+
+Every skill file lists its specific dependencies in the Overview /
+Prerequisites section. This guideline defines the universal
+check-and-install protocol that applies to ALL skills.

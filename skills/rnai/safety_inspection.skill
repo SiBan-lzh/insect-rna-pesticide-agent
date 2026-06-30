@@ -21,6 +21,16 @@ The workflow consists of two levels:
 4. **Risk Aggregation** — group species results and compute summary statistics
 5. **Report Generation** — produce a natural-language ecological safety report
 
+### Prerequisites
+
+Before running this workflow, confirm the following dependencies:
+
+- **System**: NCBI BLAST+ (`blastn`), samtools, Clustal Omega (`clustalo`)
+  → Check: `which blastn && which samtools && which clustalo`
+  → Install: `sudo apt-get install ncbi-blast+ samtools clustalo`
+
+Follow the Dependency Check Protocol in analysis-standards.skill.
+
 **Per-Species Sub-Workflow — five steps:**
 1. **Homology Search** — BLAST dsRNA sequence against the NTO genome
 2. **Hit Evaluation** — select fetchable BLAST hits (identity_pct > 80)

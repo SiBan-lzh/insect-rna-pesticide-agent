@@ -18,6 +18,19 @@ The workflow consists of four phases:
 3. **dsRNA Fragment Design** — select fragment boundaries that cover high-scoring siRNA hotspots
 4. **Primer Design** — design PCR primers for each selected fragment
 
+### Prerequisites
+
+Before running this workflow, confirm the following dependencies:
+
+- **System**: RNAstructure (provides `oligowalk` binary)
+  → Check: `which oligowalk`
+  → Install: See RNAstructure documentation (requires manual download)
+- **Python**: primer3-py
+  → Check: `python -c "import primer3; print('OK')"`
+  → Install: `pip install primer3-py`
+
+Follow the Dependency Check Protocol in analysis-standards.skill.
+
 ---
 
 ## Phase 1: Sequence Preparation

@@ -1,0 +1,575 @@
+---
+name: target_design
+category: rnai
+description: Step-by-step guide for cross-species RNAi target design — map validated primers from related species to the target pest genome, reconstruct amplicons, perform spatial aggregation, functional audit, and multi-target effect detection.
+keywords: [target, target design, cross-species, blast, amplicon, annotation, mte, multi-target effect, ortholog mapping]
+required_tools_tag: [target_discovery, sequence_processing]
+---
+
+# Cross-Species RNAi Target Design Guide
+
+## Overview
+
+This guide covers the complete target design workflow that follows `target_find`. While `target_find` identifies **which genes** are promising RNAi targets (based on kinship + literature evidence), `target_design` transforms those gene names into **concrete genomic coordinates, sequences, and annotations** in the target pest species.
+
+**Input** (expected from `target_find` results):
+- Target pest species (e.g., `Spodoptera frugiperda`)
+- Candidate target gene(s) (e.g., CHS1, V-ATPase)
+- Related species evidence table — for each related species that validated the target:
+  - Related species name
+  - Primer sequences (F/R) used
+  - Mortality rate / phenotype observed
+  - Reference (PMID)
+
+**Output**:
+- Validated amplicon sequences (cross-species conserved regions)
+- Target species hit coordinates with spatial clustering
+- Functional annotations (transcript ID, gene description)
+- Recommendation index per target
+- Multi-target effect (MTE) assessment
+
+The workflow consists of nine phases:
+1. **Input Parsing** — extract candidate targets and primers from target_find results
+2. **Sequence Cleaning** — remove T7 adapters, retain gene-specific 18-25nt fragments
+3. **Cross-Species Coordinate Mapping** — BLAST primers → annotate → fetch CDS
+4. **Amplicon Reconstruction** — clip validated amplicon from CDS using primer coordinates
+5. **Homology Mapping to Target** — BLAST amplicon against target species genome
+6. **Spatial Aggregation** — group hits by chromosome, merge nearby clusters
+7. **Functional Audit** — annotate each target cluster with gene features
+8. **Multi-Target Effect Detection** — check if a dsRNA can silence multiple essential genes
+9. **Report Generation** — formatted target list with recommendation index
+
+### Prerequisites
+
+Before running this workflow, confirm the following dependencies:
+
+- **System**: NCBI BLAST+ (`blastn`), BEDTools (`bedtools`)
+  → Check: `which blastn && which bedtools`
+  → Install: `sudo apt-get install ncbi-blast+ bedtools`
+
+Follow the Dependency Check Protocol in analysis-standards.skill.
+
+---
+
+## BLAST Parameter Strategy
+
+The BLAST parameters must be chosen based on the input sequence length, as different sequence types require different sensitivity/specificity trade-offs:
+
+| Sequence Length | Scenario | word_size | evalue | gapopen | gapextend | penalty | reward |
+|---------------|----------|-----------|--------|---------|----------|--------|-------|
+| **< 100 nt** (primers, siRNA) | Cross-species mapping (Phase 3) | 7 | 1.0 | 10 (default) | 4 (default) | -1 (default) | 1 (default) |
+| **≥ 100 nt** (validated amplicon) | Homology mapping to target (Phase 5) | 7 (default) | 1e-10 | 5 | 2 | -1 | 1 |
+
+**Rationale**:
+- Short sequences (<100nt) need relaxed evalue (1.0) and small word_size (7) to find distant homologs across species.
+- Long sequences (≥100nt) use strict evalue (1e-10) with adjusted gap penalties (gapopen=5, gapextend=2) to capture full-length gene structures rather than scattered fragments.
+
+---
+
+## Phase 1: Input Parsing
+
+### Task
+
+Extract structured data from the `target_find` results. The user is expected to provide the target_find report (or reference it). From this, extract:
+
+1. **Target species** — the pest species being studied (Latin binomial)
+2. **Candidate target gene list** — one or more genes with their functional categories
+3. **Related species evidence** — for each related species that contributed evidence:
+   - Related species name (Latin)
+   - Primer-F and Primer-R sequences (used in the original RNAi study)
+   - Mortality rate / phenotype
+   - Target gene name (in the related species)
+   - Reference (DOI or PMID)
+
+### Target Table Structure
+
+Create a structured evidence table for each candidate target gene:
+
+**Gene: {Target Gene Name} | Category: {Functional Category}**
+
+| Related Species | Primer-F (5'→3') | Primer-R (5'→3') | Mortality | Phenotype | Reference |
+|----------------|-----------------|-----------------|-----------|-----------|-----------|
+| _S. frugiperda_ | ATGGC... | TTAGGC... | 85% | Abnormal molting | PMID: xxx |
+| _S. exigua_ | ATGGC... | TTAAGC... | 72% | Growth arrest | PMID: yyy |
+
+### Edge Cases
+
+- **Missing primer sequences**: If target_find did not include primer sequences (only gene names), the workflow cannot proceed. Request the user to provide primers for the target genes from the original literature.
+- **Multiple target genes**: Each target gene is processed independently. Repeat Phases 2-7 for each gene.
+- **Multiple primer pairs per gene**: Process each primer pair separately — they may target different regions of the same gene and yield different amplicons.
+
+---
+
+## Phase 2: Sequence Cleaning
+
+### Task
+
+Clean the primer sequences provided by the user. Primers from literature often contain T7 promoter sequences, adapter tags, or other non-gene-specific overhangs that must be removed before BLAST mapping.
+
+### Tool: `clean_seq`
+
+**Parameters:**
+- `sequence`: The raw primer sequence (F or R)
+- `seq_type`: `"dna"`
+
+**What to look for in the output:**
+- `cleaned_sequence`: the normalized uppercase sequence
+- `length`: should be 18-25 nt for gene-specific primers
+- `gc_content`: for quality check (typical range 40-60%)
+- `normalization_notes`: any U→T conversions performed
+
+### Handling T7 Adapters
+
+Many RNAi primers include T7 promoter sequences for in vitro transcription:
+- T7 promoter (sense): `TAATACGACTCACTATAGGG`
+- T7 promoter (antisense): `TAATACGACTCACTATAGGG` (same sequence, added to the 5' end)
+
+If the primer starts with `TAATACGACTCACTATAGGG`:
+1. Manually remove the T7 sequence (first 20-22 nt) before calling `clean_seq`
+2. Or call `clean_seq` on the full sequence, then use the output length to verify
+
+### Handling Results
+
+- **Both F and R primers cleaned**: Proceed to Phase 3.
+- **Primer too short (<15 nt after cleaning)**: Warn the user — may not produce specific BLAST hits.
+- **Primer contains invalid characters**: Report to user with position information.
+
+---
+
+## Phase 3: Cross-Species Coordinate Mapping
+
+### Task
+
+For each related species, map the cleaned primers to the genome to locate the target gene. This is a three-step sub-workflow:
+
+1. **BLAST** — align each primer pair against the related species genome
+2. **Annotate** — find the transcript/gene overlapping the BLAST hits
+3. **Fetch CDS** — retrieve the full CDS sequence for the identified transcript
+
+### Step 3a: BLAST Primers
+
+### Tool: `insect_blast`
+
+**Parameters (short sequence mode — primers < 100 nt):**
+- `sequence`: the cleaned primer sequence
+- `species`: related species name (Latin, underscore-separated)
+- `word_size`: `7`
+- `evalue`: `1.0`
+- `gapopen`: `10` (default)
+- `gapextend`: `4` (default)
+
+**Run BLAST for both F and R primers separately.** Each primer should map to the same gene locus (F near the 5' end, R near the 3' end of the target region).
+
+**What the output means:**
+- `hits_count`: number of genomic matches
+- Each hit contains: `subject_id` (chromosome/scaffold), `identity_pct`, `aln_length`, `s_start`, `s_end`
+- For a specific primer, the best hit typically has the highest `identity_pct` and `bit_score`
+
+### Step 3b: Annotate BLAST Hits
+
+### Tool: `insect_anno`
+
+**Parameters:**
+- `blast_hits`: the best BLAST hit(s) for each primer. Include both F and R primer hits.
+  - Each hit requires: `chromosome`, `start_position`, `end_position`, `name` (e.g., "CHS1_F_primer"), `strand`
+- `species`: related species name
+- `window_size`: `100` (default, enough to capture nearby gene features)
+
+**What to look for in the output:**
+- `hits_annotated`: how many hits were successfully annotated
+- `feature_types`: the types of features found (gene, mRNA, CDS, exon, UTR)
+- Each feature in `results` contains:
+  - `type`: feature type
+  - `attributes`: feature attributes including `ID`, `Parent`, and `gene`/`product` descriptions
+
+**How to select the right transcript:**
+- If multiple isoforms exist, prioritize the transcript whose functional description matches the target gene name.
+- Look for `gene` or `product` attributes in the feature attributes that match the known gene function.
+- If the annotation includes a `transcript_id` or `mRNA_ID`, note it for the next step.
+
+### Step 3c: Fetch CDS Sequence
+
+### Tool: `fetch_insect_cds`
+
+**Parameters:**
+- `species`: related species name
+- `transcript_id`: the transcript ID obtained from Step 3b annotation
+
+**What the output means:**
+- `status`: "success" if the transcript was found
+- `length`: CDS length in bp
+- `sequence`: the full CDS nucleotide sequence (5'→3', sense strand)
+
+### Handling Results
+
+- **Both primers map to the same gene**: Proceed to Phase 4.
+- **Primers map to different genes/chromosomes**: This may indicate non-specific primers or genome assembly issues. Flag this — do not proceed with amplicon reconstruction for this pair.
+- **Primer has no BLAST hits**: Try relaxing parameters (evalue: 10, word_size: 6). If still no hits, mark this primer pair as unmappable.
+- **Transcript ID not found in CDS database**: The annotation ID format may differ from the CDS FASTA header format. Try searching by gene name or nearby gene coordinates.
+
+---
+
+## Phase 4: Amplicon Reconstruction
+
+### Task
+
+Using the full CDS sequence and the mapped primer coordinates, extract the validated amplicon — the sequence between the 5' end of the F primer and the 3' end of the R primer.
+
+### Tool: `clip_seq`
+
+**Parameters:**
+- `sequence`: the full CDS sequence (from Phase 3c)
+- `start`: the 5' coordinate of the F primer match on the CDS
+- `length`: the distance from the F primer start to the R primer end
+  - Formula: `length = R_primer_end - F_primer_start + 1`
+- `as_reverse_complement`: `False` (keep sense strand)
+
+### Naming Convention
+
+Each validated amplicon must be named using the format:
+
+```
+{SpeciesAbbreviation}-{GeneFunction}-{Number}
+```
+
+Where:
+- **SpeciesAbbreviation**: First letter of genus + first 3 letters of species (e.g., `Sfru` for _Spodoptera frugiperda_, `Dmel` for _Drosophila melanogaster_)
+- **GeneFunction**: Abbreviated gene function (e.g., `CHS` for chitin synthase, `VAT` for V-ATPase)
+- **Number**: Sequential number (01, 02, ...) for multiple amplicons of the same gene
+
+Examples: `Sfru-CHS-01`, `Sfru-VAT-01`, `Sexi-CHS-01`
+
+### Handling Results
+
+- **Amplicon length check**: Typical dsRNA fragments are 200-500 bp. If the amplicon is <100 bp, it may be too short for effective RNAi. If >1000 bp, it may be challenging to synthesize.
+- **GC content**: 30-65% is acceptable. Flag extremes.
+- **If the amplicon extends beyond the CDS boundaries**: Warn the user — the amplicon may include UTR regions.
+
+---
+
+## Phase 5: Homology Mapping to Target
+
+### Task
+
+Use the validated amplicon (from Phase 4) as a query to BLAST against the **target pest species** genome. This identifies where the homologous sequence is located in the target species.
+
+### Tool: `insect_blast`
+
+**Parameters (long sequence mode — amplicon ≥ 100 nt):**
+- `sequence`: the validated amplicon sequence (from Phase 4)
+- `species`: target pest species name
+- `word_size`: `7` (default)
+- `evalue`: `1e-10` (strict, to capture full gene structures)
+- `gapopen`: `5` (reduced to allow intron gaps)
+- `gapextend`: `2` (reduced to allow intron gaps)
+- `penalty`: `-1`
+- `reward`: `1`
+
+**What to look for in the output:**
+- `hits_count`: number of significant matches in the target genome
+- For each hit:
+  - `subject_id`: chromosome/scaffold name
+  - `identity_pct`: sequence similarity — higher is better
+  - `aln_length`: alignment length
+  - `s_start`, `s_end`: genomic coordinates on the chromosome
+
+### Handling Results
+
+- **High-identity hits found (≥80% identity)**: Strong evidence of homology. Proceed to Phase 6.
+- **Moderate identity hits (60-80%)**: Possible homology but with divergence. Include in analysis but note lower confidence.
+- **No hits found**: The amplicon may not be conserved in the target species. Try relaxing evalue to 1e-5. If still no hits, mark this target as "not mappable."
+
+---
+
+## Phase 6: Spatial Aggregation
+
+### Task
+
+Organize all BLAST hits from Phase 5 into a structured spatial map. Group hits by chromosome, merge nearby clusters, and detect potential multi-copy genes.
+
+### Rules (LLM Reasoning — No Tool Required)
+
+**Step 1 — Group by Chromosome**
+Group all hits by `subject_id` (chromosome/scaffold). Each chromosome gets its own group.
+
+**Step 2 — Sort by Position**
+Within each chromosome group, sort hits by their genomic start position.
+
+**Step 3 — Merge Nearby Hits**
+For consecutive hits on the same chromosome:
+- Calculate the gap: `gap = next_hit_start - current_hit_end`
+- If `gap < 2000 bp`: Merge them into the same **cluster** (they likely belong to different exons of the same gene)
+- If `gap ≥ 2000 bp`: Keep as separate clusters (possible multi-copy genes or different loci)
+
+**Step 4 — Determine Clustered Range**
+For each merged cluster, report the **Full Clustered Range**:
+- `cluster_start`: start position of the first hit in the cluster
+- `cluster_end`: end position of the last hit in the cluster
+- `strand`: inferred from BLAST hit strand information
+
+### Output Format
+
+**Chromosome: {subject_id}**
+
+| Cluster | Hit Count | Cluster Start | Cluster End | Strand | Identity Range (%) | Notes |
+|---------|-----------|--------------|------------|--------|-------------------|-------|
+| 1 | 3 | 1,234,500 | 1,238,200 | + | 85.2 - 92.1 | Merged 3 hits (gap < 2kb) |
+| 2 | 1 | 2,456,000 | 2,456,300 | - | 78.5 | Singleton hit |
+
+**If multiple clusters exist on different chromosomes** with similar identity levels, note:
+> ⚠️ Multiple homologous regions detected. This may indicate multi-copy genes or pseudogenes in the target species.
+
+---
+
+## Phase 7: Functional Audit
+
+### Task
+
+Annotate each target cluster with gene feature information from the target species genome annotation. This provides the transcript ID, gene description, and functional context for each target region.
+
+### Tool: `insect_anno`
+
+**Parameters:**
+- `blast_hits`: for each cluster from Phase 6, create one BlastHitInput with:
+  - `chromosome`: the subject_id
+  - `start_position`: cluster_start
+  - `end_position`: cluster_end
+  - `name`: e.g., "CHS1_cluster1"
+  - `strand`: inferred from BLAST
+- `species`: target pest species name
+- `window_size`: `100`
+
+### What to Look For
+
+Each cluster's annotation reveals:
+- **Gene ID**: the target gene identifier in the target species
+- **Transcript ID**: specific transcript isoform
+- **Gene description**: functional annotation of the gene
+- **Feature types**: whether the region covers CDS, UTR, or non-coding features
+
+### Annotation Table
+
+| Cluster | Gene ID | Transcript ID | Description | Feature Types | Strand | Confidence |
+|---------|--------|--------------|-------------|---------------|--------|-----------|
+| 1 | gene001234 | mRNA_001 | Chitin synthase 1 | CDS, exon | + | High (92% identity) |
+| 2 | gene005678 | mRNA_005 | Chitin synthase-like | CDS, exon | - | Moderate (78%) |
+
+### Handling Results
+
+- **Cluster annotated to the expected gene**: High confidence target. Proceed to recommendation index calculation.
+- **Cluster annotated to a different gene**: The amplicon may have cross-mapped to a paralog. Flag for user attention.
+- **No annotation found**: The region may be intergenic. Lower confidence — note in the report.
+
+---
+
+## Phase 8: Multi-Target Effect Detection (MTE)
+
+### Task
+
+Assess whether a given dsRNA sequence (typically the validated amplicon) can simultaneously interfere with **multiple essential genes** in the target species. Multi-target effects can enhance RNAi pesticide efficacy by targeting multiple genes at once.
+
+### Trigger
+
+This phase is optional. Perform it when:
+- The user explicitly requests multi-target effect analysis.
+- The amplicon sequence is moderately conserved (can potentially match multiple loci).
+
+### Step 1: BLAST the Amplicon
+
+### Tool: `insect_blast`
+
+**Parameters:**
+- `sequence`: the validated amplicon sequence
+- `species`: target pest species name
+- `word_size`: `7` (default)
+- `evalue`: `1e-5` (slightly relaxed to capture moderate hits)
+- `gapopen`: `5`
+- `gapextend`: `2`
+
+**Filter results**: Keep hits with `identity_pct ≥ 80` for further analysis.
+
+### Step 2: Annotate High-Confidence Hits
+
+### Tool: `insect_anno`
+
+Annotate each qualifying hit using the same approach as Phase 7.
+
+### Step 3: MTE Assessment
+
+Analyze the annotated hits to determine:
+
+1. **Hit count**: How many distinct gene loci match the dsRNA?
+   - 1 locus → single target (no multi-target effect)
+   - 2+ loci → potential multi-target effect
+
+2. **Functional diversity**: Are the hit genes functionally related or diverse?
+   - Same pathway → synergistic effect possible
+   - Different pathways → broad-spectrum effect possible
+   - Essential genes (housekeeping) → higher lethality potential
+
+3. **Identity distribution**: Are the secondary hits nearly as strong as the primary?
+   - Secondary hits with >85% identity → strong multi-target potential
+   - Secondary hits with 80-85% identity → moderate potential
+   - Secondary hits with <80% identity → weak potential
+
+### MTE Classification
+
+| Category | Criteria | Recommendation |
+|----------|----------|---------------|
+| **Strong MTE** | ≥2 essential genes, >85% identity | Recommend as multi-targeting RNAi pesticide candidate |
+| **Moderate MTE** | ≥2 genes, 80-85% identity | Suggest further experimental validation |
+| **Single target** | 1 gene only or <80% secondary hits | Report as single-target candidate |
+
+---
+
+## Phase 9: Report Generation
+
+### Task
+
+Generate a comprehensive target design report. The report must include:
+
+### Report Structure
+
+**1. Input Summary**
+- Target species: [Latin name]
+- Source: target_find results reference
+- Candidate genes processed: [list]
+
+**2. Validated Amplicons Table**
+
+| Amplicon ID | Source Species | Gene | Length (bp) | GC% | Primer-F | Primer-R |
+|-------------|---------------|------|-------------|-----|----------|----------|
+| Sfru-CHS-01 | _S. frugiperda_ | CHS1 | 385 | 42.3 | ATCG... | GCTA... |
+
+**3. Target Species Hit Map**
+
+For each candidate gene, a spatial aggregation table (from Phase 6):
+- Chromosome, cluster range, strand, hit count, identity range
+
+**4. Functional Annotation Table** (from Phase 7)
+
+| Target Gene | Target Cluster | Gene ID | Transcript ID | Description |
+|-------------|---------------|---------|--------------|-------------|
+| CHS1 | chr1:1,234,500-1,238,200 | gene001234 | mRNA_001 | Chitin synthase 1 |
+
+**5. Recommendation Index**
+
+Calculate a recommendation index for each candidate target based on:
+
+| Factor | Weight | Scoring |
+|--------|--------|---------|
+| BLAST identity_pct (target species) | High | ≥90%=5, 85-90%=4, 80-85%=3, <80%=2 |
+| Mortality in related species | High | ≥80%=5, 60-80%=4, 40-60%=3, <40%=2 |
+| Cross-species conservation | Medium | ≥3 related species=5, 2=4, 1=3 |
+| Functional essentiality | Medium | Housekeeping=5, Pathway=4, Tissue-specific=3 |
+| Target cluster quality | Low | Single cluster=5, Multi-cluster same chr=4, Multi-chr=3 |
+
+**Overall score**: Sum of weighted scores. Present as a star rating (★) or numerical score.
+
+| Target Gene | Identity | Mortality | Conservation | Essentiality | Cluster | **Total** |
+|-------------|----------|-----------|-------------|-------------|---------|-----------|
+| CHS1 | 5 | 5 | 5 | 4 | 5 | **★★★★★** |
+| V-ATPase | 4 | 4 | 4 | 5 | 4 | **★★★★** |
+
+**6. Multi-Target Effect Assessment** (if performed)
+
+| Amplicon | Hits | Target Genes | MTE Category | Recommendation |
+|----------|------|-------------|-------------|---------------|
+| Sfru-CHS-01 | 1 | CHS1 only | Single target | Proceed with single-target design |
+| Sfru-VAT-01 | 3 | VAT-A, VAT-B, VAT-D | Strong MTE | Recommended as multi-targeting candidate |
+
+**7. Recommendations**
+- Top-priority targets for dsRNA design
+- Targets requiring further validation
+- Suggested next workflow step (dsRNA design → safety inspection → delivery design)
+
+### Vocabulary Rules
+
+**Allowed:**
+- suggest, recommend, candidate, prioritized, predicted
+- "CHS1 is recommended as the top-priority target for dsRNA design"
+- "This amplicon is predicted to map to the target species based on 92% BLAST identity"
+
+**Prohibited:**
+- prove, confirmed, guaranteed, effective (without experimental validation)
+- Never claim in vivo RNAi efficacy from in silico mapping alone
+
+### Conclusion Statement
+
+End each target design cycle with:
+> "RNAi target mining and mapping completed."
+
+Or for MTE analysis:
+> "Multi-target effect analysis completed."
+
+---
+
+## Complete Workflow Example
+
+```
+User provides target_find results showing:
+- Target: Spodoptera frugiperda
+- Candidate: CHS1 (chitin synthase)
+- Evidence: S. frugiperda (primers: ATGGC.../TTAGGC..., 85% mortality)
+            S. exigua (primers: ATGGC.../TTAAGC..., 72% mortality)
+
+Agent actions:
+
+1. Phase 1 — Input Parsing
+   → Create evidence table for CHS1 with both species' primers and mortality
+
+2. Phase 2 — Sequence Cleaning
+   → clean_seq(sequence="TAATACGACTCACTATAGGGATGGC...", seq_type="dna")
+   → Manually remove T7 adapter first, then clean
+   → Repeat for all 4 primers (2 species × 2 primers)
+
+3. Phase 3 — Cross-Species Coordinate Mapping
+   For S. frugiperda:
+   → insect_blast(sequence="ATGGC...", species="Spodoptera_frugiperda",
+                   word_size=7, evalue=1.0)
+   → insect_anno(blast_hits=[F_hit, R_hit], species="Spodoptera_frugiperda")
+   → fetch_insect_cds(species="Spodoptera_frugiperda",
+                       transcript_id="mRNA_001234")
+   → Get full CDS: 1650 bp sequence
+   Repeat for S. exigua
+
+4. Phase 4 — Amplicon Reconstruction
+   → clip_seq(sequence=CDS, start=F_start, length=R_end-F_start+1)
+   → Name: Sfru-CHS-01 (385 bp), Sexi-CHS-01 (378 bp)
+
+5. Phase 5 — Homology Mapping to Target
+   → insect_blast(sequence="Sfru-CHS-01 sequence", species="Spodoptera_frugiperda",
+                   evalue=1e-10, gapopen=5, gapextend=2)
+   → 5 hits found on chromosome 1
+
+6. Phase 6 — Spatial Aggregation
+   → Group by chr1: 5 hits, gaps < 2000bp → merge into 1 cluster
+   → Cluster range: chr1:1,234,500-1,238,200
+
+7. Phase 7 — Functional Audit
+   → insect_anno(blast_hits=[cluster1_hit], species="Spodoptera_frugiperda")
+   → Gene: CHS1, Transcript: mRNA_001, Description: Chitin synthase 1
+
+8. Phase 8 — MTE Detection
+   → insect_blast(sequence=amplicon, species="Spodoptera_frugiperda",
+                   evalue=1e-5)
+   → 1 high-confidence hit → Single target, no MTE
+
+9. Phase 9 — Report Generation
+   → Structured report with all tables and recommendation index
+```
+
+## Computation Source Reference
+
+| Component | Method |
+|-----------|--------|
+| Sequence cleaning | `clean_seq` — normalization, T/U conversion, validation |
+| Cross-species BLAST | `insect_blast` with short-sequence parameters (word_size=7, evalue=1.0) |
+| Genomic annotation | `insect_anno` — bedtools window against GFF3 |
+| CDS retrieval | `fetch_insect_cds` — FASTA search by transcript ID |
+| Amplicon clipping | `clip_seq` — coordinate-based subsequence extraction |
+| Homology mapping | `insect_blast` with long-sequence parameters (evalue=1e-10, gapopen=5) |
+| Spatial aggregation | LLM reasoning — chromosome grouping + 2000bp merge threshold |
+| Functional audit | `insect_anno` on target species genome |
+| MTE detection | `insect_blast` + `insect_anno` with relaxed evalue (1e-5) |
+| Recommendation index | LLM synthesis — identity × mortality × conservation × essentiality |

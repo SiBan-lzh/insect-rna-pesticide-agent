@@ -1,0 +1,411 @@
+---
+name: delivery_design
+category: rnai
+description: Step-by-step guide for designing optimal dsRNA delivery strategies based on insect biology, target gene properties, experimental conditions, and environmental factors. Integrates rnai_records KB for historical delivery data and delivery_strategy KB for decision rules.
+keywords: [delivery, dsrna delivery, delivery strategy, delivery method, nanocarrier, higs, microbial expression, oral delivery, injection, soaking]
+required_tools_tag: [discovery]
+---
+
+# dsRNA Delivery Strategy Design Guide
+
+## Overview
+
+This guide covers the complete delivery strategy design workflow for insect RNAi pesticide development. It integrates three information sources:
+
+1. **`rnai_records` KB** — historical delivery records for the target species and gene (delivery method, vector, insect stage, host plant)
+2. **`delivery_strategy` KB** — structured decision tables covering (a) the 4-level delivery options hierarchy tree and (b) 5-level conditional decision rules mapping biological/environmental factors to preferred methods
+3. **Embedded reference tables** (below) — condensed lookup tables for rapid reasoning
+
+The workflow consists of six phases:
+
+1. **Context Collection** — gather insect, target gene, experimental conditions
+2. **Historical Record Retrieval** — query rnai_records for past delivery data
+3. **Pest Biology Inference** — deduce mouthpart type, feeding structure, pest stage
+4. **Delivery Strategy Screening** — query delivery_strategy KB for matching rules
+5. **Strategy Synthesis** — combine evidence into 2-3 feasible combined strategies
+6. **Report Generation** — structured output with justification
+
+---
+
+## Delivery Options Reference (Embedded)
+
+This 4-level hierarchy defines all available dsRNA delivery methods.
+
+| Scene | Category (L1) | Subtype (L2) | Specific Method (L3) |
+|-------|--------------|-------------|---------------------|
+| **Laboratory verification** | Amplification | E. coli or yeast | Feed / Injection / Soak / Topical application |
+| **dsRNA pesticide design or field application** | HIGS | Endogenous expression in host plants | Transgenic |
+| | HIGS | Plant virus | Host plant virus |
+| | Microbial expression | Biocontrol bacteria | Colonizable engineered bacteria / Rhizosphere microbes |
+| | Microbial expression | Insect virus | Target insect virus |
+| | Microbial expression | Insect symbiotic bacteria | Target insect symbiotic bacteria |
+| | Nanocarrier | Natural nanomaterials | Chitosan NPs / Clay NPs |
+| | Nanocarrier | Organic synthetic nanomaterials | Liposomes / PNPs |
+| | Nanocarrier | Inorganic nanomaterials | SiNPs / LDH / MNPs / Carbon nanomaterials |
+
+**Scene-first rule:** Laboratory verification → only "Amplification" category. Field application or pesticide design → only "HIGS", "Microbial expression", "Nanocarrier".
+
+## Delivery Influencing Factors Reference (Embedded)
+
+These conditional rules determine which delivery method to prefer given the user's context.
+
+### Level 1 — Scene (mandatory)
+| Condition | Rule |
+|-----------|------|
+| scene = laboratory verification | Select only from "Amplification" |
+| scene = dsRNA pesticide design or field application | Select only from "HIGS", "Microbial expression", "Nanocarrier" |
+
+### Level 2 — Host / Nanocarrier availability
+| Condition | Rule |
+|-----------|------|
+| host plant transgenic = yes | Prefer "HIGS" |
+| host plant transgenic = no | Cannot choose "HIGS" |
+| nanocarrier = yes | Prefer "Nanocarrier" |
+| nanocarrier = no | Cannot choose "Nanocarrier" |
+
+### Level 3 — Biological agent availability
+| Condition | Rule |
+|-----------|------|
+| biocontrol bacteria = yes | Prefer "Microbial expression" → "Biocontrol bacteria" |
+| biocontrol bacteria = no | Cannot choose "Microbial expression" → "Biocontrol bacteria" |
+| insect symbiotic bacteria = yes | Prefer "Microbial expression" → "Insect symbiotic bacteria" |
+| insect symbiotic bacteria = no | Cannot choose "Microbial expression" → "Insect symbiotic bacteria" |
+| insect virus = yes | Prefer "Microbial expression" → "Insect virus" |
+| insect virus = no | Cannot choose "Microbial expression" → "Insect virus" |
+
+### Level 4 — Insect biology
+| Condition | Value | Preferred Methods |
+|-----------|-------|-------------------|
+| Stage | Egg | Feed, Injection |
+| Stage | Larva | Injection, Soak, or Chitosan NPs, or Liposomes |
+| Stage | Pupa | Injection |
+| Stage | Adult | Feed, Injection, Topical application, or Nanocarrier |
+| Mouthparts | Chewing or sponging | Injection, Microbial expression, Nanocarrier |
+| Mouthparts | Piercing-sucking | Feed, Injection, HIGS, Nanocarrier |
+| Feeding structure | Leaf | Injection, Microbial expression, Nanocarrier |
+| Feeding structure | Phloem | Feed, Injection, HIGS, Nanocarrier |
+| Feeding structure | Root | Injection, Soak, Topical application, Rhizosphere microbes, Clay NPs |
+| Feeding structure | Internal tissue | Feed, HIGS |
+
+### Level 5 — Environmental conditions
+| Condition | Value | Rule |
+|-----------|-------|------|
+| Temperature | High | Prefer Colonizable engineered bacteria. Cannot choose Liposomes. When using Nanocarrier, choose SiNPs. |
+| Temperature | Middle | No bias |
+| Temperature | Low | Cannot choose Liposomes |
+| Light | High | Prefer SiNPs / LDH |
+| Light | Middle / Low | No bias |
+| Humidity | High | Prefer Natural nanomaterials |
+| Humidity | Middle | No bias |
+| Humidity | Low | Prefer HIGS → Endogenous expression in host plants |
+
+---
+
+## Phase 1: Context Collection
+
+### Task
+
+Gather all available context from the user to drive the delivery strategy design.
+
+**Required information:**
+- `insect_name` — target insect (common name or Latin binomial, e.g., "Spodoptera frugiperda")
+- `target_gene` — target gene name or accession (e.g., "V-ATPase A", "XP_123456.1")
+
+**Optional but valuable:**
+- `experimental_conditions` — field or lab? host plant? environmental conditions?
+- `scene` — laboratory verification or field application / pesticide design?
+- `target_stage` — which life stage is targeted (egg / larva / pupa / adult)?
+- `host_plant_transgenic` — is a transgenic host plant available?
+- `nanocarrier_available` — are nanocarrier technologies accessible?
+- `biocontrol_bacteria`, `insect_symbiotic_bacteria`, `insect_virus` — availability of biological agents?
+- `environment` — temperature, light, humidity conditions?
+
+### How to Respond
+
+If `insect_name` or `target_gene` is missing, ask the user. For optional fields, probe with targeted questions rather than asking everything at once:
+
+- "Is this for laboratory validation or field application?"
+- "What life stage of the insect are you targeting?"
+- "What is the host plant / feeding substrate?"
+
+### Edge Cases
+
+- **Insect name is a common name** (e.g., "fall armyworm"): Convert to Latin binomial (Spodoptera frugiperda) before proceeding.
+- **Target gene is a synonym** (e.g., "vATPase" instead of "V-ATPase"): Use standard nomenclature; note the synonym in the report.
+- **User provides no conditions**: Default to laboratory verification scene with injection as baseline, and note assumptions in the report.
+
+---
+
+## Phase 2: Historical Record Retrieval
+
+### Task
+
+Search the `rnai_records` knowledge base for past delivery experiments on the target species and target gene. This provides real-world evidence of what has worked.
+
+### Tool: `search_knowledge`
+
+**Parameters:**
+- `query`: Combine insect Latin name and target gene with delivery-related keywords.
+  - Example: `"Spodoptera frugiperda V-ATPase delivery method injection feeding dsRNA concentration"`
+  - Example: `"Bemisia tabaci RNAi delivery stage adult feeding host plant cotton"`
+- `knowledge_base`: `"rnai_records"`
+- `top_k`: 8-12 (to get sufficient coverage of delivery-related records)
+- `semantic_weight`: 0.4 (default hybrid)
+
+**What to extract from results:**
+Each record may contain fields like:
+- `delivery_method` — how dsRNA was delivered (injection, feeding, soaking, topical)
+- `vector` — carrier/vector used (e.g., "E. coli HT115", "chitosan nanoparticles", "liposomes")
+- `developmental_stage` — insect stage at delivery
+- `concentration` — dsRNA concentration used
+- `host_plant` — host plant used for feeding-based delivery
+- `target_species` and `target_gene` for verification
+
+### Handling Results
+
+- **Records found**: Extract delivery methods, vectors, concentrations, stages, and host plants. Note which methods produced effective knockdown.
+- **Few records (0-2)**: Broaden the query — remove the gene name and search only by species. Try both Latin and common name.
+- **No records at all**: Note this in the report. Proceed to Phase 3 and rely on the delivery_strategy KB rules and embedded reference tables.
+
+### Edge Case: KB Unavailable
+
+If `rnai_records` KB is inaccessible, inform the user and proceed using only the delivery_strategy KB and embedded reference tables.
+
+---
+
+## Phase 3: Pest Biology Inference
+
+### Task
+
+Based on the insect's taxonomic identity and known biology, deduce the following characteristics:
+
+1. **Mouthpart type**: chewing/sponging vs. piercing-sucking
+2. **Feeding structure**: leaf / phloem / root / internal tissue
+3. **Typical pest stage**: which life stage causes economic damage
+4. **Host plants**: common host plants for this species
+
+### How to Infer
+
+Use your own knowledge of entomology. Key heuristics:
+
+| Insect Order | Mouthpart Type | Typical Feeding |
+|-------------|---------------|-----------------|
+| Lepidoptera (caterpillars) | Chewing | Leaf, internal tissue |
+| Hemiptera (aphids, whiteflies, planthoppers) | Piercing-sucking | Phloem |
+| Coleoptera (beetles, weevils) | Chewing | Leaf, root, internal tissue |
+| Diptera (flies, mosquitoes) | Sponging / Piercing | Varied |
+| Thysanoptera (thrips) | Piercing-sucking | Leaf, flower |
+| Orthoptera (grasshoppers) | Chewing | Leaf |
+| Acari (mites) | Piercing-sucking | Leaf |
+
+### Handling Results
+
+Record the deduced characteristics. If unsure about a specific trait, note it as "uncertain" and include multiple possibilities — the delivery_strategy KB query in Phase 4 can handle multiple values.
+
+---
+
+## Phase 4: Delivery Strategy Screening
+
+### Task
+
+Query the `delivery_strategy` knowledge base to find matching decision rules and delivery options based on the user's conditions and the insect biology deduced in Phase 3.
+
+### Tool: `search_knowledge`
+
+**Parameters for delivery options:**
+- `query`: Describe the scene and desired category. Include keywords from the delivery options hierarchy.
+  - Example: `"laboratory verification amplification E. coli yeast feed injection"`
+  - Example: `"field application nanocarrier natural nanomaterials chitosan NPs"`
+  - Example: `"dsRNA pesticide design HIGS endogenous expression host plant transgenic"`
+- `knowledge_base`: `"delivery_strategy"`
+- `top_k`: 5-8
+- `semantic_weight`: 0.4
+
+**Parameters for influencing factors:**
+- `query`: Describe the conditions using the factor framework.
+  - Example: `"stage larva mouthparts chewing feeding leaf laboratory verification"`
+  - Example: `"stage adult piercing-sucking phloem nanocarrier yes field application high temperature"`
+- `knowledge_base`: `"delivery_strategy"`
+- `top_k`: 5-8
+- `semantic_weight`: 0.4
+
+### Understanding KB Output
+
+The KB stores the exact rows from the decision tables. Each result chunk will contain fields like:
+- `Level: 4 | Field Name: stage | Field Value: larva | Result: Prefer "Injection", "Soak" or "Nanocarrier"`
+- `Level: 2 | Field Name: host plant transgenic | Field Value: yes | Result: Prefer "HIGS"`
+
+The chunks serve as confirmation and reference for the embedded tables in this guide. Use them to verify your reasoning and cite specific rules.
+
+### Handling Results
+
+- **Rules found**: Cross-reference with the embedded reference tables in this guide. Ensure consistency.
+- **No rules found**: The query may be too specific — broaden terms (e.g., use only Level 4 stage without mouthpart). Fall back to the embedded tables directly.
+
+---
+
+## Phase 5: Strategy Synthesis
+
+### Task
+
+Combine evidence from all prior phases to design 2-3 feasible combined delivery strategies.
+
+### Synthesis Logic
+
+**Step 1 — Determine Scene**
+- If the user says "lab" or no scene given → Laboratory verification → Amplification only
+- If the user says "field" or "pesticide" → Field application → HIGS / Microbial expression / Nanocarrier
+
+**Step 2 — Apply Exclusion Rules (Levels 1-3)**
+Apply the decision rules from the influencing factors. For example:
+- No host plant transgenic → exclude HIGS
+- No nanocarrier available → exclude Nanocarrier
+- No biocontrol bacteria → exclude that subtype
+
+**Step 3 — Apply Preference Rules (Levels 4-5)**
+Based on insect biology and environment, identify the preferred methods.
+
+**Step 4 — Cross-reference with Historical Records**
+- If rnai_records shows a method was effective for this species/gene → prioritize it
+- If rnai_records shows a method failed → deprioritize or flag as risky
+
+**Step 5 — Assemble Combined Strategies**
+Each strategy should specify:
+- Delivery method (from L3 of the options tree)
+- Vector / carrier (if applicable)
+- Target stage
+- Concentration guidance (from rnai_records if available)
+- Brief justification
+
+### Example Strategy Output
+
+**Strategy A: Injection of in vitro-synthesized dsRNA**
+- Vector: None (naked dsRNA in buffer)
+- Target stage: 3rd-4th instar larva
+- Concentration: 50-200 ng/mg (based on rnai_records for Spodoptera spp.)
+- Justification: Injection bypasses gut barriers, provides precise dosage control. Well-documented for Lepidoptera. Suitable for laboratory verification.
+
+**Strategy B: Oral feeding with E. coli HT115-expressed dsRNA**
+- Vector: E. coli HT115 (RNase III-deficient)
+- Target stage: 2nd-3rd instar larva
+- Host plant: Artificial diet or leaf disc
+- Concentration: OD600 0.8-1.0 bacterial culture
+- Justification: Non-invasive, scalable. E. coli amplification is the standard lab method. Suitable for both lab and preliminary field trials.
+
+### Edge Cases
+
+- **Conflicting evidence**: If rnai_records and the decision rules disagree (e.g., records show feeding worked but rules prefer injection), present both options with the conflict noted. Let the user decide.
+- **Novel pest with no records**: Base strategies entirely on decision rules and biological inference. Note the lack of empirical validation.
+- **Multiple life stages targeted**: Design separate strategies for each stage, or identify a single method that works across stages (e.g., HIGS for continuous exposure).
+
+---
+
+## Phase 6: Report Generation
+
+### Task
+
+Output a structured delivery strategy design report. Use the following format:
+
+### Report Structure
+
+**1. User Context Summary**
+- Target insect: [Latin name]
+- Target gene: [gene name]
+- Scene: [laboratory verification / field application / unspecified → assumed lab]
+- Key conditions: [host plant, environment, etc.]
+
+**2. Pest Biology Profile**
+- Mouthpart type: [chewing / piercing-sucking / etc.]
+- Feeding structure: [leaf / phloem / root / internal tissue]
+- Pest stage: [egg / larva / pupa / adult]
+- Host plants: [list]
+
+**3. Historical Delivery Records (from rnai_records)**
+- [If records found]: Table of delivery methods, vectors, stages, concentrations used for this species/gene
+- [If no records]: "No historical records found for [species] + [gene] in rnai_records. Strategies are based on decision rules and biological inference."
+
+**4. Decision Rule Application**
+- Scene restriction: [rule applied]
+- Exclusion rules triggered: [list]
+- Preference rules triggered: [list]
+- Environmental adjustments: [list]
+
+**5. Recommended Delivery Strategies**
+
+| Strategy | Method | Vector/Carrier | Target Stage | Concentration | Justification |
+|----------|--------|---------------|-------------|---------------|---------------|
+| A | ... | ... | ... | ... | ... |
+| B | ... | ... | ... | ... | ... |
+| C (optional) | ... | ... | ... | ... | ... |
+
+**6. Notes and Caveats**
+- Any limitations, assumptions, or conflicting evidence
+- Recommendations for validation before field application
+- Suggested next steps (e.g., "Start with Strategy A in lab, then scale to Strategy B for field trials")
+
+### Vocabulary Rules
+
+**Allowed:**
+- recommend, suggest, typically, commonly, option, adjustable
+- "Injection is recommended for precise dosage control in laboratory settings"
+- "Feeding-based delivery is commonly reported for piercing-sucking insects"
+
+**Prohibited:**
+- guarantee, best, perfect, optimal (unless quoting a KB record directly)
+- Never claim a strategy will guarantee RNAi success without empirical validation
+
+---
+
+## Complete Workflow Example
+
+```
+User: "I need to design a delivery strategy for RNAi targeting V-ATPase in
+       Spodoptera frugiperda (fall armyworm). This is for lab validation."
+
+Agent actions:
+
+1. Phase 1 — Context Collection
+   → insect: Spodoptera frugiperda
+   → gene: V-ATPase
+   → scene: laboratory verification
+   → missing: target stage, host plant → ask user
+   User replies: "3rd instar larvae, feeding on corn leaves"
+
+2. Phase 2 — Historical Record Retrieval
+   search_knowledge(query="Spodoptera frugiperda V-ATPase delivery injection feeding dsRNA",
+                    knowledge_base="rnai_records", top_k=10)
+   → Returns records showing: injection (50-200 ng/mg), feeding with E. coli (OD600 0.8),
+     various concentrations. Most common: injection.
+
+3. Phase 3 — Pest Biology Inference
+   → Lepidoptera → chewing mouthparts → leaf feeding
+   → Pest stage: larva (3rd instar)
+   → Host: corn (Zea mays)
+
+4. Phase 4 — Delivery Strategy Screening
+   search_knowledge(query="stage larva mouthparts chewing feeding leaf laboratory verification",
+                    knowledge_base="delivery_strategy", top_k=5)
+   → Rules confirm: Larva → prefer Injection, Soak, or Chitosan NPs
+   → Lab scene → Amplification only → E. coli or yeast
+
+5. Phase 5 — Strategy Synthesis
+   Combine evidence:
+   - Lab scene → only Amplification category → E. coli or yeast
+   - Larva stage → Injection or Soak or Chitosan NPs
+   - rnai_records: injection most common for this species
+   → Strategy A: Injection of in vitro dsRNA (precise, well-documented)
+   → Strategy B: Oral feeding with E. coli HT115 (scalable, non-invasive)
+
+6. Phase 6 — Report Generation
+   → Structured report with all sections
+```
+
+## Computation Source Reference
+
+| Component | Method |
+|-----------|--------|
+| Historical delivery records | Chroma vector DB + BM25 hybrid search on `rnai_records` KB (4245 records) |
+| Delivery options & decision rules | Chroma vector DB + BM25 hybrid search on `delivery_strategy` KB (50 rules from 2 Excel tables) |
+| Embedded reference tables | Hardcoded in skill file for rapid LLM reasoning without KB dependency |
+| Pest biology inference | LLM entomological knowledge |
+| Strategy synthesis | Multi-source evidence integration by LLM |

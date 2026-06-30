@@ -1,0 +1,234 @@
+---
+name: sirna_website_guidance
+category: rnai
+description: Step-by-step guide for recommending siRNA design websites, explaining parameter settings, and providing protocol guidance using the siRNA_website_protocol knowledge base.
+keywords: [sirna, sirna design, website protocol, parameter guidance, design tool, oligowalk]
+required_tools_tag: [discovery]
+---
+
+# siRNA Website Guidance Guide
+
+## Overview
+
+This guide covers how to help users navigate siRNA design websites and tools. It uses the `siRNA_website_protocol` knowledge base to retrieve detailed usage protocols, parameter recommendations, and troubleshooting guidance for 13 mainstream siRNA design platforms.
+
+The workflow consists of four phases:
+1. **Requirement Analysis** — identify what the user needs (specific website help, parameter advice, troubleshooting)
+2. **Knowledge Base Retrieval** — search the `siRNA_website_protocol` KB for matching protocols
+3. **Protocol Synthesis** — extract and present the relevant protocol content
+4. **Guidance Delivery** — provide clear, actionable recommendations to the user
+
+---
+
+## Phase 1: Requirement Analysis
+
+### Task
+
+Identify what the user needs regarding siRNA design tools. There are three common request types:
+
+| Request Type | User Asks About | Example |
+|-------------|----------------|---------|
+| **Type A — Website Recommendation** | Which website to use for a specific task | "Which website should I use to design siRNA for a long dsRNA sequence?" |
+| **Type B — Parameter Guidance** | How to set specific parameters on a known website | "What GC content should I set in OligoWalk?" |
+| **Type C — Troubleshooting** | Errors, limitations, or optimization strategies | "siDirect keeps rejecting my sequence, what's wrong?" |
+
+### How to Respond
+
+- **Type A**: First recommend suitable website(s) based on the user's description of their task, then offer to retrieve the protocol for details.
+- **Type B**: Search the KB for the specific tool the user mentioned and extract the parameter section.
+- **Type C**: Search the KB for the tool in question and look for known limitations or input format requirements.
+
+### Available Platforms
+
+The `siRNA_website_protocol` knowledge base contains protocols for 13 platforms:
+
+siDESIGN Center, Genscript siRNA Target Finder, siDirect 2.1, siRNA Wizard 3.1, RNAxs, DSIR, OligoWalk, Sfold 2.2, siRNA at Whitehead, siRNA Design (IDT), i-score, BLOCK-iT RNAi Designer, siMAX siRNA Design
+
+---
+
+## Phase 2: Knowledge Base Retrieval
+
+### Task
+
+Search the `siRNA_website_protocol` knowledge base to retrieve the relevant protocol content.
+
+### Tool: `search_knowledge`
+
+**Parameters:**
+- `query`: Describe what the user needs — include the tool name and the specific aspect they are asking about. Use technical English keywords.
+  - Examples:
+    - `"OligoWalk parameter settings GC content Tm"`
+    - `"siDirect 2.1 input format sequence requirements"`
+    - `"BLOCK-iT RNAi Designer step-by-step protocol"`
+    - `"siRNA Wizard 3.1 recommended settings"`
+- `knowledge_base`: `"siRNA_website_protocol"`
+- `top_k`: 3-5 (enough to cover the relevant protocol)
+- `semantic_weight`: use the knowledge base's recommended default (0.4)
+
+**What the output means:**
+This KB uses `parent_child` chunk strategy:
+- **Child chunks**: specific sections of a protocol (parameter descriptions, step details)
+- **Parent content**: the broader section context attached to each child chunk
+
+Each result may include:
+- `content`: the specific protocol section text
+- `parent_content`: broader context from the parent section
+- `source`: which document the content came from (e.g., "OligoWalk - user guide.docx")
+- `section`: the section within the document
+
+### Handling Results
+
+- **Relevant content found**: Proceed to Phase 3 to synthesize and present.
+- **No relevant content found**: The query may be too narrow — try broader terms (e.g., use just the tool name instead of a specific parameter). If still no results, inform the user that the specific information is not available in the knowledge base and suggest general siRNA design best practices.
+- **Multiple tools matched**: Present the user with options if they didn't specify a tool, or narrow down by asking which tool they are using.
+
+### Edge Case: Knowledge Base Unavailable
+
+If `search_knowledge` returns an error indicating the Chroma index is missing:
+1. Inform the user that the local siRNA protocol knowledge base is unavailable.
+2. Provide general siRNA design best practices from your own knowledge:
+   - Typical GC content range: 30-60%
+   - siRNA length: 19-21 nt
+   - Avoid stretches of 4+ identical nucleotides
+   - Avoid seed region matches to off-target transcripts
+   - Preferred target region: 50-100 nt downstream of start codon
+
+---
+
+## Phase 3: Protocol Synthesis
+
+### Task
+
+Extract the relevant protocol content from the retrieved chunks and organize it into a clear, actionable format for the user.
+
+### For Website Recommendation (Type A)
+
+Present a summary of recommended websites with:
+
+| Website | Best For | Key Features |
+|---------|----------|-------------|
+| OligoWalk | Thermodynamic scoring | Provides ΔG binding energy for each candidate siRNA |
+| siDirect 2.1 | Off-target minimization | Uses BLAST to filter off-target matches |
+| siRNA Wizard 3.1 | Easy parameter tuning | Simple interface with GC% and Tm sliders |
+
+Then offer: "Would you like me to retrieve the detailed protocol for any of these?"
+
+### For Parameter Guidance (Type B)
+
+Extract and present:
+- **Parameter name**: what it controls
+- **Recommended range**: typical values
+- **Effect**: how changing it affects results
+- **Example**: a concrete example if available
+
+### For Troubleshooting (Type C)
+
+Extract and present:
+- **Known limitation**: what the tool cannot handle
+- **Input requirements**: format, length, content constraints
+- **Common errors**: what users typically get wrong
+- **Workaround**: how to work around the limitation
+
+### Citation
+
+When presenting protocol content, cite the source document name so the user knows which tool's protocol was used.
+
+---
+
+## Phase 4: Guidance Delivery
+
+### Task
+
+Deliver the guidance to the user in a clear, structured format.
+
+### Guidance Report Structure
+
+**1. User Requirement Summary**
+- What the user asked about
+- Which tool(s) were identified as relevant
+
+**2. Protocol Content**
+- Step-by-step instructions or parameter table
+- Source citation (which document the content came from)
+
+**3. Practical Recommendations**
+- Concrete parameter values or settings to try
+- Any caveats or limitations to be aware of
+
+**4. Additional Resources (Optional)**
+- Suggest related tools that may also be useful
+- Offer to retrieve protocol for another tool if relevant
+
+### Vocabulary Rules
+
+**Allowed:**
+- recommend, suggest, typically, commonly, option, adjustable
+- "OligoWalk is recommended for thermodynamic scoring of siRNA candidates"
+- "The recommended GC content range is 30-60%"
+
+**Prohibited:**
+- guarantee, best, perfect, optimal (unless quoting the protocol directly)
+- Never claim that a specific website or setting will guarantee siRNA design success
+
+### Edge Case: User Has No Specific Tool in Mind
+
+If the user asks "How do I design siRNA?" without specifying a tool:
+1. Briefly describe 2-3 commonly used platforms (e.g., OligoWalk for thermodynamics, siDirect for off-target check).
+2. Ask which aspect of siRNA design they want to optimize.
+3. Retrieve the relevant protocol based on their answer.
+
+---
+
+## Complete Workflow Examples
+
+### Example A: Parameter Guidance
+
+```
+User: "What GC content should I use in OligoWalk?"
+
+Agent actions:
+1. Phase 1 — Requirement Analysis
+   → Type B (Parameter Guidance): user asks about OligoWalk GC content
+
+2. Phase 2 — KB Retrieval
+   search_knowledge(query="OligoWalk GC content parameter setting",
+                    knowledge_base="siRNA_website_protocol", top_k=3)
+   → Returns chunks describing OligoWalk's GC content parameter
+
+3. Phase 3 — Protocol Synthesis
+   Extract: recommended range, effect on siRNA binding, relation to Tm
+
+4. Phase 4 — Guidance Delivery
+   Present: "In OligoWalk, the GC content filter controls... The recommended
+   range is 30-60%. Setting it too high may exclude effective siRNAs..."
+```
+
+### Example B: Website Recommendation
+
+```
+User: "I need to design siRNA for a long dsRNA, which website should I use?"
+
+Agent actions:
+1. Phase 1 — Requirement Analysis
+   → Type A (Website Recommendation): user wants a tool for long dsRNA siRNA design
+
+2. Phase 2 — KB Retrieval
+   search_knowledge(query="siRNA design for long dsRNA sequence website comparison",
+                    knowledge_base="siRNA_website_protocol", top_k=5)
+   → Returns protocols from multiple tools
+
+3. Phase 3 — Protocol Synthesis
+   Compare tools: OligoWalk (thermodynamic), siDirect (off-target), IDT (comprehensive)
+
+4. Phase 4 — Guidance Delivery
+   Present: "For long dsRNA sequences, I recommend... Would you like me to
+   retrieve the detailed protocol?"
+```
+
+## Computation Source Reference
+
+| Component | Method |
+|-----------|--------|
+| Knowledge retrieval | Chroma vector DB + BM25 hybrid search (BAAI/bge-large-en-v1.5) |
+| KB content | 13 curated siRNA design website protocols (parent-child chunked) |
+| Guidance synthesis | LLM synthesis from retrieved protocol chunks |

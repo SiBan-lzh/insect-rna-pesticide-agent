@@ -1,0 +1,481 @@
+---
+name: experiment_design
+category: rnai
+description: Step-by-step guide for designing insect RNAi wet-lab experimental protocols using the experiment_protocol and rnai_records knowledge bases, with optional online literature search for parameter reference.
+keywords: [experiment, protocol, wet-lab, rnai, dsrna synthesis, delivery, qpcr, validation]
+required_tools_tag: [discovery, literature_search]
+---
+
+# Experiment Design Guide
+
+## Overview
+
+This guide covers how to design complete insect RNAi wet-lab experimental protocols. It integrates **three information sources** to produce evidence-based, species-specific experimental designs:
+
+1. **`experiment_protocol` KB** — 31 curated insect RNAi experimental plans providing step-by-step procedures, equipment requirements, and protocol logic
+2. **`rnai_records` KB** — 4245 real experimental records providing concrete parameter values (developmental stage, dsRNA concentration, host plant, delivery method, mortality rate, etc.)
+3. **Online literature search** (PubMed / OpenAlex) — optional, when KB evidence is insufficient or the user requests the latest published parameters
+
+The workflow consists of five phases:
+1. **Requirement Analysis & Multi-Source KB Search** — identify experimental constraints, search both KBs, optionally search online
+2. **Physiological Contextualization** — determine insect rearing conditions and optimal intervention window
+3. **Nucleic Acid & Formulation Design** — design dsRNA synthesis and formulation preparation steps
+4. **Delivery & Exposure Planning** — detail delivery parameters, dosage, and exposure duration
+5. **Validation Pipeline & Controls** — design qPCR validation, phenotype observation, and control groups
+
+---
+
+## Phase 1: Requirement Analysis & Multi-Source KB Search
+
+### Task
+
+Identify the experimental constraints from the user's input, then search **both** `rnai_records` (for concrete experimental parameters) and `experiment_protocol` (for procedural workflow logic). Optionally perform an online literature search when KB evidence is insufficient.
+
+### Step 1a: Identify Experimental Constraints
+
+Extract or ask the user for the following key constraints:
+
+| Constraint | Description | Example |
+|-----------|------------|---------|
+| **Target Species** | The insect species (Latin name) | _Spodoptera frugiperda_ |
+| **Target Gene** | The gene being knocked down | CHS1, V-ATPase |
+| **Developmental Stage** | Stage at which RNAi is applied | egg, larva (instar), pupa, adult |
+| **Delivery Method** | How dsRNA will be delivered | injection, feeding, soaking, topical |
+| **Experimental Scale** | Approximate number of insects per group | 30-50 per treatment |
+
+If the user has not provided all constraints, use what is available and proceed — the KB search can still find partial matches.
+
+### Step 1b: Search `rnai_records` for Experimental Parameters
+
+Search the `rnai_records` knowledge base first — it contains 4245 real experimental records with concrete parameter values that can be directly used to tailor the design to the user's species.
+
+#### Tool: `search_knowledge` (rnai_records)
+
+**Parameters:**
+- `query`: Latin species name + target gene + delivery method (if known). Use technical English keywords.
+  - Examples:
+    - `"Spodoptera frugiperda CHS1 injection dsRNA concentration"`
+    - `"Tribolium castaneum V-ATPase feeding mortality"`
+    - `"Nilaparvata lugens RNAi developmental stage instar"`
+    - `"Bombyx mori dsRNA delivery host plant"`
+- `knowledge_base`: `"rnai_records"`
+- `top_k`: 10-15 (to maximize parameter coverage per species)
+- `semantic_weight`: use the knowledge base's recommended default (0.4)
+
+**What the output means:**
+Each returned record is a real experimental entry containing actionable parameter values:
+- `developmental_stage`: the exact instar or stage used (e.g., "3rd instar larvae", "adult")
+- `delivery_method`: how dsRNA was delivered
+- `concentration`: dsRNA concentration used (e.g., "500 ng/µL", "100 µg/mL diet")
+- `dosage`: amount per insect (e.g., "1 µg per larva")
+- `host_plant`: the host plant used in feeding assays
+- `vector`: delivery vector if used (e.g., "chitosan nanoparticles")
+- `mortality_rate`: observed mortality (useful for power analysis)
+- `interference_efficiency`: knockdown efficiency reported
+- `phenotype`: observed phenotypic effects
+- `reference`: source publication
+
+**Priority Rule:** Parameters extracted from `rnai_records` for the **same species** as the user's target take highest priority. If the user's exact species has no records, use records from the closest related species (same genus or family).
+
+### Step 1c: Search `experiment_protocol` for Workflow Logic
+
+After retrieving parameter values, search the `experiment_protocol` KB for full procedural workflow logic — rearing protocols, synthesis steps, validation pipelines.
+
+#### Tool: `search_knowledge` (experiment_protocol)
+
+**Parameters:**
+- `query`: Generate technical English keywords from the constraints. Focus on procedure and technique names.
+  - Examples:
+    - `"Spodoptera frugiperda larval injection dsRNA protocol"`
+    - `"dsRNA synthesis in vitro transcription T7 purification"`
+    - `"RNA extraction qPCR validation insect RNAi"`
+    - `"chitosan nanoparticle dsRNA formulation"`
+- `knowledge_base`: `"experiment_protocol"`
+- `top_k`: 5-10 (exploratory, to cover multiple protocol aspects)
+- `semantic_weight`: use the knowledge base's recommended default (0.4)
+
+**What the output means:**
+This KB uses `parent_child` chunk strategy:
+- **Child chunks**: specific procedural steps or parameter sections
+- **Parent content**: broader context from the enclosing section
+
+Each result may include:
+- `content`: the specific protocol section
+- `parent_content`: broader section context
+- `source`: document name from the curated collection
+
+### Step 1d: Multi-Source Knowledge Synthesis
+
+Combine results from both KBs to build a complete picture:
+
+| Aspect | Primary Source | Purpose |
+|--------|--------------|---------|
+| **Developmental stage** | `rnai_records` | Real experimental stages used for this species |
+| **dsRNA concentration / dosage** | `rnai_records` | Proven effective concentrations |
+| **Host plant / diet** | `rnai_records` | Host plants used in successful experiments |
+| **Delivery method details** | Both | Cross-validate; `rnai_records` for parameters, `experiment_protocol` for procedure |
+| **Rearing conditions** | `experiment_protocol` | Temperature, humidity, light cycle |
+| **Synthesis protocol steps** | `experiment_protocol` | IVT kit, purification method, QC criteria |
+| **Validation pipeline** | `experiment_protocol` | RNA extraction, qPCR, reference genes |
+| **Phenotype observation** | Both | `rnai_records` for expected outcomes, `experiment_protocol` for scoring methods |
+
+### Step 1e: Optional Online Literature Search
+
+Perform an online literature search when:
+- The user explicitly requests the latest published parameters
+- Both KBs return insufficient results for the user's specific species or gene
+- The user wants to compare their design against recent publications
+
+#### Tools: `pubmed_Esearch` + `pubmed_Efetch` / `openalex_search`
+
+**Parameters:**
+- `query`: Latin species name + target gene + "RNAi" + parameter keywords
+  - Examples:
+    - `"Spodoptera frugiperda CHS1 RNAi injection concentration 2023"`
+    - `"Tribolium castaneum dsRNA feeding nanoparticle"`
+- `max_results`: 5-10
+- Optionally filter by year range (e.g., `min_year: "2020"`) for recent publications
+
+**What to extract from online articles:**
+- Delivery method and dosage parameters
+- Developmental stage used
+- Observed mortality / knockdown efficiency
+- Any novel formulation or delivery technique
+
+### Handling Results
+
+- **Rich results from both KBs** (covers species, gene, and delivery method): Use KB data as primary reference. Online search is optional.
+- **`rnai_records` has good parameters, `experiment_protocol` is partial**: Use `rnai_records` parameters as the foundation; supplement missing procedural steps with general best practices.
+- **`rnai_records` is sparse, `experiment_protocol` has related protocols**: Use related-species parameters from `rnai_records`, adapt to the target species using `experiment_protocol` workflow logic.
+- **Both KBs insufficient**: Perform online literature search. If still insufficient, provide reasoned estimates and clearly label them as such.
+
+### Edge Case: Knowledge Bases Unavailable
+
+If `search_knowledge` returns an error indicating the Chroma index is missing:
+1. Inform the user that local knowledge bases are unavailable.
+2. Offer to perform an online literature search as a fallback.
+3. If the user agrees, proceed with PubMed/OpenAlex search.
+4. If the user declines, use general insect RNAi experimental design principles and clearly label all parameters as estimates.
+
+---
+
+## Phase 2: Physiological Contextualization
+
+### Task
+
+Identify the target insect's developmental characteristics and rearing requirements. Determine the optimal intervention window based on the target gene's expression profile.
+
+### Insect Rearing Conditions
+
+Extract from `experiment_protocol` KB or provide general guidance:
+
+| Parameter | Typical Range | Notes |
+|-----------|---------------|-------|
+| **Temperature** | 25-28°C (most insects); 30-32°C (some tropical species) | Species-dependent; check literature |
+| **Humidity** | 50-70% RH | Prevents desiccation of small larvae |
+| **Light cycle** | 14L:10D or 16L:8D (most); 24D (soil insects) | Match the species' natural photoperiod |
+| **Diet** | Artificial diet (wheat germ-based, agar-based) or natural host | Diet composition affects RNAi efficiency |
+
+### Optimal Intervention Window
+
+The intervention window should be determined by cross-referencing two sources:
+
+**Priority 1 — `rnai_records` developmental stages:**
+Check the retrieved `rnai_records` entries for the user's target species. Use the most common developmental stage reported in successful experiments. If multiple stages are reported, present them as options with their corresponding mortality/efficiency data.
+
+**Priority 2 — Biological reasoning (if `rnai_records` has no species-specific data):**
+- **Gene expression peak**: apply RNAi before or at the time of peak expression
+- **Insect size**: larger instars are easier to inject but may have stronger immune responses
+- **Molting cycle**: genes involved in molting (e.g., CHS, RXR, EcR) are best targeted at early instar
+- **Feeding activity**: for oral delivery, ensure the insect is actively feeding
+
+**Example — using `rnai_records` data:**
+> From `rnai_records`: CHS1 was successfully targeted in _S. frugiperda_ at **3rd instar larvae** via injection (85% mortality). Another study used **4th instar** via feeding (65% mortality). Recommended intervention: **3rd-4th instar larvae**, with injection as the preferred delivery method for higher mortality.
+
+If the KB contains species-specific rearing protocols, use them as the primary reference. Otherwise, provide reasoned estimates.
+
+---
+
+## Phase 3: Nucleic Acid & Formulation Design
+
+### Task
+
+Design the dsRNA synthesis workflow and formulation preparation steps.
+
+### Step 3a: dsRNA Template Preparation
+
+| Step | Details |
+|------|---------|
+| **Template PCR** | Amplify target region (300-600 bp) using gene-specific primers with T7 promoter overhangs |
+| **T7 promoter sequence** | `TAATACGACTCACTATAGGG` (append to 5' end of forward primer, or both primers for bidirectional transcription) |
+| **PCR purification** | Column purification or ethanol precipitation; elute in nuclease-free water |
+| **Template verification** | Gel electrophoresis to confirm single band; optional: Sanger sequencing |
+
+### Step 3b: In Vitro Transcription (IVT)
+
+| Parameter | Typical Range |
+|-----------|---------------|
+| **IVT kit** | T7 RNA polymerase (commercial kits: MEGAscript, T7 RiboMAX, or HiScribe) |
+| **Incubation** | 37°C for 2-4 h (or overnight for higher yield) |
+| **DNase treatment** | Add TURBO DNase I (or equivalent) to remove template DNA, 37°C, 15 min |
+| **Purification** | LiCl precipitation, column purification, or phenol-chloroform extraction |
+| **Elution buffer** | Nuclease-free water or TE buffer |
+| **Quality check** | Nanodrop (260/280 ≥ 1.8); gel electrophoresis for size confirmation |
+
+### Step 3c: dsRNA Formulation
+
+**Priority 1 — Use `rnai_records` concentrations when available:**
+Check the retrieved `rnai_records` entries for the user's target species and delivery method. Extract the exact concentration, dosage, and formulation used in successful experiments.
+
+| Delivery Method | Formulation | Typical Concentration |
+|----------------|------------|---------------------|
+| **Injection** | dsRNA in nuclease-free PBS or saline | 1-10 µg/µL stock; 0.1-5 µg per insect |
+| **Feeding** | dsRNA mixed into artificial diet or applied on leaf discs | 20-200 µg/mL diet; 50-500 ng/mg diet |
+| **Soaking** | dsRNA in culture medium | 0.1-10 µg/mL medium |
+| **Nanoparticle** | dsRNA complexed with chitosan, CNT, or liposomes | N/P ratio 5-20; size 100-300 nm |
+
+**Example — using `rnai_records` data:**
+> From `rnai_records`: CHS1 dsRNA injected at **500 ng/µL** (1 µL per larva) achieved 85% mortality in _S. frugiperda_. V-ATPase dsRNA fed at **100 µg/mL diet** achieved 65% mortality. Recommended dosage for the user's experiment: **500 ng-1 µg per larva (injection)** or **100 µg/mL diet (feeding)**.
+
+If the KB contains species-specific formulation protocols (e.g., chitosan nanoparticle preparation), extract and present those details as the primary recommendation. Adjust the concentration based on the specific species — if the user's species differs from the KB records, scale the dosage by body weight if feasible.
+
+---
+
+## Phase 4: Delivery & Exposure Planning
+
+### Task
+
+Detail the delivery procedure, dosage parameters, and exposure duration.
+
+### Delivery Parameters from `rnai_records`
+
+Check the retrieved `rnai_records` entries for the user's target species. Extract the exact delivery parameters used:
+
+| Parameter | Where to Find in `rnai_records` |
+|-----------|--------------------------------|
+| **Developmental stage** | `developmental_stage` field — use the most common stage reported |
+| **Delivery method** | `delivery_method` field — injection, feeding, soaking, etc. |
+| **dsRNA concentration** | `concentration` field — exact µg/µL or µg/mL values |
+| **Dosage per insect** | `dosage` field — µg per insect |
+| **Host plant** | `host_plant` field — for feeding assays, use the reported host plant |
+| **Mortality rate** | `mortality_rate` field — useful for sample size power analysis |
+| **Knockdown efficiency** | `interference_efficiency` field — expected validation outcome |
+
+**Example — using `rnai_records` data:**
+> From `rnai_records`: For _S. frugiperda_ CHS1 via injection — **3rd instar larvae**, **1 µg dsRNA** in **500 nL PBS**, injected between abdominal segments, **85% mortality** at 7 days. For _S. frugiperda_ V-ATPase via feeding — **4th instar larvae**, **100 µg/mL diet** on **corn leaf discs**, **65% mortality** at 10 days.
+
+### Injection Protocol
+
+If `rnai_records` does not contain species-specific injection parameters, use these general ranges:
+
+| Parameter | Typical Range |
+|-----------|---------------|
+| **Injection site** | Hemocoel (between abdominal segments); proleg (for Lepidoptera larvae) |
+| **Needle type** | Glass capillary needle (pulled); 30-34G for larger insects |
+| **Volume** | 50 nL-2 µL per insect (depends on insect size) |
+| **Dosage** | 0.1-5 µg dsRNA per insect (100 ng-1 µg typical for larvae) |
+| **Control injection** | Same volume of buffer or dsGFP at same concentration |
+| **Post-injection recovery** | 1-2 h on fresh diet at rearing temperature |
+
+### Feeding Protocol
+
+If `rnai_records` does not contain species-specific feeding parameters, use these general ranges. **Pay special attention to the host plant** — use the host plant reported in `rnai_records` if available, or ask the user which host plant they are using:
+
+| Parameter | Typical Range |
+|-----------|---------------|
+| **Diet incorporation** | Mix dsRNA solution into molten artificial diet (≤50°C to prevent degradation) |
+| **Leaf disc method** | Apply dsRNA solution on leaf disc surface, air-dry before feeding |
+| **Concentration** | 20-200 µg/mL diet or 50-500 ng/cm² leaf area |
+| **Feeding duration** | 24-72 h (ad libitum); then transfer to untreated diet |
+| **Feeding confirmation** | Monitor consumption; starve insects 4-6 h before offering treated diet |
+
+### Exposure Maintenance
+
+| Aspect | Guidance |
+|--------|----------|
+| **Temperature** | Maintain at species-specific rearing temperature throughout |
+| **Humidity** | Keep high (60-80% RH) to prevent diet desiccation |
+| **Photoperiod** | Maintain normal light cycle |
+| **Monitoring frequency** | Daily for mortality, every 2-3 days for weight/growth |
+| **Diet change** | Replace every 2-3 days to prevent microbial growth |
+
+If the KB contains species-specific delivery protocols, prioritize those parameters. Otherwise, use the typical ranges above.
+
+---
+
+## Phase 5: Validation Pipeline & Controls
+
+### Task
+
+Design the downstream molecular validation pipeline, phenotype observation metrics, and control groups.
+
+### Step 5a: RNA Extraction & cDNA Synthesis
+
+| Step | Details |
+|------|---------|
+| **Sampling time** | 24-72 h post-delivery (depending on gene and delivery method); include multiple timepoints if possible |
+| **Tissue** | Whole insect (small species) or target tissue (fat body, midgut, integument) |
+| **RNA extraction** | TRIzol-based or column-based (RNeasy); DNase I treatment recommended |
+| **RNA QC** | Nanodrop (260/280 ≥ 2.0); gel or Bioanalyzer for integrity |
+| **cDNA synthesis** | Random hexamers or oligo-dT; commercial kit (iScript, SuperScript, or equivalent) |
+| **cDNA dilution** | 5-10× dilution in nuclease-free water for qPCR template |
+
+### Step 5b: qPCR Validation
+
+| Parameter | Guidance |
+|-----------|----------|
+| **Reference genes** | 2-3 stable housekeeping genes (actin, GAPDH, RPL18, EF1α, 18S rRNA) |
+| **Primer design** | 80-200 bp amplicon; Tm 58-62°C; GC 40-60%; cross-intron if possible |
+| **qPCR chemistry** | SYBR Green (PowerUp, SYBR Premix Ex Taq, or equivalent) |
+| **Thermal protocol** | 95°C 2 min; [95°C 15 s → 60°C 30 s] × 40 cycles; melt curve 65-95°C |
+| **Normalization** | ∆∆Cq method; normalize to control group mean = 1.0 |
+| **Replicates** | 3 biological replicates × 3 technical replicates minimum |
+
+### Step 5c: Phenotype Observation
+
+| Metric | Method | Typical Timeline |
+|--------|--------|-----------------|
+| **Mortality** | Daily count; Kaplan-Meier survival analysis | 3-14 days post-delivery |
+| **Growth inhibition** | Weight gain (mg/day); body length | 3-10 days |
+| **Molting defect** | Observation of exuviae retention, double head capsule | 2-7 days (at expected molt) |
+| **Feeding inhibition** | Diet consumption (weight); frass production | Daily |
+| **Developmental delay** | Time to pupation/adult emergence | Days to weeks |
+
+### Step 5d: Control Group Design
+
+| Control Type | Purpose | Treatment |
+|-------------|---------|-----------|
+| **Negative control (mock)** | Baseline for injection/feeding effects | Buffer or nuclease-free water only |
+| **Non-target dsRNA** | Off-target effects baseline | dsGFP (green fluorescent protein) or dsLuc (luciferase) — both absent in insects |
+| **Scrambled siRNA** | Sequence-specific effect confirmation | Scrambled version of target siRNA (same GC%, random order) |
+| **Positive control** | Verify RNAi pathway is functional | A known effective dsRNA for the species (if available) |
+
+### Step 5e: Coherence Check
+
+Before finalizing the design, verify:
+1. **Feasibility**: Can all steps be executed with the available equipment?
+2. **Timeline**: Are the timepoints realistic for the insect's development rate?
+3. **Controls**: Are all necessary controls included?
+4. **Sample size**: Is n ≥ 3 biological replicates per treatment?
+5. **Evidence support**: Are the chosen parameters supported by KB evidence or reasoned estimation?
+
+---
+
+## Report Generation
+
+### Task
+
+Generate a complete experimental design report with all sections.
+
+### Report Structure
+
+**1. Experimental Constraints Summary**
+- Target species, gene, stage, delivery method
+- Knowledge base sources used
+
+**2. Insect Rearing Protocol**
+- Temperature, humidity, light cycle, diet
+- Optimal intervention window
+
+**3. dsRNA Synthesis Protocol**
+- Template preparation (primers, T7 addition, PCR conditions)
+- IVT reaction (kit, incubation, purification)
+- Quality control criteria
+
+**4. Formulation & Delivery Protocol**
+- Formulation method (if applicable)
+- Delivery step-by-step (injection/feeding/soaking)
+- Dosage, volume, concentration
+- Exposure duration and conditions
+
+**5. Validation Protocol**
+- RNA extraction method
+- cDNA synthesis
+- qPCR parameters and reference genes
+- Phenotype observation metrics and timeline
+
+**6. Control Design**
+- All control groups with rationale
+- Sample size per group
+
+**7. Expected Outcomes**
+- Predicted knockdown efficiency (based on KB evidence or general knowledge)
+- Expected phenotypic timeline
+- Potential pitfalls
+
+### Vocabulary Rules
+
+**Allowed:**
+- recommend, suggest, typical, common, option
+- "Based on the retrieved protocol, the recommended injection volume is..."
+- "If the KB does not contain species-specific data, a reasoned estimate based on related species is..."
+
+**Prohibited:**
+- guarantee, always, never, perfect, optimal (unless quoting a specific KB protocol)
+- Never claim a specific mortality rate or knockdown efficiency without citing evidence
+
+### Edge Case: Insufficient KB Evidence
+
+If neither `rnai_records` nor `experiment_protocol` contains protocols matching the user's specific species or gene:
+1. **First fallback**: Perform an online literature search (PubMed/OpenAlex) for published experimental parameters.
+2. **Second fallback**: Use protocols from related species (same genus or family) in `rnai_records` as reference.
+3. Clearly state which parameters are from KB evidence, which are from online literature, and which are reasoned estimates.
+4. Add a note: "Species-specific protocol not found in the knowledge base. Parameters are estimated based on [related species / online literature / general principles]."
+
+---
+
+## Complete Workflow Example
+
+```
+User: "Design an RNAi experiment for Spodoptera frugiperda targeting CHS1 via injection."
+
+Agent actions:
+1. Phase 1 — Requirement Analysis & Multi-Source KB Search
+   Constraints: species=S. frugiperda, gene=CHS1, delivery=injection, stage=larva
+
+   a. Search rnai_records for experimental parameters:
+      search_knowledge(query="Spodoptera frugiperda CHS1 injection dsRNA concentration",
+                       knowledge_base="rnai_records", top_k=10)
+      → Returns 6 records: 3rd instar, 1 µg/larva, 85% mortality; 4th instar, 500 ng/larva, 78% mortality...
+
+   b. Search experiment_protocol for workflow logic:
+      search_knowledge(query="Spodoptera frugiperda larval injection dsRNA protocol",
+                       knowledge_base="experiment_protocol", top_k=8)
+      → Returns rearing protocol, injection procedure, qPCR validation details
+
+   c. (Optional) Search online for latest publications:
+      pubmed_Esearch(query="Spodoptera frugiperda CHS1 RNAi 2023 2024", max_results=5)
+      → Returns 3 recent PMIDs; fetch details with pubmed_Efetch
+
+2. Phase 2 — Physiological Contextualization
+   → From rnai_records: most studies used 3rd-4th instar larvae
+   → Rearing: 26±1°C, 60-70% RH, 14L:10D, artificial diet (from experiment_protocol)
+
+3. Phase 3 — dsRNA Design
+   → Template: 400 bp CHS1 region with T7 overhangs
+   → IVT: MEGAscript T7 kit, 37°C 4 h, LiCl purification
+   → From rnai_records: 500 ng-1 µg per larva in PBS (use this as target concentration)
+
+4. Phase 4 — Delivery Plan
+   → From rnai_records: injection between abdominal segments, 500 nL-1 µL volume
+   → Recovery: 2 h on fresh diet, then normal rearing
+
+5. Phase 5 — Validation & Controls
+   → Sampling: 24 h, 48 h, 72 h post-injection
+   → qPCR: actin + GAPDH reference, CHS1 primers
+   → Controls: PBS mock, dsGFP, untreated
+   → Phenotype: daily mortality, weight, molting defects
+
+6. Report Generation
+   → Complete structured protocol with parameter sources clearly labeled
+   → Note: "Injection dosage (500 ng-1 µg/larva) sourced from rnai_records for S. frugiperda CHS1"
+```
+
+## Computation Source Reference
+
+| Component | Method |
+|-----------|--------|
+| Experimental parameter retrieval | `rnai_records` KB — Chroma + BM25 hybrid search |
+| Protocol workflow retrieval | `experiment_protocol` KB — Chroma + BM25 hybrid search |
+| Online literature search | PubMed E-utilities API + OpenAlex REST API |
+| Protocol synthesis | LLM synthesis from multi-source KB content + domain knowledge |

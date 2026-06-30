@@ -114,7 +114,7 @@ SKILL_REGISTRY: dict[str, SkillDoc] = _discover_skills()
 SKILL_CATEGORIES: dict[str, dict] = {
     "behavior": {
         "label": "Behavior standards",
-        "skills": ["analysis-standards", "shell", "memory"],
+        "skills": ["analysis-standards", "shell", "memory", "data_analysis"],
     },
     "rnai": {
         "label": "RNAi workflow",

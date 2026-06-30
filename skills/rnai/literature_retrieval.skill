@@ -1,0 +1,302 @@
+---
+name: literature_retrieval
+category: rnai
+description: Step-by-step guide for retrieving RNAi literature from local RAG knowledge bases and online sources (PubMed/OpenAlex), extracting experimental parameters, and generating structured evidence reports.
+keywords: [literature, pubmed, openalex, rag, rnai records, knowledge retrieval, evidence report]
+required_tools_tag: [discovery, literature_search]
+---
+
+# Literature Retrieval Guide
+
+## Overview
+
+This guide covers the complete literature retrieval workflow for RNAi pesticide research. It integrates local RAG knowledge base queries with online PubMed/OpenAlex searches to gather, analyze, and report RNAi experimental evidence. An online search is always performed by default unless the user explicitly declines it.
+
+The workflow consists of five phases:
+1. **Input Analysis & Strategy Optimization** — parse user input, determine search scope
+2. **Local RAG Base Query** — search `rnai_records` for structured experimental records
+3. **Online Literature Retrieval** — search PubMed and OpenAlex for recent publications
+4. **Content Analysis & Extraction** — extract key experimental parameters from all sources
+5. **Report Generation** — produce a structured, cited evidence report
+
+---
+
+## Phase 1: Input Analysis & Strategy Optimization
+
+### Task
+
+Analyze the user's input and determine the optimal search strategy. Convert common names to Latin scientific names before searching.
+
+### Strategy Selection
+
+| User Input Pattern | Strategy | Example |
+|-------------------|----------|---------|
+| **Case A — Specific Search**: Both pest name AND target gene provided | Direct targeted retrieval | "RNAi of chitin synthase in Spodoptera frugiperda" |
+| **Case B — Fuzzy Search**: Only pest name or biological description | Broad RNAi keyword search for that species | "RNAi in Spodoptera frugiperda" or "lethal RNAi targets Spodoptera" |
+| **Case C — Expanded Search**: Target gene defined, no records in the given species | Escalate to genus → family → order level | "CHS1 RNAi Lepidoptera" |
+
+### Name Conversion Rule
+
+If the user provides a common name (e.g., "fall armyworm", "silkworm", "rice planthopper"), convert it to the standard Latin binomial name before performing any search:
+
+| Common Name | Latin Name |
+|------------|-----------|
+| Fall armyworm | _Spodoptera frugiperda_ |
+| Silkworm | _Bombyx mori_ |
+| Rice planthopper | _Nilaparvata lugens_ |
+| Tobacco hornworm | _Manduca sexta_ |
+| Red flour beetle | _Tribolium castaneum_ |
+| Yellow fever mosquito | _Aedes aegypti_ |
+
+### Quality Gate
+
+- Confirm the Latin name is valid before proceeding to Phase 2.
+- If the user input is ambiguous, ask clarifying questions before committing to a search strategy.
+
+---
+
+## Phase 2: Local RAG Base Query
+
+### Task
+
+Search the local `rnai_records` knowledge base for structured experimental records matching the target species and/or gene.
+
+### Tool: `search_knowledge`
+
+**Parameters:**
+- `query`: Latin species name plus relevant keywords (e.g., `"Spodoptera frugiperda chitin synthase RNAi"`). For fuzzy searches, use the species name plus `"RNAi"` (e.g., `"Spodoptera frugiperda RNAi"`).
+- `knowledge_base`: `"rnai_records"`
+- `top_k`: 10 (for broad exploration); 3-5 (for specific gene lookups)
+- `semantic_weight`: use the knowledge base's recommended default (0.4)
+
+**What the output means:**
+Each returned record typically contains:
+- `species`: the insect species studied
+- `target_gene`: the gene targeted by RNAi
+- `primer_sequences` or `dsRNA_sequence`: sequences used
+- `phenotype`: observed phenotypic effects
+- `mortality_rate`: reported mortality percentage
+- `delivery_method`: how dsRNA was delivered (injection, feeding, soaking, etc.)
+- `developmental_stage`: the stage at which RNAi was applied
+- `interference_efficiency`: measured knockdown efficiency
+- `vector`: delivery vector if used
+- `reference`: source literature reference
+
+### Handling Results
+
+- **Sufficient records found** (≥5 relevant records): Proceed to Phase 4 (Content Analysis). Online retrieval (Phase 3) may be skipped only if the user did not request the latest publications.
+- **Few or no records found** (<5 relevant records): Always proceed to Phase 3 for online retrieval.
+- **No records found at all**: Report this to the user and proceed to Phase 3.
+
+### Edge Case: Knowledge Base Unavailable
+
+If `search_knowledge` returns an error indicating the Chroma index is missing or the knowledge base is not found:
+1. Inform the user that the local knowledge base is unavailable.
+2. Proceed directly to Phase 3 (Online Literature Retrieval).
+3. Note in the final report that the local RAG base was unavailable.
+
+---
+
+## Phase 3: Online Literature Retrieval
+
+### Task
+
+Search online databases (PubMed and OpenAlex) for relevant publications. This phase is **always executed by default** unless the user explicitly states they do not want online searches.
+
+### Step 3a: PubMed Search
+
+Use `pubmed_Esearch` to find relevant PMIDs, then `pubmed_Efetch` to retrieve full details.
+
+#### Tool: `pubmed_Esearch`
+
+**Parameters:**
+- `query`: Simplified keywords — start with a specific query, broaden if no results. Use Latin names, not common names.
+  - Example: `"RNAi Spodoptera frugiperda chitin synthase"`
+  - Broadened: `"RNAi Spodoptera frugiperda"` or `"RNAi Lepidoptera"`
+- `max_results`: 10-20 (default 10)
+- `min_year`: Optional year filter (e.g., `"2020"`)
+- `max_year`: Optional year filter (e.g., `"2025"`)
+
+**What the output means:**
+- `pmids`: list of PubMed IDs matching the query
+- `total_count`: total number of results found
+- If `pmids` is empty, the query returned no results — broaden the search terms.
+
+#### Tool: `pubmed_Efetch`
+
+**Parameters:**
+- `pmids`: comma-separated PMIDs from `pubmed_Esearch` output
+
+**What the output means:**
+Each returned article contains:
+- `pubmed_id`: PMID
+- `title`: article title
+- `abstract`: article abstract
+- `doi`: Digital Object Identifier
+- `publication_year`: year of publication
+- `concepts`: MeSH terms or keywords (up to 6)
+
+### Step 3b: OpenAlex Search (Complementary)
+
+Use `openalex_search` as a complementary search. OpenAlex is free, requires no API key, and provides citation counts that help assess article impact.
+
+#### Tool: `openalex_search`
+
+**Parameters:**
+- `keyword`: search keywords (same strategy as PubMed)
+- `max_results`: 10-20
+- `field`: optional field filter (e.g., `"insect"`, `"molecular biology"`, `"agriculture"`)
+- `min_year`: optional year filter
+- `max_year`: optional year filter
+
+**What the output means:**
+Each returned article contains:
+- `title`: article title
+- `abstract`: rebuilt abstract text
+- `doi`: DOI link
+- `publication_year`: year of publication
+- `cited_by_count`: citation count (useful for impact assessment)
+- `concepts`: research concept tags (up to 6)
+
+### Result Filtering
+
+Review the metadata of all returned articles and filter out irrelevant hits:
+- Keep only publications strictly related to **insect RNAi** (not mammalian RNAi, not plant RNAi, not siRNA therapeutics)
+- Remove duplicates across PubMed and OpenAlex results
+- Prioritize articles with available abstracts (they contain usable experimental details)
+
+### Handling No Results
+
+If both PubMed and OpenAlex return no results:
+1. Broaden the search scope (use fewer keywords, expand to genus/family level).
+2. If still no results, inform the user and suggest alternative search terms or species.
+3. Do **not** fabricate or hallucinate references.
+
+---
+
+## Phase 4: Content Analysis & Extraction
+
+### Task
+
+Extract key experimental parameters from all retrieved sources (RAG records + online articles). Organize the extracted data for the final report.
+
+### Extraction Template
+
+For each retrieved article or record, extract the following fields:
+
+| Field | Description | Example |
+|-------|------------|---------|
+| **Literature Source** | PMID, DOI, Title, Journal, Publication Year | PMID: 12345678, DOI: 10.xxx/xxxx |
+| **Target Details** | Target gene name, identifier, biological function | CHS1, chitin synthase, chitin metabolism |
+| **Experimental Design** | RNAi delivery method, dsRNA concentration, experimental setup | Injection, 500 ng/µL, 3rd instar larvae |
+| **RNAi Outcomes** | Mortality rate, growth inhibition, phenotypic change | 85% mortality at 7 days, abnormal molting |
+| **Conclusion** | Interference efficiency, key research findings | Significant knockdown (>80%), lethal phenotype |
+
+### Organization
+
+- **Group by species**: if multiple species were searched, organize results per species.
+- **Group by target gene**: within each species, group by target gene.
+- **Deduplicate**: remove duplicate records (same PMID/same study appearing in both RAG and online results).
+
+---
+
+## Phase 5: Report Generation
+
+### Task
+
+Generate a structured, cited evidence report covering the full retrieval process and all findings.
+
+### Report Structure
+
+**1. Search Strategy**
+- Target species and/or gene
+- Search terms used (RAG, PubMed, OpenAlex)
+- Date range filter (if any)
+- Number of sources searched
+
+**2. Local RAG Results Summary**
+- Knowledge base: `rnai_records`
+- Number of records found
+- Per-species or per-gene summary table
+- Note if the knowledge base was unavailable
+
+**3. Online Literature Results**
+- PubMed results: number of PMIDs found, details fetched
+- OpenAlex results: number of articles found
+- Filtering summary (how many kept after relevance screening)
+- Per-article table: PMID, Title, Journal, Year, DOI, Key Findings
+
+**4. Experimental Parameter Summary**
+
+Organize into a structured table:
+
+| Species | Target Gene | Delivery Method | Concentration | Mortality | Phenotype | Stage | Reference |
+|---------|------------|----------------|--------------|-----------|-----------|-------|-----------|
+| _S. frugiperda_ | CHS1 | Injection | 500 ng/µL | 85% | Abnormal molting | Larva | PMID: xxx |
+| _S. frugiperda_ | V-ATPase | Feeding | 100 µg/mL | 65% | Growth arrest | Larva | PMID: yyy |
+
+**5. Conclusion & Recommendations**
+- Summary of the strongest RNAi evidence found
+- Which target genes have the best mortality/efficiency data
+- Suggested next steps for the researcher
+- If no relevant literature was found, state this clearly
+
+### Vocabulary Rules
+
+**Allowed:**
+- suggest, may, potentially, candidate, reported, observed
+- "CHS1 has been reported as an effective RNAi target in _S. frugiperda_ with 85% mortality"
+- "These findings suggest that V-ATPase may be a promising target"
+
+**Prohibited:**
+- prove, demonstrate, superior, guarantee, confirmed (unless directly quoting the original paper's conclusion)
+- Never claim experimental results that were not explicitly reported in the retrieved literature
+
+### Edge Case: No Results Found
+
+If no relevant literature was found in any source:
+1. State clearly: "No RNAi literature was found for [species/gene] in the searched databases."
+2. Suggest broadening the search (e.g., expand to genus or family level).
+3. Do **not** generate fabricated references or invent experimental parameters.
+
+---
+
+## Complete Workflow Example
+
+```
+User: "What RNAi targets have been studied in Spodoptera frugiperda?"
+
+Agent actions:
+1. Phase 1 — Input Analysis
+   Input: species="Spodoptera frugiperda" (already Latin), no specific gene
+   Strategy: Case B (Fuzzy Search) — broad RNAi keyword search
+
+2. Phase 2 — RAG Query
+   search_knowledge(query="Spodoptera frugiperda RNAi",
+                    knowledge_base="rnai_records", top_k=10)
+   → Returns 8 records (CHS1, V-ATPase, HSP70, etc.)
+
+3. Phase 3 — Online Retrieval (default: always run)
+   pubmed_Esearch(query="RNAi Spodoptera frugiperda", max_results=10)
+   → Returns 10 PMIDs
+   pubmed_Efetch(pmids="123,124,125,...")
+   → Returns full article details
+   openalex_search(keyword="RNAi Spodoptera frugiperda", max_results=10)
+   → Returns 8 articles with citation counts
+
+4. Phase 4 — Content Analysis
+   Merge RAG + online results, deduplicate, extract parameters
+
+5. Phase 5 — Report Generation
+   Generate structured report with all sections
+```
+
+## Computation Source Reference
+
+| Component | Method |
+|-----------|--------|
+| RAG knowledge retrieval | Chroma vector DB + BM25 hybrid search (BAAI/bge-large-en-v1.5) |
+| PubMed search | NCBI E-utilities API (ESearch + EFetch) |
+| OpenAlex search | OpenAlex REST API (free, no auth required) |
+| Content extraction | LLM synthesis from retrieved records |
+| Report generation | LLM synthesis |

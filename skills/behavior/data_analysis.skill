@@ -1,0 +1,620 @@
+---
+name: data_analysis
+description: Wet-lab experimental data analysis guide for RNAi research. Covers RT-qPCR normalization, Kaplan-Meier survival analysis, correlation analysis, and general statistics with ready-to-run Python code templates.
+category: behavior
+required_tools_tag: [system]
+---
+
+# Data Analysis Guide — RNAi Wet-Lab Results
+
+## Overview
+
+This guide provides a complete workflow for transforming raw RNAi experimental data into publication-ready statistical insights and visualizations. It covers four common analysis scenarios in insect RNAi research:
+
+1. **RT-qPCR Analysis** — Ct value normalization, ΔΔCt fold-change calculation
+2. **Survival Analysis** — Kaplan-Meier curves, LT50/LD50 estimation
+3. **Correlation Analysis** — molecular knockdown vs. phenotypic traits
+4. **General Statistics** — t-tests, ANOVA, non-parametric tests
+
+### Prerequisites
+
+Before running any analysis, confirm the following dependencies:
+
+- **Python packages**: matplotlib, pandas, seaborn, statsmodels, lifelines
+  → Check: `python -c "import matplotlib, pandas, seaborn, statsmodels, lifelines; print('OK')"`
+  → Install: `pip install matplotlib pandas seaborn statsmodels lifelines`
+
+Follow the Dependency Check Protocol in analysis-standards.skill.
+
+### Output Convention
+
+All generated plots are saved to `outputs/plots/` directory with descriptive filenames:
+- `outputs/plots/analysis_rtqpcr_{timestamp}.png`
+- `outputs/plots/analysis_survival_{timestamp}.png`
+- `outputs/plots/analysis_correlation_{timestamp}.png`
+- `outputs/plots/analysis_stats_{timestamp}.png`
+
+After generating a plot, inform the user of the saved path so they can open it
+(e.g., `! open outputs/plots/analysis_rtqpcr_20260630_143022.png`).
+
+### Execution via `shell`
+
+All code in this guide is executed via the `shell` tool. Use the following pattern:
+
+```
+save_path = "outputs/plots/analysis_TYPE_TIMESTAMP.png"
+os.makedirs(os.path.dirname(save_path), exist_ok=True)
+```
+
+The `os.makedirs` call is the exception — it ensures the output directory exists
+on first use. All subsequent code blocks assume it already exists.
+
+---
+
+## Phase 1: RT-qPCR Data Analysis
+
+### Task
+
+Normalize raw Ct values and calculate relative expression (fold-change) for target
+gene knockdown. The control group mean MUST be normalized to 1.0 in the final
+visualization to clearly reflect fold-change.
+
+### Tool: `shell`
+
+Execute the full analysis script as a single Python file via the `shell` tool.
+
+### Example Code
+
+```python
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import scipy.stats as stats
+import os
+from datetime import datetime
+
+# ---------- Scientific style ----------
+plt.rcParams.update({
+    'font.sans-serif': ['Arial', 'DejaVu Sans', 'Liberation Sans'],
+    'axes.unicode_minus': False,
+    'figure.dpi': 150,
+    'savefig.bbox': 'tight'
+})
+sns.set_theme(style="ticks")
+
+# ---------- Mock data: replace with your real Ct data ----------
+# Columns: Sample, Gene, Ct
+# Typically: 3 treatment groups × 3 biological replicates
+# Reference gene (e.g., RPL18, Actin, GAPDH) + Target gene
+data = pd.DataFrame({
+    'Sample':   ['C1','C2','C3','T1','T2','T3','N1','N2','N3'] * 2,
+    'Group':    (['Control']*3 + ['dsRNA-Target']*3 + ['dsRNA-Negative']*3) * 2,
+    'Gene':     ['RPL18']*9 + ['Target']*9,
+    'Ct': [
+        # RPL18 (reference)
+        22.1, 22.3, 22.0,   # Control
+        22.2, 22.4, 22.1,   # dsRNA-Target
+        22.3, 22.5, 22.2,   # dsRNA-Negative
+        # Target gene
+        27.5, 27.8, 27.3,   # Control
+        29.8, 30.2, 29.5,   # dsRNA-Target
+        27.6, 27.9, 27.4,   # dsRNA-Negative
+    ]
+})
+
+# ---------- ΔΔCt calculation ----------
+# Step 1: ΔCt = Ct(target) - Ct(reference), per sample
+ref = data[data['Gene'] == 'RPL18'][['Sample', 'Ct']].rename(
+    columns={'Ct': 'Ct_ref'})
+tgt = data[data['Gene'] == 'Target'][['Sample', 'Group', 'Ct']].rename(
+    columns={'Ct': 'Ct_tgt'})
+merged = pd.merge(tgt, ref, on='Sample')
+merged['dCt'] = merged['Ct_tgt'] - merged['Ct_ref']
+
+# Step 2: ΔΔCt = ΔCt(sample) - mean(ΔCt of Control group)
+ctrl_mean = merged[merged['Group'] == 'Control']['dCt'].mean()
+merged['ddCt'] = merged['dCt'] - ctrl_mean
+
+# Step 3: Fold-change = 2^(-ΔΔCt)
+merged['Fold_change'] = 2 ** (-merged['ddCt'])
+
+# ---------- Summary statistics ----------
+summary = merged.groupby('Group')['Fold_change'].agg(['mean', 'std', 'sem'])
+summary = summary.reset_index()
+print("=== Relative Expression Summary (Control normalized to 1.0) ===")
+print(summary.to_string(index=False))
+
+# ---------- t-test vs Control ----------
+ctrl_fc = merged[merged['Group'] == 'Control']['Fold_change']
+results = []
+for grp in ['dsRNA-Target', 'dsRNA-Negative']:
+    grp_fc = merged[merged['Group'] == grp]['Fold_change']
+    t_stat, p_val = stats.ttest_ind(ctrl_fc, grp_fc)
+    results.append({'Group': grp, 't_stat': round(t_stat, 3),
+                    'p_value': round(p_val, 4)})
+print("\n=== t-test Results vs Control ===")
+print(pd.DataFrame(results).to_string(index=False))
+
+# ---------- Plot: bar chart with error bars ----------
+save_path = "outputs/plots/analysis_rtqpcr_" + \
+    datetime.now().strftime("%Y%m%d_%H%M%S") + ".png"
+os.makedirs(os.path.dirname(save_path), exist_ok=True)
+
+groups = summary['Group']
+means = summary['mean']
+sems = summary['sem']
+
+colors = ['#4C72B0', '#DD8452', '#55A868']
+fig, ax = plt.subplots(figsize=(6, 4))
+bars = ax.bar(groups, means, yerr=sems, capsize=5,
+              color=colors, edgecolor='black', linewidth=0.8)
+
+# Significance markers
+sig_map = {'dsRNA-Target': '***', 'dsRNA-Negative': 'ns'}
+for bar, grp in zip(bars, groups):
+    sig = sig_map.get(grp, '')
+    if sig:
+        ax.text(bar.get_x() + bar.get_width()/2,
+                bar.get_height() + max(sems)*0.1,
+                sig, ha='center', va='bottom', fontsize=12)
+
+ax.axhline(y=1.0, color='gray', linestyle='--', linewidth=0.7, alpha=0.6)
+ax.set_ylabel('Relative Expression (Fold Change)')
+ax.set_title('Target Gene Knockdown Efficiency')
+sns.despine()
+plt.tight_layout()
+plt.savefig(save_path)
+plt.close()
+print(f"\nPlot saved to: {save_path}")
+```
+
+### Handling Results
+
+After execution, review the output:
+- **Summary table**: The control group mean should be exactly 1.0 (this confirms
+  normalization is correct). Treatment groups < 1.0 indicate knockdown.
+- **t-test p-values**: p < 0.05 (*), p < 0.01 (**), p < 0.001 (***) indicate
+  statistically significant knockdown.
+- **SEM (Standard Error of the Mean)**: Reported as error bars. If SEM is large
+  (>30% of mean), flag potential variability issues.
+- **Plot**: Visual confirmation of the bar heights and error bar magnitudes.
+
+### Edge Cases
+
+- **High Ct values (>35)**: May indicate low expression or technical failure.
+  Flag these for user attention — do not include in analysis without justification.
+- **Uneven group sizes**: t-test handles unequal n, but note in report.
+- **Multiple target genes**: Repeat the analysis for each target gene separately.
+- **No reference gene data**: Cannot compute ΔΔCt. Inform user that a stably
+  expressed reference gene (e.g., RPL18, Actin, GAPDH) is required.
+
+---
+
+## Phase 2: Survival Analysis (Kaplan-Meier)
+
+### Task
+
+Analyze insect mortality data from RNAi bioassays using Kaplan-Meier survival
+curves. Estimate LT50 (median survival time) and compare groups via log-rank test.
+
+### Tool: `shell`
+
+### Example Code
+
+```python
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+from lifelines import KaplanMeierFitter, statistics
+from datetime import datetime
+import os
+
+plt.rcParams.update({
+    'font.sans-serif': ['Arial', 'DejaVu Sans'],
+    'axes.unicode_minus': False,
+    'figure.dpi': 150,
+    'savefig.bbox': 'tight'
+})
+sns.set_theme(style="ticks")
+
+# ---------- Mock data: replace with your real survival data ----------
+# Columns: Duration (days), Event (1=dead, 0=censored/alive), Group
+# 4 groups: dsRNA-Target, dsRNA-Negative, dsGFP, Buffer control
+# 10 insects per group, monitored for 14 days
+np.random.seed(42)
+
+def generate_survival_data(n=10, max_days=14, hazard_scale=1.0):
+    """Generate mock survival data with Weibull-distributed survival times."""
+    raw_times = np.random.weibull(2.0, n) * 7 / hazard_scale
+    times = np.clip(np.ceil(raw_times), 1, max_days).astype(int)
+    events = np.ones(n, dtype=int)
+    return times, events
+
+data_list = []
+# dsRNA-Target (high mortality)
+t, e = generate_survival_data(hazard_scale=2.5)
+data_list.append(pd.DataFrame({'Duration': t, 'Event': e,
+                                'Group': 'dsRNA-Target'}))
+# dsRNA-Negative (low mortality)
+t, e = generate_survival_data(hazard_scale=0.8)
+data_list.append(pd.DataFrame({'Duration': t, 'Event': e,
+                                'Group': 'dsRNA-Negative'}))
+# dsGFP control (minimal mortality)
+t, e = generate_survival_data(hazard_scale=0.5)
+data_list.append(pd.DataFrame({'Duration': t, 'Event': e,
+                                'Group': 'dsGFP'}))
+# Buffer control
+t, e = generate_survival_data(hazard_scale=0.4)
+data_list.append(pd.DataFrame({'Duration': t, 'Event': e,
+                                'Group': 'Buffer'}))
+df = pd.concat(data_list, ignore_index=True)
+
+# ---------- Kaplan-Meier fit ----------
+colors = {'dsRNA-Target': '#DD8452', 'dsRNA-Negative': '#55A868',
+          'dsGFP': '#4C72B0', 'Buffer': '#C44E52'}
+fig, ax = plt.subplots(figsize=(7, 5))
+
+kmf_results = []
+for grp in ['dsRNA-Target', 'dsRNA-Negative', 'dsGFP', 'Buffer']:
+    grp_data = df[df['Group'] == grp]
+    kmf = KaplanMeierFitter()
+    kmf.fit(grp_data['Duration'], grp_data['Event'], label=grp)
+    kmf.plot_survival_function(ax=ax, color=colors[grp], linewidth=2)
+
+    # Estimate LT50
+    idx = np.searchsorted(kmf.survival_function_.values[::-1, 0], 0.5)
+    if idx < len(kmf.survival_function_):
+        lt50 = kmf.survival_function_.index[-idx-1] if idx > 0 else '>14'
+    else:
+        lt50 = '>14'
+    kmf_results.append({'Group': grp, 'LT50 (days)': str(lt50)})
+
+ax.set_xlabel('Days Post-Treatment')
+ax.set_ylabel('Survival Probability')
+ax.set_title('Kaplan-Meier Survival Curves')
+ax.set_ylim(0, 1.05)
+ax.legend(loc='lower left')
+sns.despine()
+plt.tight_layout()
+
+# ---------- Log-rank test ----------
+from lifelines.statistics import multivariate_logrank_test
+# Pairwise: compare each treatment vs Buffer
+buffer_data = df[df['Group'] == 'Buffer']
+for grp in ['dsRNA-Target', 'dsRNA-Negative', 'dsGFP']:
+    grp_data = df[df['Group'] == grp]
+    combined = pd.concat([buffer_data, grp_data])
+    result = multivariate_logrank_test(
+        combined['Duration'], combined['Group'], combined['Event'])
+    print(f"Log-rank {grp} vs Buffer: chi2={result.test_statistic:.2f}, "
+          f"p={result.p_value:.4f}")
+
+print("\n=== LT50 Summary ===")
+print(pd.DataFrame(kmf_results).to_string(index=False))
+
+save_path = "outputs/plots/analysis_survival_" + \
+    datetime.now().strftime("%Y%m%d_%H%M%S") + ".png"
+os.makedirs(os.path.dirname(save_path), exist_ok=True)
+plt.savefig(save_path)
+plt.close()
+print(f"\nPlot saved to: {save_path}")
+```
+
+### Handling Results
+
+- **LT50**: The median survival time. A shorter LT50 in the treatment group
+  suggests higher RNAi-induced mortality. If LT50 > experiment duration, report
+  as ">14 days" (or the actual duration).
+- **Log-rank p-value**: p < 0.05 indicates significant difference between
+  survival curves. Report chi-square statistic alongside p-value.
+- **Censoring**: If some insects survived to the end of the experiment, they
+  are right-censored (Event=0). The K-M estimator handles this correctly.
+
+### Edge Cases
+
+- **No mortality in any group**: K-M curve stays at 1.0. Cannot estimate LT50.
+  Report as "No mortality observed within experimental window."
+- **100% mortality in treatment group**: K-M curve drops to 0. Report exact
+  day when last insect died.
+- **Small sample size (<5 per group)**: K-M estimates have large uncertainty.
+  Flag this limitation. Consider reporting individual data points instead.
+- **Irregular observation intervals**: If observation times are not daily,
+  adjust the Duration column accordingly.
+
+---
+
+## Phase 3: Correlation Analysis
+
+### Task
+
+Analyze the relationship between molecular knockdown efficiency (mRNA expression
+level) and phenotypic outcomes (mortality, weight change, development delay).
+Use appropriate regression models.
+
+### Tool: `shell`
+
+### Example Code
+
+```python
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import scipy.stats as stats
+from datetime import datetime
+import os
+
+plt.rcParams.update({
+    'font.sans-serif': ['Arial', 'DejaVu Sans'],
+    'axes.unicode_minus': False,
+    'figure.dpi': 150,
+    'savefig.bbox': 'tight'
+})
+sns.set_theme(style="ticks")
+
+# ---------- Mock data: replace with your real data ----------
+# Each row = one biological replicate (individual or pooled sample)
+# Relative_expression: qPCR-measured mRNA level (normalized, Control=1.0)
+# Mortality_pct: observed mortality percentage at endpoint
+np.random.seed(123)
+n = 12
+relative_expression = np.random.uniform(0.1, 1.0, n)
+# Negative correlation: lower expression → higher mortality
+mortality_pct = 100 - relative_expression * 80 + np.random.normal(0, 8, n)
+mortality_pct = np.clip(mortality_pct, 0, 100)
+
+df = pd.DataFrame({
+    'Sample': [f'S{i+1}' for i in range(n)],
+    'Relative_expression': relative_expression,
+    'Mortality_pct': mortality_pct
+})
+
+# ---------- Pearson correlation ----------
+r, p = stats.pearsonr(df['Relative_expression'], df['Mortality_pct'])
+print(f"Pearson correlation: r = {r:.3f}, p = {p:.4f}")
+
+# ---------- Linear regression ----------
+slope, intercept, r_value, p_value, std_err = stats.linregress(
+    df['Relative_expression'], df['Mortality_pct'])
+print(f"Linear regression: y = {slope:.2f}x + {intercept:.2f}")
+print(f"R² = {r_value**2:.3f}, p = {p_value:.4f}")
+
+# ---------- Plot ----------
+save_path = "outputs/plots/analysis_correlation_" + \
+    datetime.now().strftime("%Y%m%d_%H%M%S") + ".png"
+os.makedirs(os.path.dirname(save_path), exist_ok=True)
+
+fig, ax = plt.subplots(figsize=(6, 5))
+ax.scatter(df['Relative_expression'], df['Mortality_pct'],
+           c='#4C72B0', s=80, edgecolor='black', linewidth=0.5, alpha=0.8)
+
+# Regression line
+x_fit = np.linspace(0, 1.1, 100)
+y_fit = slope * x_fit + intercept
+ax.plot(x_fit, y_fit, color='#DD8452', linewidth=2, linestyle='-')
+
+# Annotate stats
+ax.text(0.05, 0.95, f'Pearson r = {r:.3f}\np = {p:.4f}\nR² = {r_value**2:.3f}',
+        transform=ax.transAxes, fontsize=10, verticalalignment='top',
+        bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+
+ax.set_xlabel('Relative mRNA Expression (normalized)')
+ax.set_ylabel('Mortality (%)')
+ax.set_title('Knockdown Efficiency vs Mortality')
+sns.despine()
+plt.tight_layout()
+plt.savefig(save_path)
+plt.close()
+
+print(f"\nPlot saved to: {save_path}")
+```
+
+### Handling Results
+
+- **Pearson r**: Ranges from -1 to +1. Negative r = higher knockdown (lower
+  expression) correlates with higher mortality. |r| > 0.7 = strong correlation.
+- **p-value**: p < 0.05 indicates statistically significant correlation.
+- **R²**: Proportion of variance explained by the model. Higher R² = better fit.
+- **Scatter plot**: Visual check for outliers and non-linear patterns.
+
+### Edge Cases
+
+- **Non-linear relationship**: If the scatter plot shows a clear curve, use
+  Spearman rank correlation or non-linear regression instead of Pearson.
+- **Outliers**: Identify with Z-score (|Z| > 3) or IQR method. Report analysis
+  both with and without outliers.
+- **Small sample size (n < 6)**: Correlation estimates are unreliable. Report
+  individual data points and consider descriptive statistics only.
+- **Ceiling/floor effects**: If many data points cluster at 0% or 100% mortality,
+  consider logistic regression instead of linear.
+
+---
+
+## Phase 4: General Statistical Analysis
+
+### Task
+
+Perform common statistical comparisons between experimental groups: t-tests,
+ANOVA, non-parametric alternatives, and multiple comparison corrections.
+
+### Tool: `shell`
+
+### Example Code
+
+```python
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import scipy.stats as stats
+from statsmodels.stats.multicomp import pairwise_tukeyhsd
+from datetime import datetime
+import os
+
+plt.rcParams.update({
+    'font.sans-serif': ['Arial', 'DejaVu Sans'],
+    'axes.unicode_minus': False,
+    'figure.dpi': 150,
+    'savefig.bbox': 'tight'
+})
+sns.set_theme(style="ticks")
+
+# ---------- Mock data: replace with your real data ----------
+# Example: body weight (mg) after RNAi treatment
+np.random.seed(456)
+data = pd.DataFrame({
+    'Weight': list(np.random.normal(45, 5, 8)) +   # Control
+              list(np.random.normal(32, 6, 8)) +   # dsRNA-Target
+              list(np.random.normal(42, 5, 8)) +   # dsRNA-Negative
+              list(np.random.normal(44, 4, 8)),    # dsGFP
+    'Group': ['Control']*8 + ['dsRNA-Target']*8 +
+             ['dsRNA-Negative']*8 + ['dsGFP']*8
+})
+
+# ---------- Descriptive statistics ----------
+desc = data.groupby('Group')['Weight'].agg(['mean', 'std', 'sem', 'count'])
+print("=== Descriptive Statistics ===")
+print(desc.to_string())
+
+# ---------- One-way ANOVA ----------
+groups = [g for _, g in data.groupby('Group')['Weight']]
+f_stat, p_anova = stats.f_oneway(*groups)
+print(f"\nOne-way ANOVA: F = {f_stat:.3f}, p = {p_anova:.4f}")
+
+# ---------- Post-hoc: Tukey HSD ----------
+if p_anova < 0.05:
+    tukey = pairwise_tukeyhsd(data['Weight'], data['Group'], alpha=0.05)
+    print("\n=== Tukey HSD Post-hoc Test ===")
+    print(tukey)
+else:
+    print("\nANOVA not significant — skipping post-hoc test.")
+
+# ---------- Non-parametric alternative (if assumptions violated) ----------
+kruskal = stats.kruskal(*groups)
+print(f"\nKruskal-Wallis (non-parametric): H = {kruskal.statistic:.3f}, "
+      f"p = {kruskal.pvalue:.4f}")
+
+# ---------- Plot ----------
+save_path = "outputs/plots/analysis_stats_" + \
+    datetime.now().strftime("%Y%m%d_%H%M%S") + ".png"
+os.makedirs(os.path.dirname(save_path), exist_ok=True)
+
+fig, ax = plt.subplots(figsize=(6, 4))
+order = ['Control', 'dsRNA-Target', 'dsRNA-Negative', 'dsGFP']
+colors = ['#4C72B0', '#DD8452', '#55A868', '#C44E52']
+sns.boxplot(data=data, x='Group', y='Weight', order=order,
+            palette=colors, ax=ax, width=0.5)
+sns.stripplot(data=data, x='Group', y='Weight', order=order,
+              color='black', alpha=0.5, size=5, ax=ax)
+
+# Annotate ANOVA result
+ax.text(0.5, 0.95, f'ANOVA: F={f_stat:.2f}, p={p_anova:.4f}',
+        transform=ax.transAxes, fontsize=10, ha='center',
+        bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+
+ax.set_ylabel('Body Weight (mg)')
+ax.set_title('Effect of RNAi Treatment on Body Weight')
+sns.despine()
+plt.tight_layout()
+plt.savefig(save_path)
+plt.close()
+
+print(f"\nPlot saved to: {save_path}")
+```
+
+### Handling Results
+
+- **ANOVA significance**: p < 0.05 indicates at least one group differs. Always
+  follow up with post-hoc tests (Tukey HSD) to identify which groups differ.
+- **Normality assumption**: If sample size per group < 10, consider
+  Shapiro-Wilk test. If violated, use Kruskal-Wallis instead of ANOVA.
+- **Equal variance assumption**: Use Levene's test. If violated, use Welch's
+  ANOVA or non-parametric alternative.
+- **Multiple comparisons**: Always correct for multiple testing (Tukey HSD for
+  pairwise, Bonferroni for selected contrasts).
+
+### Edge Cases
+
+- **Two groups only**: Use independent t-test instead of ANOVA.
+- **Paired data** (same individuals measured before/after): Use paired t-test
+  or repeated measures ANOVA.
+- **Zero variance** in a group (all values identical): Cannot compute t-test.
+  Flag as potential data entry error.
+- **Missing values**: Drop missing values and report how many were excluded.
+  Do not impute without justification.
+
+---
+
+## Phase 5: Report Generation
+
+### Task
+
+After completing any of the above analyses, synthesize a concise biological
+interpretation of the results. Follow these guidelines:
+
+### Report Structure
+
+**1. Analysis Summary** (1-2 sentences)
+- What was analyzed and which groups were compared.
+
+**2. Key Statistical Findings** (2-3 sentences)
+- Report test statistics, p-values, and effect sizes.
+- Use standard notation: mean ± SEM, t(df) = x.xx, p = 0.xxx
+- Significance markers: *p < 0.05, **p < 0.01, ***p < 0.001
+
+**3. Biological Interpretation** (2-3 sentences)
+- What does the statistical result mean in biological terms?
+- Relate to the RNAi mechanism, target gene function, and observed phenotype.
+- Use appropriate hedging (suggest, indicate, consistent with).
+
+**4. Limitations and Caveats** (1-2 sentences)
+- Sample size, variability, technical limitations.
+- Any assumptions that were made.
+
+### Vocabulary Rules
+
+**Allowed:**
+- suggest, indicate, consistent with, support the hypothesis that
+- "The data suggest that dsRNA-Target treatment significantly reduced target gene expression"
+- "These results are consistent with effective RNAi-mediated knockdown"
+
+**Prohibited:**
+- prove, confirm, demonstrate (implies definitive experimental proof)
+- "RNAi was successful" (without Western blot or protein-level confirmation)
+- "The gene was silenced" (qPCR measures mRNA level, not protein)
+- Guarantee claims about field efficacy from lab data alone
+
+### Quality Checklist
+
+Before finalizing the report, verify:
+- [ ] Control group normalized to 1.0 (RT-qPCR)
+- [ ] Statistical test assumptions checked (normality, equal variance)
+- [ ] Multiple comparison correction applied
+- [ ] Effect size reported alongside p-value
+- [ ] All tool outputs reported accurately without modification
+- [ ] Limitations acknowledged
+- [ ] Plot files saved and path communicated to user
+
+---
+
+## Computation Source Reference
+
+| Component | Method |
+|-----------|--------|
+| RT-qPCR normalization | ΔΔCt method (Livak & Schmittgen, 2001); Control mean → 1.0 |
+| Survival analysis | Kaplan-Meier estimator + log-rank test (lifelines) |
+| Correlation | Pearson / Spearman correlation + linear regression (scipy) |
+| Group comparison | One-way ANOVA + Tukey HSD (statsmodels); Kruskal-Wallis (scipy) |
+| Plotting | Matplotlib + Seaborn (DejaVu Sans, 150 DPI, sns ticks theme) |
+| Execution | Python via shell tool, output saved to outputs/plots/ |

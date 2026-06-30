@@ -20,6 +20,19 @@ The workflow consists of five phases:
 5. **Target Cleaning** — filter out already-studied targets in the original species
 6. **Report Generation** — output the final list of potential new RNAi targets
 
+### Prerequisites
+
+Before running this workflow, confirm the following dependencies:
+
+- **System**: NCBI BLAST+ (`blastn`), BEDTools (`bedtools`)
+  → Check: `which blastn && which bedtools`
+  → Install: `sudo apt-get install ncbi-blast+ bedtools`
+- **Python**: ete4
+  → Check: `python -c "from ete4 import Tree; print('OK')"`
+  → Install: `pip install ete4`
+
+Follow the Dependency Check Protocol in analysis-standards.skill.
+
 ---
 
 ## Phase 1: Kinship Analysis

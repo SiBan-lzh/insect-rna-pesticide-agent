@@ -1,0 +1,233 @@
+---
+name: sirna_website_guidance_cn
+category: rnai
+description: 推荐 siRNA 设计网站、解释参数设置、提供协议指导的分步指南。使用 siRNA_website_protocol 知识库检索 13 个主流 siRNA 设计平台的使用协议。
+keywords: [sirna, sirna设计, 网站协议, 参数指导, 设计工具, oligowalk]
+required_tools_tag: [discovery]
+---
+
+# siRNA 网站指导指南
+
+## 概述
+
+本指南涵盖如何帮助用户使用 siRNA 设计网站和工具。它使用 `siRNA_website_protocol` 知识库检索 13 个主流 siRNA 设计平台的详细使用协议、参数推荐和故障排除指导。
+
+工作流包含四个阶段：
+1. **需求分析** — 识别用户需要什么（特定网站帮助、参数建议、故障排除）
+2. **知识库检索** — 搜索 `siRNA_website_protocol` 知识库获取匹配的协议
+3. **协议综合** — 提取并呈现相关的协议内容
+4. **指导交付** — 为用户提供清晰可操作的建议
+
+---
+
+## 阶段 1：需求分析
+
+### 任务
+
+识别用户关于 siRNA 设计工具的需求。共有三种常见请求类型：
+
+| 请求类型 | 用户询问内容 | 示例 |
+|---------|------------|------|
+| **类型 A — 网站推荐** | 针对特定任务应使用哪个网站 | "设计长 dsRNA 序列的 siRNA 应该用哪个网站？" |
+| **类型 B — 参数指导** | 如何在已知网站上设置特定参数 | "OligoWalk 中 GC 含量应该设多少？" |
+| **类型 C — 故障排除** | 错误、限制或优化策略 | "siDirect 总是拒绝我的序列，哪里出问题了？" |
+
+### 如何响应
+
+- **类型 A**：首先根据用户任务描述推荐合适的网站，然后提供检索协议详情的选项。
+- **类型 B**：搜索用户提到的特定工具的 KB，提取参数部分。
+- **类型 C**：搜索相关工具的 KB，查找已知限制或输入格式要求。
+
+### 可用平台
+
+`siRNA_website_protocol` 知识库包含 13 个平台的协议：
+
+siDESIGN Center、Genscript siRNA Target Finder、siDirect 2.1、siRNA Wizard 3.1、RNAxs、DSIR、OligoWalk、Sfold 2.2、siRNA at Whitehead、siRNA Design (IDT)、i-score、BLOCK-iT RNAi Designer、siMAX siRNA Design
+
+---
+
+## 阶段 2：知识库检索
+
+### 任务
+
+搜索 `siRNA_website_protocol` 知识库，检索相关的协议内容。
+
+### 工具：`search_knowledge`
+
+**参数：**
+- `query`：描述用户需求——包含工具名称和具体询问的方面。使用技术性英文关键词。
+  - 示例：
+    - `"OligoWalk parameter settings GC content Tm"`
+    - `"siDirect 2.1 input format sequence requirements"`
+    - `"BLOCK-iT RNAi Designer step-by-step protocol"`
+    - `"siRNA Wizard 3.1 recommended settings"`
+- `knowledge_base`：`"siRNA_website_protocol"`
+- `top_k`：3-5（足以覆盖相关协议）
+- `semantic_weight`：使用知识库推荐默认值（0.4）
+
+**输出含义：**
+此 KB 使用 `parent_child` 块策略：
+- **子块（child chunks）**：协议的具体章节（参数描述、步骤细节）
+- **父内容（parent content）**：附加到每个子块的更宽泛的章节上下文
+
+每条结果可能包含：
+- `content`：具体的协议章节文本
+- `parent_content`：来自父章节的更宽泛的上下文
+- `source`：内容来源文档（如 "OligoWalk - user guide.docx"）
+- `section`：文档内的章节
+
+### 结果处理
+
+- **找到相关内容**：进入阶段 3 进行综合和呈现。
+- **未找到相关内容**：查询可能太窄——尝试更宽泛的术语（如仅使用工具名称而非特定参数）。如果仍然没有结果，告知用户知识库中没有特定信息，并提供一般的 siRNA 设计最佳实践建议。
+- **匹配到多个工具**：如果用户未指定工具，提供选项供选择；或通过询问他们正在使用哪个工具来缩小范围。
+
+### 边界情况：知识库不可用
+
+如果 `search_knowledge` 返回 Chroma 索引缺失的错误：
+1. 告知用户本地 siRNA 协议知识库不可用。
+2. 根据自身知识提供一般的 siRNA 设计最佳实践：
+   - 典型 GC 含量范围：30-60%
+   - siRNA 长度：19-21 nt
+   - 避免 4 个以上相同核苷酸的连续重复
+   - 避免与脱靶转录本的种子区匹配
+   - 首选靶标区域：起始密码子下游 50-100 nt
+
+---
+
+## 阶段 3：协议综合
+
+### 任务
+
+从检索到的块中提取相关协议内容，并组织成清晰可操作的格式呈现给用户。
+
+### 网站推荐（类型 A）
+
+呈现推荐网站的摘要：
+
+| 网站 | 最适合 | 主要特点 |
+|------|--------|---------|
+| OligoWalk | 热力学评分 | 为每个候选 siRNA 提供 ΔG 结合能 |
+| siDirect 2.1 | 脱靶最小化 | 使用 BLAST 过滤脱靶匹配 |
+| siRNA Wizard 3.1 | 轻松参数调整 | 带有 GC% 和 Tm 滑块的简单界面 |
+
+然后询问："需要我检索其中任何一个的详细协议吗？"
+
+### 参数指导（类型 B）
+
+提取并呈现：
+- **参数名称**：控制什么
+- **推荐范围**：典型值
+- **影响**：更改它如何影响结果
+- **示例**：如有可用的具体示例
+
+### 故障排除（类型 C）
+
+提取并呈现：
+- **已知限制**：工具不能处理什么
+- **输入要求**：格式、长度、内容约束
+- **常见错误**：用户通常出错的地方
+- **解决方法**：如何绕过限制
+
+### 引用
+
+呈现协议内容时，引用来源文档名称，以便用户知道使用的是哪个工具的协议。
+
+---
+
+## 阶段 4：指导交付
+
+### 任务
+
+以清晰的结构化格式向用户交付指导。
+
+### 指导报告结构
+
+**1. 用户需求摘要**
+- 用户询问的内容
+- 识别出的相关工具
+
+**2. 协议内容**
+- 分步说明或参数表
+- 来源引用（内容来自哪个文档）
+
+**3. 实用建议**
+- 建议尝试的具体参数值或设置
+- 需要注意的任何注意事项或限制
+
+**4. 附加资源（可选）**
+- 建议也可能有用的相关工具
+- 提供检索另一个工具协议选项
+
+### 词汇规则
+
+**允许使用：**
+- 推荐、建议、通常、常见、可选、可调
+- "OligoWalk 被推荐用于 siRNA 候选物的热力学评分"
+- "推荐的 GC 含量范围为 30-60%"
+
+**禁止使用：**
+- 保证、最好、完美、最优（除非直接引用协议原文）
+- 绝不断言特定网站或设置能保证 siRNA 设计成功
+
+### 边界情况：用户没有指定具体工具
+
+如果用户问"如何设计 siRNA？"而没有指定工具：
+1. 简要描述 2-3 个常用平台（如 OligoWalk 用于热力学分析，siDirect 用于脱靶检查）。
+2. 询问他们想优化 siRNA 设计的哪个方面。
+3. 根据回答检索相关协议。
+
+---
+
+## 完整工作流示例
+
+### 示例 A：参数指导
+
+```
+用户："OligoWalk 中 GC 含量应该设多少？"
+
+Agent 执行步骤：
+1. 阶段 1 — 需求分析
+   → 类型 B（参数指导）：用户询问 OligoWalk GC 含量
+
+2. 阶段 2 — KB 检索
+   search_knowledge(query="OligoWalk GC content parameter setting",
+                    knowledge_base="siRNA_website_protocol", top_k=3)
+   → 返回描述 OligoWalk GC 含量参数的块
+
+3. 阶段 3 — 协议综合
+   提取：推荐范围、对 siRNA 结合的影响、与 Tm 的关系
+
+4. 阶段 4 — 指导交付
+   呈现："在 OligoWalk 中，GC 含量过滤器控制...推荐范围为 30-60%。
+   设得太高可能会排除有效的 siRNA..."
+```
+
+### 示例 B：网站推荐
+
+```
+用户："我需要为长 dsRNA 设计 siRNA，应该用哪个网站？"
+
+Agent 执行步骤：
+1. 阶段 1 — 需求分析
+   → 类型 A（网站推荐）：用户需要长 dsRNA siRNA 设计的工具
+
+2. 阶段 2 — KB 检索
+   search_knowledge(query="siRNA design for long dsRNA sequence website comparison",
+                    knowledge_base="siRNA_website_protocol", top_k=5)
+   → 返回多个工具的协议
+
+3. 阶段 3 — 协议综合
+   比较工具：OligoWalk（热力学）、siDirect（脱靶）、IDT（综合）
+
+4. 阶段 4 — 指导交付
+   呈现："对于长 dsRNA 序列，我推荐...需要我检索详细协议吗？"
+```
+
+## 计算来源参考
+
+| 组件 | 方法 |
+|------|------|
+| 知识检索 | Chroma 向量数据库 + BM25 混合搜索（BAAI/bge-large-en-v1.5） |
+| KB 内容 | 13 个精心整理的 siRNA 设计网站协议（parent-child 分块） |
+| 指导综合 | 从检索到的协议块中由 LLM 综合 |
